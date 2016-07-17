@@ -1,22 +1,21 @@
 package game
 
 import (
-	"github.com/MichaelDiBernardo/srl/lib/math"
-    "github.com/MichaelDiBernardo/srl/lib/client"
-    "github.com/MichaelDiBernardo/srl/lib/world"
-    "github.com/nsf/termbox-go"
+	"github.com/MichaelDiBernardo/srl/lib/client"
+	"github.com/MichaelDiBernardo/srl/lib/event"
+	"github.com/MichaelDiBernardo/srl/lib/world"
 )
 
 type Game struct {
-    client client.Client
-    world *world.World
+	client client.Client
+	world  *world.World
 }
 
 func New() *Game {
-    return &Game{
-        client: client.NewConsole(),
-        world: world.New(),
-    }
+	return &Game{
+		client: client.NewConsole(),
+		world:  world.New(),
+	}
 }
 
 func (g *Game) Loop() {
@@ -27,23 +26,11 @@ func (g *Game) Loop() {
 	defer g.client.Close()
 
 	for {
-        g.client.Render(g.world)
-
-        player := g.world.Player
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			switch ev.Key {
-			case termbox.KeyEsc:
-				return
-			case termbox.KeyArrowUp:
-				player.Y = math.Max(player.Y-1, 0)
-			case termbox.KeyArrowDown:
-				player.Y += 1
-			case termbox.KeyArrowLeft:
-				player.X = math.Max(player.X-1, 0)
-			case termbox.KeyArrowRight:
-				player.X += 1
-			}
+		g.client.Render(g.world)
+		ev := g.client.NextEvent()
+		if ev == event.Quit {
+			return
 		}
+		g.world.Handle(ev)
 	}
 }

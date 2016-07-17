@@ -1,26 +1,29 @@
 package client
 
 import (
-    "github.com/MichaelDiBernardo/srl/lib/world"
+	"github.com/MichaelDiBernardo/srl/lib/event"
+	"github.com/MichaelDiBernardo/srl/lib/world"
 )
 
 type Renderer interface {
-    Render(w *world.World)
+	Render(w *world.World)
 }
 
 type Initer interface {
-    Init() error
+	Init() error
 }
 
 type Closer interface {
-    Close()
+	Close()
 }
 
-type Poller interface {
+type Eventer interface {
+	NextEvent() event.Event
 }
 
 type Client interface {
-    Renderer
-    Initer
-    Closer
+	Closer
+	Eventer
+	Initer
+	Renderer
 }

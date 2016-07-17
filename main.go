@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-    game := game.New()
-    game.Loop()
+	game := game.New()
+	game.Loop()
 }
