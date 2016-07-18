@@ -35,7 +35,7 @@ func TestSubPoints(t *testing.T) {
 		t.Errorf("%v.Sub(%v) was %v, want %v", p1, p2, diff, want)
 	}
 
-    want = Point{2, 3}
+	want = Point{2, 3}
 	diff = p2.Sub(p1)
 
 	if diff != want {

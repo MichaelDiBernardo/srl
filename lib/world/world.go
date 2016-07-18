@@ -18,12 +18,12 @@ func (w *World) Handle(e event.Event) {
 	player := w.Player
 	switch e {
 	case event.MoveN:
-		player.Y = math.Max(player.Y-1, 0)
+		player.Pos = player.Pos.Add(math.Point{0, -1})
 	case event.MoveS:
-		player.Y += 1
+		player.Pos = player.Pos.Add(math.Point{0, 1})
 	case event.MoveW:
-		player.X = math.Max(player.X-1, 0)
+		player.Pos = player.Pos.Add(math.Point{-1, 0})
 	case event.MoveE:
-		player.X += 1
+		player.Pos = player.Pos.Add(math.Point{1, 0})
 	}
 }

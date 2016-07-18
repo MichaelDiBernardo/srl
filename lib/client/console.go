@@ -19,7 +19,7 @@ func (*Console) Init() error {
 
 func (*Console) Render(w *world.World) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	termbox.SetCell(w.Player.X, w.Player.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
+	termbox.SetCell(w.Player.Pos.X, w.Player.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
 	termbox.Flush()
 }
 

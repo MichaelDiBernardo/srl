@@ -1,9 +1,13 @@
 package actor
 
+import (
+    "github.com/MichaelDiBernardo/srl/lib/math"
+)
+
 type Player struct {
-    X, Y int
+    Pos math.Point
 }
 
 func NewPlayer() *Player {
-    return &Player{X: 0, Y: 0}
+    return &Player{Pos: math.Origin}
 }

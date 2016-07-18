@@ -1,7 +1,7 @@
 package math
 
 import (
-    "fmt"
+	"fmt"
 )
 
 // A point in 2D space.
