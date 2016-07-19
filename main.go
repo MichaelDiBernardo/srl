@@ -1,6 +1,10 @@
 package main
 
 import (
+    "log"
+    "fmt"
+    "os"
+    "io"
 	"github.com/MichaelDiBernardo/srl/lib/client"
 	"github.com/MichaelDiBernardo/srl/lib/game"
 )
@@ -34,7 +38,24 @@ func (g *Game) Loop() {
 	}
 }
 
+var logfile *os.File
+
+func setup() {
+    f, err := os.OpenFile("srl.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+    if err != nil {
+        panic(fmt.Sprintf("error opening logfile: %v", err))
+    }
+    log.SetOutput(io.Writer(f))
+}
+
+func teardown() {
+    logfile.Close()
+}
+
 func main() {
+    setup()
+    defer teardown()
+
 	game := NewGame()
 	game.Loop()
 }
