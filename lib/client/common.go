@@ -1,12 +1,11 @@
 package client
 
 import (
-	"github.com/MichaelDiBernardo/srl/lib/event"
-	"github.com/MichaelDiBernardo/srl/lib/world"
+	"github.com/MichaelDiBernardo/srl/lib/game"
 )
 
 type Renderer interface {
-	Render(w *world.World)
+	Render(w *game.World)
 }
 
 type Initer interface {
@@ -18,7 +17,7 @@ type Closer interface {
 }
 
 type Eventer interface {
-	NextEvent() event.Event
+	NextEvent() game.Event
 }
 
 type Client interface {

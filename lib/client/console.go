@@ -1,8 +1,7 @@
 package client
 
 import (
-	"github.com/MichaelDiBernardo/srl/lib/event"
-	"github.com/MichaelDiBernardo/srl/lib/world"
+	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/nsf/termbox-go"
 )
 
@@ -17,19 +16,19 @@ func (*Console) Init() error {
 	return termbox.Init()
 }
 
-func (*Console) Render(w *world.World) {
+func (*Console) Render(w *game.World) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	termbox.SetCell(w.Player.Pos.X, w.Player.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
 	termbox.Flush()
 }
 
-func (*Console) NextEvent() event.Event {
-	keymap := map[rune]event.Event{
-		'h': event.MoveW,
-		'j': event.MoveS,
-		'k': event.MoveN,
-		'l': event.MoveE,
-		'q': event.Quit,
+func (*Console) NextEvent() game.Event {
+	keymap := map[rune]game.Event{
+		'h': game.EMoveW,
+		'j': game.EMoveS,
+		'k': game.EMoveN,
+		'l': game.EMoveE,
+		'q': game.EQuit,
 	}
 	for {
 		tboxev := termbox.PollEvent()

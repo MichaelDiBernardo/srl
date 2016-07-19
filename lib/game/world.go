@@ -1,29 +1,27 @@
-package world
+package game
 
 import (
-	"github.com/MichaelDiBernardo/srl/lib/actor"
-	"github.com/MichaelDiBernardo/srl/lib/event"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
 type World struct {
-	Player *actor.Player
+	Player *Player
 }
 
-func New() *World {
-	return &World{Player: actor.NewPlayer()}
+func NewWorld() *World {
+	return &World{Player: NewPlayer()}
 }
 
-func (w *World) Handle(e event.Event) {
+func (w *World) Handle(e Event) {
 	player := w.Player
 	switch e {
-	case event.MoveN:
+	case EMoveN:
 		player.Pos = player.Pos.Add(math.Point{0, -1})
-	case event.MoveS:
+	case EMoveS:
 		player.Pos = player.Pos.Add(math.Point{0, 1})
-	case event.MoveW:
+	case EMoveW:
 		player.Pos = player.Pos.Add(math.Point{-1, 0})
-	case event.MoveE:
+	case EMoveE:
 		player.Pos = player.Pos.Add(math.Point{1, 0})
 	}
 }

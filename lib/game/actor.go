@@ -1,4 +1,4 @@
-package actor
+package game
 
 import (
     "github.com/MichaelDiBernardo/srl/lib/math"
