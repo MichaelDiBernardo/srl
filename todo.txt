@@ -1,9 +1,11 @@
+- Change world map into its own type
+- Add bounds checking on the map
+- Generalize "player on map" to "actor on map" somehow :/
+
 - user-level configs for
     - keymaps
     - morgues
     - etc
-- Load a world with the player, a map, and no other actors
-- Add features + tiles
 - Add other actors with random AI
 - Map generation 
 - Monster AI

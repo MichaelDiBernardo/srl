@@ -8,6 +8,18 @@ import (
 type Console struct {
 }
 
+// Looks exactly like termbox.Cell :(
+type glyph struct {
+	Ch rune
+	Fg termbox.Attribute
+	Bg termbox.Attribute
+}
+
+var featureGlyphs = map[game.FeatureType]glyph{
+	"FeatWall":  glyph{Ch: '#', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
+	"FeatFloor": glyph{Ch: '.', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+}
+
 func NewConsole() *Console {
 	return &Console{}
 }
@@ -18,7 +30,16 @@ func (*Console) Init() error {
 
 func (*Console) Render(w *game.World) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	termbox.SetCell(w.Player.Pos.X, w.Player.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
+	for _, row := range w.Map {
+		for _, tile := range row {
+			if tile.Actor != nil {
+				termbox.SetCell(tile.Pos.X, tile.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
+			} else {
+				gl := featureGlyphs[tile.Feature.Type]
+				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
+			}
+		}
+	}
 	termbox.Flush()
 }
 

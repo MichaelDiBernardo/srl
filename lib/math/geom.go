@@ -9,6 +9,11 @@ type Point struct {
 	X, Y int
 }
 
+// Shorthand to create a new point.
+func Pt(x, y int) Point {
+	return Point{x, y}
+}
+
 // Stringifies a point.
 func (p Point) String() string {
 	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
