@@ -16,13 +16,13 @@ type Closer interface {
 	Close()
 }
 
-type Eventer interface {
-	NextEvent() game.Event
+type Commander interface {
+	NextCommand() game.Command
 }
 
 type Client interface {
 	Closer
-	Eventer
 	Initer
 	Renderer
+	Commander
 }

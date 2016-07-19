@@ -12,16 +12,31 @@ func NewWorld() *World {
 	return &World{Player: NewPlayer()}
 }
 
-func (w *World) Handle(e Event) {
+func (w *World) Handle(e Command) {
 	player := w.Player
 	switch e {
-	case EMoveN:
+	case CommandMoveN:
 		player.Pos = player.Pos.Add(math.Point{0, -1})
-	case EMoveS:
+	case CommandMoveS:
 		player.Pos = player.Pos.Add(math.Point{0, 1})
-	case EMoveW:
+	case CommandMoveW:
 		player.Pos = player.Pos.Add(math.Point{-1, 0})
-	case EMoveE:
+	case CommandMoveE:
 		player.Pos = player.Pos.Add(math.Point{1, 0})
 	}
 }
+
+type Command int
+
+const (
+	_ Command = iota
+	CommandQuit
+	CommandMoveN
+	CommandMoveNE
+	CommandMoveE
+	CommandMoveSE
+	CommandMoveS
+	CommandMoveSW
+	CommandMoveW
+	CommandMoveNW
+)

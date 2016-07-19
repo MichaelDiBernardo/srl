@@ -26,11 +26,11 @@ func (g *Game) Loop() {
 
 	for {
 		g.client.Render(g.world)
-		ev := g.client.NextEvent()
-		if ev == game.EQuit {
+		command := g.client.NextCommand()
+		if command == game.CommandQuit {
 			return
 		}
-		g.world.Handle(ev)
+		g.world.Handle(command)
 	}
 }
 

@@ -22,13 +22,13 @@ func (*Console) Render(w *game.World) {
 	termbox.Flush()
 }
 
-func (*Console) NextEvent() game.Event {
-	keymap := map[rune]game.Event{
-		'h': game.EMoveW,
-		'j': game.EMoveS,
-		'k': game.EMoveN,
-		'l': game.EMoveE,
-		'q': game.EQuit,
+func (*Console) NextCommand() game.Command {
+	keymap := map[rune]game.Command{
+		'h': game.CommandMoveW,
+		'j': game.CommandMoveS,
+		'k': game.CommandMoveN,
+		'l': game.CommandMoveE,
+		'q': game.CommandQuit,
 	}
 	for {
 		tboxev := termbox.PollEvent()
