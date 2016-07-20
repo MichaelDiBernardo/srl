@@ -1,12 +1,12 @@
 package main
 
 import (
-    "log"
-    "fmt"
-    "os"
-    "io"
+	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/client"
 	"github.com/MichaelDiBernardo/srl/lib/game"
+	"io"
+	"log"
+	"os"
 )
 
 type Game struct {
@@ -41,20 +41,20 @@ func (g *Game) Loop() {
 var logfile *os.File
 
 func setup() {
-    f, err := os.OpenFile("srl.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
-    if err != nil {
-        panic(fmt.Sprintf("error opening logfile: %v", err))
-    }
-    log.SetOutput(io.Writer(f))
+	f, err := os.OpenFile("srl.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(fmt.Sprintf("error opening logfile: %v", err))
+	}
+	log.SetOutput(io.Writer(f))
 }
 
 func teardown() {
-    logfile.Close()
+	logfile.Close()
 }
 
 func main() {
-    setup()
-    defer teardown()
+	setup()
+	defer teardown()
 
 	game := NewGame()
 	game.Loop()

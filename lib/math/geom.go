@@ -29,5 +29,15 @@ func (p Point) Sub(q Point) Point {
 	return Point{p.X - q.X, p.Y - q.Y}
 }
 
+// Delegates to s.HasPoint -- exists because pt.In(s) is prettier to read than
+// s.HasPoint(p) sometimes.
+func (p Point) In(s Shape) bool {
+	return s.HasPoint(p)
+}
+
 // (0,0). Also serves as the zero value for Point in comparisons.
 var Origin Point
+
+type Shape interface {
+	HasPoint(p Point) bool
+}

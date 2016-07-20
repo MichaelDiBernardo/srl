@@ -10,7 +10,42 @@ type Tile struct {
 	Pos     math.Point
 }
 
-type Map [80][24]*Tile
+type Map [][]*Tile
+
+func NewMap(width, height int) Map {
+	newmap := Map{}
+	for y := 0; y < height; y++ {
+		row := make([]*Tile, width, width)
+		newmap = append(newmap, row)
+	}
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			feature := FeatFloor
+			if x == 0 || y == 0 || y == height-1 || x == width-1 {
+				feature = FeatWall
+			}
+			newmap[y][x] = &Tile{Pos: math.Pt(x, y), Feature: feature}
+		}
+	}
+	return newmap
+}
+
+func (m Map) Width() int {
+	return len(m[0])
+}
+
+func (m Map) Height() int {
+	return len(m)
+}
+
+func (m Map) At(p math.Point) *Tile {
+	return m[p.Y][p.X]
+}
+
+func (m Map) HasPoint(p math.Point) bool {
+	return p.X >= 0 && p.Y >= 0 && p.X < m.Width() && p.Y < m.Height()
+}
 
 type World struct {
 	Player *Player
@@ -18,16 +53,7 @@ type World struct {
 }
 
 func NewWorld() *World {
-	wmap := Map{}
-	for i := 0; i < 80; i++ {
-		for j := 0; j < 24; j++ {
-			feature := FeatFloor
-			if i == 0 || j == 0 || i == 79 || j == 23 {
-				feature = FeatWall
-			}
-			wmap[i][j] = &Tile{Pos: math.Pt(i, j), Feature: feature}
-		}
-	}
+	wmap := NewMap(80, 24)
 	player := &Player{
 		Map:  wmap,
 		Tile: wmap[1][1],

@@ -18,10 +18,12 @@ func (p *Player) Move(dir math.Point) bool {
 	beginpos := p.GetPos()
 	endpos := p.GetPos().Add(dir)
 
-	// TODO: Bounds check
-	// TODO: Map needs a type with methods for these accesses.
-	begintile := p.Map[beginpos.X][beginpos.Y]
-	endtile := p.Map[endpos.X][endpos.Y]
+	if !endpos.In(p.Map) {
+		return false
+	}
+
+	begintile := p.Map.At(beginpos)
+	endtile := p.Map.At(endpos)
 
 	if endtile.Feature.Solid {
 		return false

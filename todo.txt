@@ -1,6 +1,8 @@
-- Change world map into its own type
-- Add bounds checking on the map
 - Generalize "player on map" to "actor on map" somehow :/
+- Make Point comparable??? Then use this to do points bounds checking?
+tests:
+    - New shape stuff (In, Contains)
+    - Actor move (once moveable -> component)
 
 - user-level configs for
     - keymaps
