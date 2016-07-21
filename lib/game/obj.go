@@ -23,9 +23,9 @@ type Traits struct {
 // on a map with Place before use.
 func NewObj(traits Traits) *Obj {
 	newobj := &Obj{}
-    if traits.Mover != nil {
-        newobj.Mover = traits.Mover(newobj)
-    }
+	if traits.Mover != nil {
+		newobj.Mover = traits.Mover(newobj)
+	}
 	return newobj
 }
 
