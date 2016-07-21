@@ -1,9 +1,8 @@
-- Generalize "player on map" to "actor on map" somehow :/
 - Make Point comparable??? Then use this to do points bounds checking?
+- Make map generation a function passed to map init
 tests:
     - New shape stuff (In, Contains)
-    - Actor move (once moveable -> component)
-
+- Github CI
 - user-level configs for
     - keymaps
     - morgues

@@ -6,7 +6,7 @@ import (
 
 type Tile struct {
 	Feature *Feature
-	Actor   *Player
+	Actor   *Obj
 	Pos     math.Point
 }
 
@@ -48,30 +48,27 @@ func (m Map) HasPoint(p math.Point) bool {
 }
 
 type World struct {
-	Player *Player
+	Player *Obj
 	Map    Map
 }
 
 func NewWorld() *World {
 	wmap := NewMap(80, 24)
-	player := &Player{
-		Map:  wmap,
-		Tile: wmap[1][1],
-	}
-	wmap[1][1].Actor = player
+	player := NewObj(Traits{Mover: NewPlayerMover})
+	player.Place(wmap, math.Pt(1, 1))
 	return &World{Player: player, Map: wmap}
 }
 
 func (w *World) Handle(e Command) {
 	switch e {
 	case CommandMoveN:
-		w.Player.Move(math.Pt(0, -1))
+		w.Player.Mover.Move(math.Pt(0, -1))
 	case CommandMoveS:
-		w.Player.Move(math.Pt(0, 1))
+		w.Player.Mover.Move(math.Pt(0, 1))
 	case CommandMoveW:
-		w.Player.Move(math.Pt(-1, 0))
+		w.Player.Mover.Move(math.Pt(-1, 0))
 	case CommandMoveE:
-		w.Player.Move(math.Pt(1, 0))
+		w.Player.Mover.Move(math.Pt(1, 0))
 	}
 }
 
