@@ -30,7 +30,7 @@ func (*Console) Init() error {
 
 func (*Console) Render(w *game.World) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	for _, row := range w.Map {
+	for _, row := range w.Level.Map {
 		for _, tile := range row {
 			if tile.Actor != nil {
 				termbox.SetCell(tile.Pos.X, tile.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)

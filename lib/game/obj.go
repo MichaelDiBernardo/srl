@@ -8,8 +8,10 @@ import (
 // Something. Its traits determine what it can do.
 type Obj struct {
 	Tile  *Tile
-	Map   Map
+	Level *Level 
+    // Actor traits
 	Mover Mover
+    AI AI
 }
 
 // A specification object for NewObj. Each key maps to a factory function for
@@ -17,6 +19,7 @@ type Obj struct {
 // supposed to have a specific trait, leave it unspecified.
 type Traits struct {
 	Mover func(*Obj) Mover
+    AI func(*Obj) AI
 }
 
 // Create a new game object with the given traits. This object should be placed
@@ -32,8 +35,8 @@ func NewObj(traits Traits) *Obj {
 // Place `o` on the tile at `p`. Returns false if this is impossible (e.g.
 // trying to put something on a solid square.)
 // This will remove `o` from any tile on any map it was previously on.
-func (o *Obj) Place(m Map, p math.Point) bool {
-	tile := m.At(p)
+func (o *Obj) Place(l *Level, p math.Point) bool {
+	tile := l.At(p)
 
 	if tile.Feature.Solid {
 		return false
@@ -42,7 +45,7 @@ func (o *Obj) Place(m Map, p math.Point) bool {
 	if o.Tile != nil {
 		o.Tile.Actor = nil
 	}
-	o.Map = m
+	o.Level = l
 	o.Tile = tile
 	tile.Actor = o
 	return true

@@ -6,14 +6,14 @@ import (
 
 type World struct {
 	Player *Obj
-	Map    Map
+	Level  *Level
 }
 
 func NewWorld() *World {
-	wmap := NewMap(80, 24, SquareMap)
+	level := NewLevel(80, 24, SquareLevel)
 	player := NewObj(Traits{Mover: NewActorMover})
-	player.Place(wmap, math.Pt(1, 1))
-	return &World{Player: player, Map: wmap}
+	player.Place(level, math.Pt(1, 1))
+	return &World{Player: player, Level: level}
 }
 
 func (w *World) Handle(e Command) {

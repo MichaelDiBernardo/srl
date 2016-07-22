@@ -7,9 +7,9 @@ import (
 
 func TestPlayerOkMove(t *testing.T) {
 	obj := NewObj(Traits{Mover: NewActorMover})
-	m := NewMap(4, 4, IdentMap)
+	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
-	obj.Place(m, startpos)
+	obj.Place(l, startpos)
 
 	ok := obj.Mover.Move(math.Pt(1, 0))
 
@@ -23,10 +23,10 @@ func TestPlayerOkMove(t *testing.T) {
 		t.Errorf(`Move((1, 0)) = %v, want %v`, newpos, want)
 	}
 
-	if m.At(startpos).Actor != nil {
+	if l.At(startpos).Actor != nil {
 		t.Error(`Move((1, 0)) did not set start tile actor to nil`)
 	}
-	if m.At(newpos).Actor != obj {
+	if l.At(newpos).Actor != obj {
 		t.Error(`Move((1, 0)) did not set dest tile actor to obj`)
 	}
 }

@@ -1,6 +1,7 @@
 package game
 
 import (
+    "math/rand"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
@@ -23,9 +24,28 @@ func (p *ActorMover) Move(dir math.Point) bool {
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)
 
-	if !endpos.In(obj.Map) {
+	if !endpos.In(obj.Level) {
 		return false
 	}
 
-	return obj.Place(obj.Map, endpos)
+	return obj.Place(obj.Level, endpos)
+}
+
+// A thing that can move given a specific direction.
+type AI interface {
+	Act(w World) bool
+}
+
+type RandomAI struct {
+	Obj *Obj
+}
+
+func NewRandomAI(obj *Obj) AI {
+	return &RandomAI{Obj: obj}
+}
+
+func (ai *RandomAI) Act(w World) bool {
+    x, y := rand.Intn(3) -1, rand.Intn(3) - 1
+
+    return ai.Obj.Mover.Move(math.Pt(x, y))
 }
