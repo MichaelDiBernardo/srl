@@ -1,8 +1,8 @@
 package game
 
 import (
-    "math/rand"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"math/rand"
 )
 
 // A thing that can move given a specific direction.
@@ -45,7 +45,7 @@ func NewRandomAI(obj *Obj) AI {
 }
 
 func (ai *RandomAI) Act(w World) bool {
-    x, y := rand.Intn(3) -1, rand.Intn(3) - 1
+	x, y := rand.Intn(3)-1, rand.Intn(3)-1
 
-    return ai.Obj.Mover.Move(math.Pt(x, y))
+	return ai.Obj.Mover.Move(math.Pt(x, y))
 }

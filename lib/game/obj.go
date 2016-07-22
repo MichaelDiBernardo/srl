@@ -8,10 +8,10 @@ import (
 // Something. Its traits determine what it can do.
 type Obj struct {
 	Tile  *Tile
-	Level *Level 
-    // Actor traits
+	Level *Level
+	// Actor traits
 	Mover Mover
-    AI AI
+	AI    AI
 }
 
 // A specification object for NewObj. Each key maps to a factory function for
@@ -19,7 +19,7 @@ type Obj struct {
 // supposed to have a specific trait, leave it unspecified.
 type Traits struct {
 	Mover func(*Obj) Mover
-    AI func(*Obj) AI
+	AI    func(*Obj) AI
 }
 
 // Create a new game object with the given traits. This object should be placed

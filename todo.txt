@@ -1,4 +1,4 @@
-- Add other actors with random AI
+- Add other actors with random AI (right now am adding actors list to Level)
 - Screens
 - Github CI
 - user-level configs for
