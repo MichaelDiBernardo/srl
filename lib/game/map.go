@@ -55,6 +55,12 @@ func SquareMap(m Map) Map {
 }
 
 func IdentMap(m Map) Map {
+    height, width := m.Height(), m.Width()
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			m[y][x] = &Tile{Pos: math.Pt(x, y), Feature: FeatFloor}
+		}
+	}
     return m
 }
 

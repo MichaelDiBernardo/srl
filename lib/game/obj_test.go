@@ -44,7 +44,7 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 
 func TestBadPlace(t *testing.T) {
 	obj := NewObj(Traits{})
-	m := NewMap(4, 4, IdentMap)
+	m := NewMap(4, 4, SquareMap)
 	startpos := math.Pt(0, 0)
 
 	ok := obj.Place(m, startpos)

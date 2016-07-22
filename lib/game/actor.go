@@ -9,16 +9,16 @@ type Mover interface {
 	Move(dir math.Point) bool
 }
 
-type PlayerMover struct {
+type ActorMover struct {
 	Obj *Obj
 }
 
-func NewPlayerMover(obj *Obj) Mover {
-	return &PlayerMover{Obj: obj}
+func NewActorMover(obj *Obj) Mover {
+	return &ActorMover{Obj: obj}
 }
 
 // Try to move the player. Return false if the player couldn't move.
-func (p *PlayerMover) Move(dir math.Point) bool {
+func (p *ActorMover) Move(dir math.Point) bool {
 	obj := p.Obj
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)

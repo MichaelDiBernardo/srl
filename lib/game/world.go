@@ -10,8 +10,8 @@ type World struct {
 }
 
 func NewWorld() *World {
-	wmap := NewMap(80, 24)
-	player := NewObj(Traits{Mover: NewPlayerMover})
+	wmap := NewMap(80, 24, SquareMap)
+	player := NewObj(Traits{Mover: NewActorMover})
 	player.Place(wmap, math.Pt(1, 1))
 	return &World{Player: player, Map: wmap}
 }

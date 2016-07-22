@@ -1,14 +1,13 @@
-- Make Point comparable??? Then use this to do points bounds checking?
-- Make map generation a function passed to map init
-tests:
-    - New shape stuff (In, Contains)
+- Add other actors with random AI
+- Screens
 - Github CI
 - user-level configs for
     - keymaps
     - morgues
     - etc
-- Add other actors with random AI
 - Map generation 
 - Monster AI
-- Screens
 - Separate client from game, communicate over event queue
+- Consider typedeffing 'subsets' of Obj like `type Actor Obj` so we can catch
+  cases where an Item is being assigned to an occupant slot or something like
+  that, and can reduce # of traits being passed into the obj constructor as nil.
