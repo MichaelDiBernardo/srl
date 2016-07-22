@@ -7,7 +7,7 @@ import (
 
 func TestOkPlace(t *testing.T) {
 	obj := NewObj(Traits{})
-	m := NewMap(4, 4)
+	m := NewMap(4, 4, IdentMap)
 	startpos := math.Pt(1, 1)
 
 	ok := obj.Place(m, startpos)
@@ -27,7 +27,7 @@ func TestOkPlace(t *testing.T) {
 
 func TestSecondPlaceCleansUp(t *testing.T) {
 	obj := NewObj(Traits{})
-	m := NewMap(4, 4)
+	m := NewMap(4, 4, IdentMap)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
 
@@ -44,7 +44,7 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 
 func TestBadPlace(t *testing.T) {
 	obj := NewObj(Traits{})
-	m := NewMap(4, 4)
+	m := NewMap(4, 4, IdentMap)
 	startpos := math.Pt(0, 0)
 
 	ok := obj.Place(m, startpos)

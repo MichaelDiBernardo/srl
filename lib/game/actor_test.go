@@ -7,7 +7,7 @@ import (
 
 func TestPlayerOkMove(t *testing.T) {
 	obj := NewObj(Traits{Mover: NewPlayerMover})
-	m := NewMap(4, 4)
+	m := NewMap(4, 4, IdentMap)
 	startpos := math.Pt(1, 1)
 	obj.Place(m, startpos)
 
