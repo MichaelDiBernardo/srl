@@ -8,19 +8,19 @@ import (
 func TestOkPlace(t *testing.T) {
 	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, IdentLevel)
-	startpos := math.Pt(1, 1)
+	pos := math.Pt(1, 1)
 
-	ok := l.Place(obj, startpos)
+	ok := l.Place(obj, pos)
 
 	if !ok {
 		t.Error(`Place((1, 1) was false, want true`)
 	}
 
-	if l.At(startpos).Actor != obj {
+	if l.At(pos).Actor != obj {
 		t.Error(`Place((1, 1)) did not set tile actor to obj`)
 	}
 
-	if l.At(startpos) != obj.Tile {
+	if l.At(pos) != obj.Tile {
 		t.Error(`Place((1, 1)) did not set actor's tile to obj`)
 	}
 }
@@ -42,15 +42,29 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 	}
 }
 
-func TestBadPlace(t *testing.T) {
+func TestBadPlaceOntoSolid(t *testing.T) {
 	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, SquareLevel)
-	startpos := math.Pt(0, 0)
+	pos := math.Pt(0, 0)
 
-	ok := l.Place(obj, startpos)
+	ok := l.Place(obj, pos)
 
 	if ok {
-		t.Error(`Move( (0,0) ) onto FeatWall ok was true; want false`)
+		t.Error(`Place( (0,0) ) onto FeatWall ok was true; want false`)
+	}
+}
+
+func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
+	a1 := NewObj(&Traits{})
+	a2 := NewObj(&Traits{})
+	l := NewLevel(4, 4, SquareLevel)
+	pos := math.Pt(0, 0)
+
+	l.Place(a1, pos)
+	ok := l.Place(a2, pos)
+
+	if ok {
+		t.Error(`Place onto other actor: ok was true; want false`)
 	}
 }
 

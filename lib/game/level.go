@@ -50,7 +50,7 @@ func (l *Level) HasPoint(p math.Point) bool {
 func (l *Level) Place(o *Obj, p math.Point) bool {
 	tile := l.At(p)
 
-	if tile.Feature.Solid {
+	if tile.Feature.Solid || tile.Actor != nil {
 		return false
 	}
 

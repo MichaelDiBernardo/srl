@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPlayerOkMove(t *testing.T) {
+func TestOkMove(t *testing.T) {
 	obj := NewObj(&Traits{Mover: NewActorMover})
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
@@ -28,5 +28,19 @@ func TestPlayerOkMove(t *testing.T) {
 	}
 	if l.At(newpos).Actor != obj {
 		t.Error(`Move((1, 0)) did not set dest tile actor to obj`)
+	}
+}
+
+func TestActorCollision(t *testing.T) {
+	a1 := NewObj(&Traits{Mover: NewActorMover})
+	a2 := NewObj(&Traits{Mover: NewActorMover})
+	l := NewLevel(4, 4, IdentLevel)
+	l.Place(a1, math.Pt(1, 1))
+	l.Place(a2, math.Pt(2, 1))
+
+	ok := a1.Mover.Move(math.Pt(1, 0))
+
+	if ok {
+		t.Error(`a1.Move( (1, 0)) = true, want false`)
 	}
 }

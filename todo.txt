@@ -1,6 +1,5 @@
 - change World into a Game, and make current Game be ... something else
 - make Trait nullobjs so we don't always have to look before leaping.
-- tests for not letting movers collide with other actors
 - Player factory function
 - Add other actors with random AI (right now am adding actors list to Level)
 - repositories
