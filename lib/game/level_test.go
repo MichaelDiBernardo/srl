@@ -53,3 +53,30 @@ func TestBadPlace(t *testing.T) {
 		t.Error(`Move( (0,0) ) onto FeatWall ok was true; want false`)
 	}
 }
+
+func TestPlaceAddsActorToList(t *testing.T) {
+	obj := NewObj(Traits{})
+	l := NewLevel(4, 4, IdentLevel)
+	startpos := math.Pt(1, 1)
+
+	l.Place(obj, startpos)
+
+	if actual := len(l.actors); actual != 1 {
+		t.Errorf(`Place(obj) put %d actors in list; want 1`, actual)
+	}
+	if actual := l.actors[0]; actual != obj {
+		t.Errorf(`Place(obj) put %v in list; want %v`, actual, obj)
+	}
+}
+
+func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
+	obj := NewObj(Traits{})
+	l := NewLevel(4, 4, SquareLevel)
+	startpos := math.Pt(0, 0)
+
+	l.Place(obj, startpos)
+
+	if actual := len(l.actors); actual != 0 {
+		t.Errorf(`Place(obj) put %d actors in list; want 0`, actual)
+	}
+}
