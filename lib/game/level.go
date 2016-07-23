@@ -54,16 +54,36 @@ func (l *Level) Place(o *Obj, p math.Point) bool {
 		return false
 	}
 
+	// If this actor has been placed before, we need to clear the tile they
+	// were on previously. If they haven't, we need to add them to the actor
+	// list so we know who they are.
 	if o.Tile != nil {
 		o.Tile.Actor = nil
+	} else {
+		l.actors = append(l.actors, o)
 	}
+
 	o.Level = l
 	o.Tile = tile
 
 	tile.Actor = o
 
-	l.actors = append(l.actors, o)
 	return true
+}
+
+func (l *Level) Evolve() {
+	for _, actor := range l.actors {
+		if actor.AI != nil {
+			actor.AI.Act(l)
+		}
+	}
+}
+
+func TestLevel(l *Level) *Level {
+	l = SquareLevel(l)
+	l.Place(NewActor(MonOrc), math.Pt(10, 10))
+	l.Place(NewActor(MonOrc), math.Pt(20, 20))
+	return l
 }
 
 // Generators.

@@ -10,8 +10,10 @@ type World struct {
 }
 
 func NewWorld() *World {
-	level := NewLevel(80, 24, SquareLevel)
-	player := NewObj(Traits{Mover: NewActorMover})
+	level := NewLevel(80, 24, TestLevel)
+	player := NewObj(&Traits{Mover: NewActorMover})
+	player.Type = "Actor"
+	player.Subtype = "Player"
 	level.Place(player, math.Pt(1, 1))
 	return &World{Player: player, Level: level}
 }
@@ -27,6 +29,7 @@ func (w *World) Handle(e Command) {
 	case CommandMoveE:
 		w.Player.Mover.Move(math.Pt(1, 0))
 	}
+	w.Level.Evolve()
 }
 
 type Command int

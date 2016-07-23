@@ -15,6 +15,11 @@ type glyph struct {
 	Bg termbox.Attribute
 }
 
+var actorGlyphs = map[game.ObjSubtype]glyph{
+	"Player": glyph{Ch: '@', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+	"MonOrc": glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
+}
+
 var featureGlyphs = map[game.FeatureType]glyph{
 	"FeatWall":  glyph{Ch: '#', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
 	"FeatFloor": glyph{Ch: '.', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
@@ -33,7 +38,8 @@ func (*Console) Render(w *game.World) {
 	for _, row := range w.Level.Map {
 		for _, tile := range row {
 			if tile.Actor != nil {
-				termbox.SetCell(tile.Pos.X, tile.Pos.Y, '@', termbox.ColorWhite, termbox.ColorBlack)
+				gl := actorGlyphs[tile.Actor.Subtype]
+				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
 				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)

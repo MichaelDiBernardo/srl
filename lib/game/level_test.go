@@ -6,7 +6,7 @@ import (
 )
 
 func TestOkPlace(t *testing.T) {
-	obj := NewObj(Traits{})
+	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 
@@ -26,7 +26,7 @@ func TestOkPlace(t *testing.T) {
 }
 
 func TestSecondPlaceCleansUp(t *testing.T) {
-	obj := NewObj(Traits{})
+	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
@@ -43,7 +43,7 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 }
 
 func TestBadPlace(t *testing.T) {
-	obj := NewObj(Traits{})
+	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, SquareLevel)
 	startpos := math.Pt(0, 0)
 
@@ -55,7 +55,7 @@ func TestBadPlace(t *testing.T) {
 }
 
 func TestPlaceAddsActorToList(t *testing.T) {
-	obj := NewObj(Traits{})
+	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 
@@ -70,7 +70,7 @@ func TestPlaceAddsActorToList(t *testing.T) {
 }
 
 func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
-	obj := NewObj(Traits{})
+	obj := NewObj(&Traits{})
 	l := NewLevel(4, 4, SquareLevel)
 	startpos := math.Pt(0, 0)
 

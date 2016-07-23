@@ -4,11 +4,19 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
+// e.g. "Actor", "Item"
+type ObjType string
+
+// e.g. "Orc", "HealPotion"
+type ObjSubtype string
+
 // Specifically, an in-game object that can be placed on a map and can Do
 // Something. Its traits determine what it can do.
 type Obj struct {
-	Tile  *Tile
-	Level *Level
+	Type    ObjType
+	Subtype ObjSubtype
+	Tile    *Tile
+	Level   *Level
 	// Actor traits
 	Mover Mover
 	AI    AI
@@ -24,10 +32,13 @@ type Traits struct {
 
 // Create a new game object with the given traits. This object should be placed
 // on a map with Place before use.
-func NewObj(traits Traits) *Obj {
+func NewObj(traits *Traits) *Obj {
 	newobj := &Obj{}
 	if traits.Mover != nil {
 		newobj.Mover = traits.Mover(newobj)
+	}
+	if traits.AI != nil {
+		newobj.AI = traits.AI(newobj)
 	}
 	return newobj
 }

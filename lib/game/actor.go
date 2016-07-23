@@ -2,8 +2,21 @@ package game
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 	"math/rand"
 )
+
+type ActorSpec struct {
+	Type   ObjSubtype
+	Traits *Traits
+}
+
+func NewActor(spec *ActorSpec) *Obj {
+	obj := NewObj(spec.Traits)
+	obj.Type = "Actor"
+	obj.Subtype = spec.Type
+	return obj
+}
 
 // A thing that can move given a specific direction.
 type Mover interface {
@@ -11,16 +24,16 @@ type Mover interface {
 }
 
 type ActorMover struct {
-	Obj *Obj
+	obj *Obj
 }
 
 func NewActorMover(obj *Obj) Mover {
-	return &ActorMover{Obj: obj}
+	return &ActorMover{obj: obj}
 }
 
 // Try to move the player. Return false if the player couldn't move.
 func (p *ActorMover) Move(dir math.Point) bool {
-	obj := p.Obj
+	obj := p.obj
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)
 
@@ -33,19 +46,21 @@ func (p *ActorMover) Move(dir math.Point) bool {
 
 // A thing that can move given a specific direction.
 type AI interface {
-	Act(w World) bool
+	Act(l *Level) bool
 }
 
 type RandomAI struct {
-	Obj *Obj
+	obj *Obj
 }
 
 func NewRandomAI(obj *Obj) AI {
-	return &RandomAI{Obj: obj}
+	return &RandomAI{obj: obj}
 }
 
-func (ai *RandomAI) Act(w World) bool {
+func (ai *RandomAI) Act(l *Level) bool {
 	x, y := rand.Intn(3)-1, rand.Intn(3)-1
+	dir := math.Pt(x, y)
+	log.Printf("AI: Moving from %v by %v", ai.obj.Pos(), dir)
 
-	return ai.Obj.Mover.Move(math.Pt(x, y))
+	return ai.obj.Mover.Move(dir)
 }

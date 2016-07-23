@@ -6,7 +6,7 @@ import (
 )
 
 func TestPlayerOkMove(t *testing.T) {
-	obj := NewObj(Traits{Mover: NewActorMover})
+	obj := NewObj(&Traits{Mover: NewActorMover})
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 	l.Place(obj, startpos)
