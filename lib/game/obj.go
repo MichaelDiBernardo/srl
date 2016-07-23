@@ -32,25 +32,6 @@ func NewObj(traits Traits) *Obj {
 	return newobj
 }
 
-// Place `o` on the tile at `p`. Returns false if this is impossible (e.g.
-// trying to put something on a solid square.)
-// This will remove `o` from any tile on any map it was previously on.
-func (o *Obj) Place(l *Level, p math.Point) bool {
-	tile := l.At(p)
-
-	if tile.Feature.Solid {
-		return false
-	}
-
-	if o.Tile != nil {
-		o.Tile.Actor = nil
-	}
-	o.Level = l
-	o.Tile = tile
-	tile.Actor = o
-	return true
-}
-
 // What point on the map is this object on?
 func (o *Obj) Pos() math.Point {
 	return o.Tile.Pos

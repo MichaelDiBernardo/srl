@@ -10,7 +10,7 @@ func TestOkPlace(t *testing.T) {
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 
-	ok := obj.Place(l, startpos)
+	ok := l.Place(obj, startpos)
 
 	if !ok {
 		t.Error(`Place((1, 1) was false, want true`)
@@ -31,8 +31,8 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
 
-	obj.Place(l, startpos)
-	obj.Place(l, endpos)
+	l.Place(obj, startpos)
+	l.Place(obj, endpos)
 
 	if l.At(startpos).Actor != nil {
 		t.Error(`Place((2, 2)) did not set (1, 1) tile actor to nil`)
@@ -47,7 +47,7 @@ func TestBadPlace(t *testing.T) {
 	l := NewLevel(4, 4, SquareLevel)
 	startpos := math.Pt(0, 0)
 
-	ok := obj.Place(l, startpos)
+	ok := l.Place(obj, startpos)
 
 	if ok {
 		t.Error(`Move( (0,0) ) onto FeatWall ok was true; want false`)

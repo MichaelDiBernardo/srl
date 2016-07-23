@@ -12,7 +12,7 @@ type World struct {
 func NewWorld() *World {
 	level := NewLevel(80, 24, SquareLevel)
 	player := NewObj(Traits{Mover: NewActorMover})
-	player.Place(level, math.Pt(1, 1))
+	level.Place(player, math.Pt(1, 1))
 	return &World{Player: player, Level: level}
 }
 

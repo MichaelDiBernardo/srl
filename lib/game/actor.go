@@ -28,7 +28,7 @@ func (p *ActorMover) Move(dir math.Point) bool {
 		return false
 	}
 
-	return obj.Place(obj.Level, endpos)
+	return obj.Level.Place(obj, endpos)
 }
 
 // A thing that can move given a specific direction.

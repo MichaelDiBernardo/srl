@@ -44,6 +44,25 @@ func (l *Level) HasPoint(p math.Point) bool {
 	return p.X >= 0 && p.Y >= 0 && p.X < l.Width() && p.Y < l.Height()
 }
 
+// Place `o` on the tile at `p`. Returns false if this is impossible (e.g.
+// trying to put something on a solid square.)
+// This will remove `o` from any tile on any map it was previously on.
+func (l *Level) Place(o *Obj, p math.Point) bool {
+	tile := l.At(p)
+
+	if tile.Feature.Solid {
+		return false
+	}
+
+	if o.Tile != nil {
+		o.Tile.Actor = nil
+	}
+	o.Level = l
+	o.Tile = tile
+	tile.Actor = o
+	return true
+}
+
 // Generators.
 func SquareLevel(l *Level) *Level {
 	height, width, m := l.Height(), l.Width(), l.Map
