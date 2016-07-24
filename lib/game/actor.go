@@ -12,10 +12,7 @@ type ActorSpec struct {
 }
 
 func NewActor(spec *ActorSpec) *Obj {
-	obj := NewObj(spec.Traits)
-	obj.Type = OTActor
-	obj.Subtype = spec.Type
-	return obj
+	return NewObj(OTActor, spec.Type, spec.Traits)
 }
 
 // A thing that can move given a specific direction.

@@ -36,8 +36,8 @@ type Traits struct {
 
 // Create a new game object with the given traits. This object should be placed
 // on a map with Place before use.
-func NewObj(traits *Traits) *Obj {
-	newobj := &Obj{}
+func NewObj(otype ObjType, ostype ObjSubtype, traits *Traits) *Obj {
+	newobj := &Obj{Type: otype, Subtype: ostype}
 	if traits.Mover != nil {
 		newobj.Mover = traits.Mover(newobj)
 	}

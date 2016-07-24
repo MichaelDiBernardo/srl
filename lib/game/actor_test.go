@@ -5,8 +5,16 @@ import (
 	"testing"
 )
 
+func newTestMover() *Obj {
+	spec := &ActorSpec{
+		Type:   "TestMover",
+		Traits: &Traits{Mover: NewActorMover},
+	}
+	return NewActor(spec)
+}
+
 func TestOkMove(t *testing.T) {
-	obj := NewObj(&Traits{Mover: NewActorMover})
+	obj := newTestMover()
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 	l.Place(obj, startpos)
@@ -32,8 +40,7 @@ func TestOkMove(t *testing.T) {
 }
 
 func TestActorCollision(t *testing.T) {
-	a1 := NewObj(&Traits{Mover: NewActorMover})
-	a2 := NewObj(&Traits{Mover: NewActorMover})
+	a1, a2 := newTestMover(), newTestMover()
 	l := NewLevel(4, 4, IdentLevel)
 	l.Place(a1, math.Pt(1, 1))
 	l.Place(a2, math.Pt(2, 1))

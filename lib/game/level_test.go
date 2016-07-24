@@ -5,8 +5,16 @@ import (
 	"testing"
 )
 
+func newTestPlacer() *Obj {
+	spec := &ActorSpec{
+		Type:   "TestPlacer",
+		Traits: &Traits{},
+	}
+	return NewActor(spec)
+}
+
 func TestOkPlace(t *testing.T) {
-	obj := NewObj(&Traits{})
+	obj := newTestPlacer()
 	l := NewLevel(4, 4, IdentLevel)
 	pos := math.Pt(1, 1)
 
@@ -26,7 +34,7 @@ func TestOkPlace(t *testing.T) {
 }
 
 func TestSecondPlaceCleansUp(t *testing.T) {
-	obj := NewObj(&Traits{})
+	obj := newTestPlacer()
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
@@ -43,7 +51,7 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 }
 
 func TestBadPlaceOntoSolid(t *testing.T) {
-	obj := NewObj(&Traits{})
+	obj := newTestPlacer()
 	l := NewLevel(4, 4, SquareLevel)
 	pos := math.Pt(0, 0)
 
@@ -55,8 +63,7 @@ func TestBadPlaceOntoSolid(t *testing.T) {
 }
 
 func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
-	a1 := NewObj(&Traits{})
-	a2 := NewObj(&Traits{})
+	a1, a2 := newTestPlacer(), newTestPlacer()
 	l := NewLevel(4, 4, SquareLevel)
 	pos := math.Pt(0, 0)
 
@@ -69,7 +76,7 @@ func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 }
 
 func TestPlaceAddsActorToList(t *testing.T) {
-	obj := NewObj(&Traits{})
+	obj := newTestPlacer()
 	l := NewLevel(4, 4, IdentLevel)
 	startpos := math.Pt(1, 1)
 
@@ -84,7 +91,7 @@ func TestPlaceAddsActorToList(t *testing.T) {
 }
 
 func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
-	obj := NewObj(&Traits{})
+	obj := newTestPlacer()
 	l := NewLevel(4, 4, SquareLevel)
 	startpos := math.Pt(0, 0)
 
