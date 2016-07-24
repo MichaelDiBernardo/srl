@@ -1,6 +1,5 @@
-- make Trait nullobjs so we don't always have to look before leaping.
-- repositories
 - Screens
+- repositories
 - messages
 - user-level configs for
     - keymaps

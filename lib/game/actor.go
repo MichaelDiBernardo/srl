@@ -28,7 +28,7 @@ type nullMover struct {
 
 // Do nothing and return false.
 func (_ *nullMover) Move(dir math.Point) bool {
-    return false
+	return false
 }
 
 // Singleton instance of the null mover.
@@ -36,7 +36,7 @@ var theNullMover = &nullMover{}
 
 // Constructor for null movers.
 func NewNullMover(_ *Obj) Mover {
-    return theNullMover
+	return theNullMover
 }
 
 // A universally-applicable mover for actors.
@@ -73,7 +73,7 @@ type nullAI struct {
 
 // Do nothing and return false.
 func (_ *nullAI) Act(l *Level) bool {
-    return false
+	return false
 }
 
 // Singleton instance of the null mover.
@@ -81,7 +81,7 @@ var theNullAI = &nullAI{}
 
 // Constructor for null movers.
 func NewNullAI(_ *Obj) AI {
-    return theNullAI
+	return theNullAI
 }
 
 // An AI that directs an actor to move completely randomly.

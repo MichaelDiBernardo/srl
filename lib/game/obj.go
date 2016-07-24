@@ -37,25 +37,25 @@ type Traits struct {
 // Takes a partially-specified traits obj and fills in the nil ones with
 // nullobj versions.
 func (t *Traits) defaults() *Traits {
-    if t.Mover == nil {
-        t.Mover = NewNullMover
-    }
-    if t.AI == nil {
-        t.AI = NewNullAI
-    }
-    return t
+	if t.Mover == nil {
+		t.Mover = NewNullMover
+	}
+	if t.AI == nil {
+		t.AI = NewNullAI
+	}
+	return t
 }
 
 // Create a new game object with the given traits. This object should be placed
 // on a map with Place before use.
 func NewObj(otype ObjType, ostype ObjSubtype, traits *Traits) *Obj {
-    // Create.
+	// Create.
 	newobj := &Obj{Type: otype, Subtype: ostype}
 
-    // Assign traits.
-    traits = traits.defaults()
-    newobj.Mover = traits.Mover(newobj)
-    newobj.AI = traits.AI(newobj)
+	// Assign traits.
+	traits = traits.defaults()
+	newobj.Mover = traits.Mover(newobj)
+	newobj.AI = traits.AI(newobj)
 
 	return newobj
 }
