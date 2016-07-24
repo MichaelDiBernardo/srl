@@ -12,9 +12,10 @@ type ActorSpec struct {
 	Traits *Traits
 }
 
-// Create an actor from its specification.
-func NewActor(spec *ActorSpec) *Obj {
-	return NewObj(OTActor, spec.Type, spec.Traits)
+// Create an actor from its specification. If you're making these for use in an
+// actual game, you should use game.NewActor(...) instead.
+func newActor(spec *ActorSpec, eq *EventQueue) *Obj {
+	return newObj(OTActor, spec.Type, spec.Traits, eq)
 }
 
 // A thing that can move given a specific direction.

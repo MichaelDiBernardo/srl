@@ -1,5 +1,6 @@
 package game
 
-func NewPlayer() *Obj {
-	return NewObj(OTActor, "Player", &Traits{Mover: NewActorMover})
+// Creates a new player.
+func newPlayer(eq *EventQueue) *Obj {
+	return newObj(OTActor, "Player", &Traits{Mover: NewActorMover}, eq)
 }

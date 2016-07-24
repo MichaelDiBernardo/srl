@@ -21,12 +21,13 @@ type Obj struct {
 	Subtype ObjSubtype
 	Tile    *Tile
 	Level   *Level
+	Events  *EventQueue
 	// Actor traits
 	Mover Mover
 	AI    AI
 }
 
-// A specification object for NewObj. Each key maps to a factory function for
+// A specification object for newObj. Each key maps to a factory function for
 // the specific implementation of the desired trait. If an object is not
 // supposed to have a specific trait, leave it unspecified.
 type Traits struct {
@@ -46,11 +47,12 @@ func (t *Traits) defaults() *Traits {
 	return t
 }
 
-// Create a new game object with the given traits. This object should be placed
-// on a map with Place before use.
-func NewObj(otype ObjType, ostype ObjSubtype, traits *Traits) *Obj {
+// Create a new game object with the given traits. This shouldn't be used
+// directly; you should instead use a *Game as a factory for any game objects
+// that need creating.
+func newObj(otype ObjType, ostype ObjSubtype, traits *Traits, eq *EventQueue) *Obj {
 	// Create.
-	newobj := &Obj{Type: otype, Subtype: ostype}
+	newobj := &Obj{Type: otype, Subtype: ostype, Events: eq}
 
 	// Assign traits.
 	traits = traits.defaults()
