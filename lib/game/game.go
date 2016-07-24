@@ -12,9 +12,7 @@ type Game struct {
 
 func NewGame() *Game {
 	level := NewLevel(80, 24, TestLevel)
-	player := NewObj(&Traits{Mover: NewActorMover})
-	player.Type = "Actor"
-	player.Subtype = "Player"
+	player := NewPlayer()
 	level.Place(player, math.Pt(1, 1))
 	return &Game{Player: player, Level: level}
 }

@@ -10,6 +10,10 @@ type ObjType string
 // e.g. "Orc", "HealPotion"
 type ObjSubtype string
 
+const (
+	OTActor = "Actor"
+)
+
 // Specifically, an in-game object that can be placed on a map and can Do
 // Something. Its traits determine what it can do.
 type Obj struct {

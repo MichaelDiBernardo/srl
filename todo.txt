@@ -1,6 +1,4 @@
-- change World into a Game, and make current Game be ... something else
 - make Trait nullobjs so we don't always have to look before leaping.
-- Player factory function
 - repositories
 - Screens
 - messages

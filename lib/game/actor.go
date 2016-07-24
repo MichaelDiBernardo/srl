@@ -13,7 +13,7 @@ type ActorSpec struct {
 
 func NewActor(spec *ActorSpec) *Obj {
 	obj := NewObj(spec.Traits)
-	obj.Type = "Actor"
+	obj.Type = OTActor
 	obj.Subtype = spec.Type
 	return obj
 }
