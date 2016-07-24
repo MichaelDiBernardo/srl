@@ -33,9 +33,9 @@ func (*Console) Init() error {
 	return termbox.Init()
 }
 
-func (*Console) Render(w *game.World) {
+func (*Console) Render(g *game.Game) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	for _, row := range w.Level.Map {
+	for _, row := range g.Level.Map {
 		for _, tile := range row {
 			if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Subtype]

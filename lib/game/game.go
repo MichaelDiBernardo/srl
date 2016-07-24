@@ -4,21 +4,22 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
-type World struct {
+// Backend for a single game.
+type Game struct {
 	Player *Obj
 	Level  *Level
 }
 
-func NewWorld() *World {
+func NewGame() *Game {
 	level := NewLevel(80, 24, TestLevel)
 	player := NewObj(&Traits{Mover: NewActorMover})
 	player.Type = "Actor"
 	player.Subtype = "Player"
 	level.Place(player, math.Pt(1, 1))
-	return &World{Player: player, Level: level}
+	return &Game{Player: player, Level: level}
 }
 
-func (w *World) Handle(e Command) {
+func (w *Game) Handle(e Command) {
 	switch e {
 	case CommandMoveN:
 		w.Player.Mover.Move(math.Pt(0, -1))

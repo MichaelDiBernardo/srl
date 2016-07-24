@@ -5,7 +5,7 @@ import (
 )
 
 type Renderer interface {
-	Render(w *game.World)
+	Render(g *game.Game)
 }
 
 type Initer interface {

@@ -3,6 +3,7 @@
 - Player factory function
 - repositories
 - Screens
+- messages
 - user-level configs for
     - keymaps
     - morgues
@@ -10,6 +11,3 @@
 - Map generation 
 - Monster AI
 - Separate client from game, communicate over event queue
-- Consider typedeffing 'subsets' of Obj like `type Actor Obj` so we can catch
-  cases where an Item is being assigned to an occupant slot or something like
-  that, and can reduce # of traits being passed into the obj constructor as nil.

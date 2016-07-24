@@ -9,32 +9,34 @@ import (
 	"os"
 )
 
-type Game struct {
+// A single running game. Once we get to serverland, srl will handle multiple
+// of these simultaneously.
+type Session struct {
 	client client.Client
-	world  *game.World
+	game   *game.Game
 }
 
-func NewGame() *Game {
-	return &Game{
+func NewGame() *Session {
+	return &Session{
 		client: client.NewConsole(),
-		world:  game.NewWorld(),
+		game:   game.NewGame(),
 	}
 }
 
-func (g *Game) Loop() {
-	err := g.client.Init()
+func (s *Session) Loop() {
+	err := s.client.Init()
 	if err != nil {
 		panic(err)
 	}
-	defer g.client.Close()
+	defer s.client.Close()
 
 	for {
-		g.client.Render(g.world)
-		command := g.client.NextCommand()
+		s.client.Render(s.game)
+		command := s.client.NextCommand()
 		if command == game.CommandQuit {
 			return
 		}
-		g.world.Handle(command)
+		s.game.Handle(command)
 	}
 }
 
