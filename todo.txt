@@ -1,6 +1,15 @@
-- Screens
-- repositories
 - messages
+- Screens
+- Very basic mechanics:
+    - Stats
+    - Skills derived from stats
+    - Fighting weaponless
+- Equipment
+    - Player can wield, monster cannot (too complicated)
+    - 
+- Viewport over larger levels
+- HUD
+- repositories
 - user-level configs for
     - keymaps
     - morgues
