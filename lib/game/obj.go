@@ -50,7 +50,7 @@ func (t *Traits) defaults() *Traits {
 // Create a new game object with the given traits. This shouldn't be used
 // directly; you should instead use a *Game as a factory for any game objects
 // that need creating.
-func newObj(otype ObjType, ostype ObjSubtype, traits *Traits, eq *EventQueue) *Obj {
+func newObj(otype ObjType, ostype ObjSubtype, traits *Traits, name string, eq *EventQueue) *Obj {
 	// Create.
 	newobj := &Obj{Type: otype, Subtype: ostype, Events: eq}
 

@@ -1,6 +1,7 @@
 package client
 
 import (
+    "log"
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/nsf/termbox-go"
 )
@@ -47,6 +48,11 @@ func (*Console) Render(g *game.Game) {
 		}
 	}
 	termbox.Flush()
+    // Put actual printing here!!!
+    for !g.Events.Empty() {
+        m := g.Events.Next().(*game.MessageEvent)
+        log.Print(m.Text)
+    }
 }
 
 func (*Console) NextCommand() game.Command {

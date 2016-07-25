@@ -9,6 +9,7 @@ import (
 // A specification for a type of actor.
 type ActorSpec struct {
 	Type   ObjSubtype
+    Name   string
 	Traits *Traits
 }
 
@@ -60,7 +61,11 @@ func (p *ActorMover) Move(dir math.Point) bool {
 		return false
 	}
 
-	return obj.Level.Place(obj, endpos)
+    moved := obj.Level.Place(obj, endpos)
+    if !moved {
+        p.obj.Events.Message("You can't go that way!")
+    }
+    return moved
 }
 
 // A thing that can move given a specific direction.
