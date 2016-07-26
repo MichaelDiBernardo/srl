@@ -14,25 +14,19 @@ var (
 )
 
 // Creates a new stub actor for use in these tests.
-func (*lTestFac) NewActor(spec *ActorSpec) *Obj {
-	spec = &ActorSpec{
-		Type:   "TestPlacer",
-		Traits: &Traits{},
+func (*lTestFac) NewObj(_ *Spec) *Obj {
+	spec := &Spec{
+		Type:    OTActor,
+		Subtype: "TestPlacer",
+		Name:    "hi",
+		Traits:  &Traits{},
 	}
-	return newActor(spec, levelTestQueue)
-}
-
-func newTestPlacer() *Obj {
-	spec := &ActorSpec{
-		Type:   "TestPlacer",
-		Traits: &Traits{},
-	}
-	return newActor(spec, newEventQueue())
+	return newObj(spec, levelTestQueue)
 }
 
 func TestOkPlace(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, IdentLevel)
-	obj := levelTestFactory.NewActor(nil)
+	obj := levelTestFactory.NewObj(nil)
 	pos := math.Pt(1, 1)
 
 	ok := l.Place(obj, pos)
@@ -52,7 +46,7 @@ func TestOkPlace(t *testing.T) {
 
 func TestSecondPlaceCleansUp(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, IdentLevel)
-	obj := levelTestFactory.NewActor(nil)
+	obj := levelTestFactory.NewObj(nil)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
 
@@ -69,7 +63,7 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 
 func TestBadPlaceOntoSolid(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, SquareLevel)
-	obj := levelTestFactory.NewActor(nil)
+	obj := levelTestFactory.NewObj(nil)
 	pos := math.Pt(0, 0)
 
 	ok := l.Place(obj, pos)
@@ -81,7 +75,7 @@ func TestBadPlaceOntoSolid(t *testing.T) {
 
 func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, IdentLevel)
-	a1, a2 := levelTestFactory.NewActor(nil), levelTestFactory.NewActor(nil)
+	a1, a2 := levelTestFactory.NewObj(nil), levelTestFactory.NewObj(nil)
 	pos := math.Pt(0, 0)
 
 	l.Place(a1, pos)
@@ -94,7 +88,7 @@ func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 
 func TestPlaceAddsActorToList(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, IdentLevel)
-	obj := levelTestFactory.NewActor(nil)
+	obj := levelTestFactory.NewObj(nil)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -109,7 +103,7 @@ func TestPlaceAddsActorToList(t *testing.T) {
 
 func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
 	l := NewLevel(4, 4, levelTestFactory, SquareLevel)
-	obj := levelTestFactory.NewActor(nil)
+	obj := levelTestFactory.NewObj(nil)
 	startpos := math.Pt(0, 0)
 
 	l.Place(obj, startpos)

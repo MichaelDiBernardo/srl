@@ -8,7 +8,7 @@ import (
 // Among other things, a Game serves as a factory for all types of game
 // objects.
 type ObjFactory interface {
-	NewActor(spec *ActorSpec) *Obj
+	NewObj(spec *Spec) *Obj
 }
 
 // Backend for a single game.
@@ -21,23 +21,20 @@ type Game struct {
 // Create a new game.
 func NewGame() *Game {
 	eq := newEventQueue()
-	player := newPlayer(eq)
 
-	game := &Game{
-		Player: player,
-		Events: eq,
-	}
+	game := &Game{Events: eq}
+	game.Player = game.NewObj(PlayerSpec)
 
 	level := NewLevel(80, 24, game, TestLevel)
 	game.Level = level
 
-	level.Place(player, math.Pt(1, 1))
+	level.Place(game.Player, math.Pt(1, 1))
 	return game
 }
 
-// Create a new actor for use in this game.
-func (g *Game) NewActor(spec *ActorSpec) *Obj {
-	return newActor(spec, g.Events)
+// Create a new object for use in this game.
+func (g *Game) NewObj(spec *Spec) *Obj {
+	return newObj(spec, g.Events)
 }
 
 // Handle a command from the client, and then evolve the world.

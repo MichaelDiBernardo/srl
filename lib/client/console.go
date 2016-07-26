@@ -1,9 +1,9 @@
 package client
 
 import (
-    "log"
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/nsf/termbox-go"
+	"log"
 )
 
 type Console struct {
@@ -39,7 +39,7 @@ func (*Console) Render(g *game.Game) {
 	for _, row := range g.Level.Map {
 		for _, tile := range row {
 			if tile.Actor != nil {
-				gl := actorGlyphs[tile.Actor.Subtype]
+				gl := actorGlyphs[tile.Actor.Spec.Subtype]
 				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
@@ -48,11 +48,11 @@ func (*Console) Render(g *game.Game) {
 		}
 	}
 	termbox.Flush()
-    // Put actual printing here!!!
-    for !g.Events.Empty() {
-        m := g.Events.Next().(*game.MessageEvent)
-        log.Print(m.Text)
-    }
+	// Put actual printing here!!!
+	for !g.Events.Empty() {
+		m := g.Events.Next().(*game.MessageEvent)
+		log.Print(m.Text)
+	}
 }
 
 func (*Console) NextCommand() game.Command {

@@ -6,19 +6,6 @@ import (
 	"math/rand"
 )
 
-// A specification for a type of actor.
-type ActorSpec struct {
-	Type   ObjSubtype
-    Name   string
-	Traits *Traits
-}
-
-// Create an actor from its specification. If you're making these for use in an
-// actual game, you should use game.NewActor(...) instead.
-func newActor(spec *ActorSpec, eq *EventQueue) *Obj {
-	return newObj(OTActor, spec.Type, spec.Traits, eq)
-}
-
 // A thing that can move given a specific direction.
 type Mover interface {
 	Move(dir math.Point) bool
@@ -61,11 +48,11 @@ func (p *ActorMover) Move(dir math.Point) bool {
 		return false
 	}
 
-    moved := obj.Level.Place(obj, endpos)
-    if !moved {
-        p.obj.Events.Message("You can't go that way!")
-    }
-    return moved
+	moved := obj.Level.Place(obj, endpos)
+	if !moved {
+		p.obj.Events.Message("You can't go that way!")
+	}
+	return moved
 }
 
 // A thing that can move given a specific direction.

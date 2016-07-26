@@ -14,17 +14,19 @@ var (
 )
 
 // Creates a new moving actor for use in these tests.
-func (*aTestFac) NewActor(spec *ActorSpec) *Obj {
-	spec = &ActorSpec{
-		Type:   "TestMover",
-		Traits: &Traits{Mover: NewActorMover},
+func (*aTestFac) NewObj(_ *Spec) *Obj {
+	spec := &Spec{
+		Type:    OTActor,
+		Name:    "Hi",
+		Subtype: "TestMover",
+		Traits:  &Traits{Mover: NewActorMover},
 	}
-	return newActor(spec, actorTestQueue)
+	return newObj(spec, actorTestQueue)
 }
 
 func TestOkMove(t *testing.T) {
 	l := NewLevel(4, 4, actorTestFactory, IdentLevel)
-	obj := actorTestFactory.NewActor(nil)
+	obj := actorTestFactory.NewObj(nil)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -51,7 +53,7 @@ func TestOkMove(t *testing.T) {
 
 func TestActorCollision(t *testing.T) {
 	l := NewLevel(4, 4, actorTestFactory, IdentLevel)
-	a1, a2 := actorTestFactory.NewActor(nil), actorTestFactory.NewActor(nil)
+	a1, a2 := actorTestFactory.NewObj(nil), actorTestFactory.NewObj(nil)
 	l.Place(a1, math.Pt(1, 1))
 	l.Place(a2, math.Pt(2, 1))
 

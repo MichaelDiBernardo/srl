@@ -14,14 +14,21 @@ const (
 	OTActor = "Actor"
 )
 
+// A specification for a type of game object.
+type Spec struct {
+	Type    ObjType
+	Subtype ObjSubtype
+	Name    string
+	Traits  *Traits
+}
+
 // Specifically, an in-game object that can be placed on a map and can Do
 // Something. Its traits determine what it can do.
 type Obj struct {
-	Type    ObjType
-	Subtype ObjSubtype
-	Tile    *Tile
-	Level   *Level
-	Events  *EventQueue
+	Spec   *Spec
+	Tile   *Tile
+	Level  *Level
+	Events *EventQueue
 	// Actor traits
 	Mover Mover
 	AI    AI
@@ -50,12 +57,12 @@ func (t *Traits) defaults() *Traits {
 // Create a new game object with the given traits. This shouldn't be used
 // directly; you should instead use a *Game as a factory for any game objects
 // that need creating.
-func newObj(otype ObjType, ostype ObjSubtype, traits *Traits, name string, eq *EventQueue) *Obj {
+func newObj(spec *Spec, eq *EventQueue) *Obj {
 	// Create.
-	newobj := &Obj{Type: otype, Subtype: ostype, Events: eq}
+	newobj := &Obj{Spec: spec, Events: eq}
 
 	// Assign traits.
-	traits = traits.defaults()
+	traits := spec.Traits.defaults()
 	newobj.Mover = traits.Mover(newobj)
 	newobj.AI = traits.AI(newobj)
 
