@@ -3,7 +3,6 @@ package client
 import (
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/nsf/termbox-go"
-	"log"
 )
 
 type Console struct {
@@ -30,11 +29,11 @@ func NewConsole() *Console {
 	return &Console{}
 }
 
-func (*Console) Init() error {
+func (c *Console) Init() error {
 	return termbox.Init()
 }
 
-func (*Console) Render(g *game.Game) {
+func (c *Console) Render(g *game.Game) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for _, row := range g.Level.Map {
 		for _, tile := range row {
@@ -47,15 +46,17 @@ func (*Console) Render(g *game.Game) {
 			}
 		}
 	}
-	termbox.Flush()
-	// Put actual printing here!!!
+
+	line := 0
 	for !g.Events.Empty() {
 		m := g.Events.Next().(*game.MessageEvent)
-		log.Print(m.Text)
+		c.write(0, line, m.Text, termbox.ColorWhite, termbox.ColorBlack)
+		line++
 	}
+	termbox.Flush()
 }
 
-func (*Console) NextCommand() game.Command {
+func (c *Console) NextCommand() game.Command {
 	keymap := map[rune]game.Command{
 		'h': game.CommandMoveW,
 		'j': game.CommandMoveS,
@@ -77,6 +78,14 @@ func (*Console) NextCommand() game.Command {
 	}
 }
 
-func (*Console) Close() {
+func (c *Console) Close() {
 	termbox.Close()
+}
+
+func (c *Console) write(x, y int, text string, fg termbox.Attribute, bg termbox.Attribute) {
+	i := 0
+	for _, r := range text {
+		termbox.SetCell(x+i, y, r, fg, bg)
+		i++
+	}
 }

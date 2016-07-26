@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 	"log"
 	"math/rand"
@@ -50,7 +51,7 @@ func (p *ActorMover) Move(dir math.Point) bool {
 
 	moved := obj.Level.Place(obj, endpos)
 	if !moved {
-		p.obj.Events.Message("You can't go that way!")
+		p.obj.Events.Message(fmt.Sprintf("%s says 'ow'.", p.obj.Spec.Name))
 	}
 	return moved
 }
