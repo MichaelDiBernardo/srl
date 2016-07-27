@@ -16,8 +16,6 @@
 - Monster AI
 
 CONSOLE STUFF:
-- break out into modules
-- Make a renderer or display interface that we can inject for tests, and is basically just termbox ( :( )
 - Put all this stuff in a screen even if there's only one.
 - then panels for:
 33 wide x 21 tall

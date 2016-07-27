@@ -7,29 +7,30 @@ import (
 
 // A console client.
 type Console struct {
+	display display
 }
 
 // Create a new console client.
 func New() *Console {
-	return &Console{}
+	return &Console{display: &tbdisplay{}}
 }
 
 // Init the console client.
 func (c *Console) Init() error {
-	return termbox.Init()
+	return c.display.Init()
 }
 
 // Render the current screen on this console.
 func (c *Console) Render(g *game.Game) {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	c.display.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for _, row := range g.Level.Map {
 		for _, tile := range row {
 			if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Spec.Subtype]
-				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
+				c.display.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
-				termbox.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
+				c.display.SetCell(tile.Pos.X, tile.Pos.Y, gl.Ch, gl.Fg, gl.Bg)
 			}
 		}
 	}
@@ -37,10 +38,10 @@ func (c *Console) Render(g *game.Game) {
 	line := 0
 	for !g.Events.Empty() {
 		m := g.Events.Next().(*game.MessageEvent)
-		write(0, line, m.Text, termbox.ColorWhite, termbox.ColorBlack)
+		c.display.Write(0, line, m.Text, termbox.ColorWhite, termbox.ColorBlack)
 		line++
 	}
-	termbox.Flush()
+	c.display.Flush()
 }
 
 // Get the next command from the player to be sent to the game instance.
@@ -53,7 +54,7 @@ func (c *Console) NextCommand() game.Command {
 		'q': game.CommandQuit,
 	}
 	for {
-		tboxev := termbox.PollEvent()
+		tboxev := c.display.PollEvent()
 
 		if tboxev.Type != termbox.EventKey || tboxev.Key != 0 {
 			continue
@@ -68,14 +69,5 @@ func (c *Console) NextCommand() game.Command {
 
 // Tear down the console client.
 func (c *Console) Close() {
-	termbox.Close()
-}
-
-// Write a string to the console.
-func write(x, y int, text string, fg termbox.Attribute, bg termbox.Attribute) {
-	i := 0
-	for _, r := range text {
-		termbox.SetCell(x+i, y, r, fg, bg)
-		i++
-	}
+	c.display.Close()
 }
