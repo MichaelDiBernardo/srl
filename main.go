@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/client"
+	"github.com/MichaelDiBernardo/srl/lib/client/console"
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"io"
 	"log"
@@ -18,7 +19,7 @@ type Session struct {
 
 func NewGame() *Session {
 	return &Session{
-		client: client.NewConsole(),
+		client: console.New(),
 		game:   game.NewGame(),
 	}
 }
