@@ -17,7 +17,7 @@ type Session struct {
 	game   *game.Game
 }
 
-func NewGame() *Session {
+func NewSession() *Session {
 	return &Session{
 		client: console.New(),
 		game:   game.NewGame(),
@@ -38,6 +38,11 @@ func (s *Session) Loop() {
 			return
 		}
 		s.game.Handle(command)
+
+		for !s.game.Events.Empty() {
+			ev := s.game.Events.Next()
+			s.client.Handle(ev)
+		}
 	}
 }
 
@@ -59,6 +64,6 @@ func main() {
 	setup()
 	defer teardown()
 
-	game := NewGame()
-	game.Loop()
+	s := NewSession()
+	s.Loop()
 }

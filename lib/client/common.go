@@ -20,9 +20,14 @@ type Commander interface {
 	NextCommand() game.Command
 }
 
+type EventHandler interface {
+	Handle(game.Event)
+}
+
 type Client interface {
 	Closer
 	Initer
 	Renderer
 	Commander
+	EventHandler
 }

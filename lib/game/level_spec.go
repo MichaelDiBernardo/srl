@@ -31,7 +31,7 @@ func IdentLevel(l *Level) *Level {
 
 func TestLevel(l *Level) *Level {
 	l = SquareLevel(l)
-	l.Place(l.fac.NewObj(MonOrc), math.Pt(10, 10))
-	l.Place(l.fac.NewObj(MonOrc), math.Pt(20, 20))
+	l.Place(l.fac.NewObj(MonOrc), math.Pt(3, 3))
+	l.Place(l.fac.NewObj(MonOrc), math.Pt(4, 4))
 	return l
 }
