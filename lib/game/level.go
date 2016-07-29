@@ -14,9 +14,9 @@ type Map [][]*Tile
 
 type Level struct {
 	Map    Map
+	Bounds math.Rectangle
 	fac    ObjFactory
 	actors []*Obj
-	bounds math.Rectangle
 }
 
 // Create a level that uses the given factory to create game objects, and which
@@ -29,19 +29,11 @@ func NewLevel(width, height int, fac ObjFactory, gen func(*Level) *Level) *Level
 	}
 	level := &Level{
 		Map:    newmap,
+		Bounds: math.Rect(math.Origin, math.Pt(width, height)),
 		fac:    fac,
 		actors: make([]*Obj, 0),
-		bounds: math.Rect(math.Origin, math.Pt(width, height)),
 	}
 	return gen(level)
-}
-
-func (l *Level) Width() int {
-	return len(l.Map[0])
-}
-
-func (l *Level) Height() int {
-	return len(l.Map)
 }
 
 func (l *Level) At(p math.Point) *Tile {
@@ -49,7 +41,7 @@ func (l *Level) At(p math.Point) *Tile {
 }
 
 func (l *Level) HasPoint(p math.Point) bool {
-	return l.bounds.HasPoint(p)
+	return l.Bounds.HasPoint(p)
 }
 
 // Place `o` on the tile at `p`. Returns false if this is impossible (e.g.

@@ -112,15 +112,28 @@ func (m *mapPanel) Handle(e game.Event) {
 
 // Render the gameplay map to the hud.
 func (m *mapPanel) Render(g *game.Game) {
-	for _, row := range g.Level.Map {
-		for _, tile := range row {
-			pos := mapPanelBounds.Min.Add(tile.Pos)
+	center := g.Player.Pos()
+	boundsdist := math.Pt(mapPanelBounds.Width()/2, mapPanelBounds.Height()/2)
+	viewport := math.Rect(center.Sub(boundsdist), center.Add(boundsdist))
+	maptrans := mapPanelBounds.Min.Sub(viewport.Min)
+	level := g.Level
+
+	for x := viewport.Min.X; x < viewport.Max.X; x++ {
+		for y := viewport.Min.Y; y < viewport.Max.Y; y++ {
+			cur := math.Pt(x, y)
+			if !cur.In(level) {
+				continue
+			}
+
+			tile := level.At(cur)
+			drawpos := cur.Add(maptrans)
+
 			if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Spec.Subtype]
-				m.display.SetCell(pos.X, pos.Y, gl.Ch, gl.Fg, gl.Bg)
+				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
-				m.display.SetCell(pos.X, pos.Y, gl.Ch, gl.Fg, gl.Bg)
+				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
 			}
 		}
 	}

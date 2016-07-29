@@ -25,7 +25,7 @@ func NewGame() *Game {
 	game := &Game{Events: eq}
 	game.Player = game.NewObj(PlayerSpec)
 
-	level := NewLevel(10, 10, game, TestLevel)
+	level := NewLevel(80, 50, game, TestLevel)
 	game.Level = level
 
 	level.Place(game.Player, math.Pt(1, 1))

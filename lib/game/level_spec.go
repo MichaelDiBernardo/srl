@@ -2,11 +2,12 @@ package game
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"math/rand"
 )
 
 // Generators.
 func SquareLevel(l *Level) *Level {
-	height, width, m := l.Height(), l.Width(), l.Map
+	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			feature := FeatFloor
@@ -20,7 +21,7 @@ func SquareLevel(l *Level) *Level {
 }
 
 func IdentLevel(l *Level) *Level {
-	height, width, m := l.Height(), l.Width(), l.Map
+	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			m[y][x] = &Tile{Pos: math.Pt(x, y), Feature: FeatFloor}
@@ -31,7 +32,14 @@ func IdentLevel(l *Level) *Level {
 
 func TestLevel(l *Level) *Level {
 	l = SquareLevel(l)
-	l.Place(l.fac.NewObj(MonOrc), math.Pt(3, 3))
-	l.Place(l.fac.NewObj(MonOrc), math.Pt(4, 4))
+	for i := 0; i < 10; i++ {
+		mon := l.fac.NewObj(MonOrc)
+		for {
+			pt := math.Pt(rand.Intn(l.Bounds.Width()), rand.Intn(l.Bounds.Height()))
+			if l.Place(mon, pt) {
+				break
+			}
+		}
+	}
 	return l
 }
