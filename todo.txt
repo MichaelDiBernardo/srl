@@ -1,7 +1,10 @@
 - Very basic mechanics:
-    - Stats
-    - Skills derived from stats
+    - Stats:
+        - single interface(s) that give accessors to stats and skills
+          (Sheet???) and implementations for monsters and player
     - Fighting weaponless
+        - Could start as single Fighter impl for both monsters and player, and
+          then specialize from there when player equipment is implemented.
 - Equipment
     - Player can wield, monster cannot (too complicated)
 - repositories
