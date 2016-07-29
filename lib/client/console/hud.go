@@ -14,17 +14,19 @@ type hudScreen struct {
 	panels  [3]panel
 }
 
+var hudBounds = math.Rect(math.Origin, math.Pt(80, 24))
+
 // Where the message panel should go.
-var messagePanelAnchor = math.Pt(1, 19)
+var messagePanelBounds = math.Rect(math.Pt(1, 19), math.Pt(1, hudBounds.Max.Y))
 
 // How many lines should show by default in the message panel.
-const messagePanelNumLines = 5
+var messagePanelNumLines = messagePanelBounds.Height()
 
 // Where the status panel should go.
-var statusPanelAnchor = math.Pt(38, 0)
+var statusPanelBounds = math.Rect(math.Pt(38, 0), math.Pt(hudBounds.Max.X-38, messagePanelBounds.Min.Y))
 
 // Where the map panel should go.
-var mapPanelAnchor = math.Origin
+var mapPanelBounds = math.Rect(math.Origin, math.Pt(statusPanelBounds.Min.X, messagePanelBounds.Min.Y))
 
 // Create a new HUD.
 func newHudScreen(display display) *hudScreen {
@@ -112,7 +114,7 @@ func (m *mapPanel) Handle(e game.Event) {
 func (m *mapPanel) Render(g *game.Game) {
 	for _, row := range g.Level.Map {
 		for _, tile := range row {
-			pos := mapPanelAnchor.Add(tile.Pos)
+			pos := mapPanelBounds.Min.Add(tile.Pos)
 			if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Spec.Subtype]
 				m.display.SetCell(pos.X, pos.Y, gl.Ch, gl.Fg, gl.Bg)
@@ -152,7 +154,7 @@ func (m *messagePanel) Handle(e game.Event) {
 func (m *messagePanel) Render(_ *game.Game) {
 	for e, i := m.lines.Front(), 0; e != nil; e, i = e.Next(), i+1 {
 		line := e.Value.(string)
-		m.display.Write(messagePanelAnchor.X, messagePanelAnchor.Y+i, line, termbox.ColorWhite, termbox.ColorBlack)
+		m.display.Write(messagePanelBounds.Min.X, messagePanelBounds.Min.Y+i, line, termbox.ColorWhite, termbox.ColorBlack)
 	}
 }
 
@@ -183,17 +185,17 @@ func (s *statusPanel) Render(g *game.Game) {
 	player := g.Player
 	fg, bg := termbox.ColorWhite, termbox.ColorBlack
 
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+0, player.Spec.Name, fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+1, "Human", fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+1, "Human", fg, bg)
 
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+3, fmt.Sprintf("%-7s%3d", "STR", 1), fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+4, fmt.Sprintf("%-7s%3d", "AGI", 2), fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+5, fmt.Sprintf("%-7s%3d", "VIT", 2), fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+6, fmt.Sprintf("%-7s%3d", "MND", 0), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", 1), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", 2), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", 2), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", 0), fg, bg)
 
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+8, fmt.Sprintf("%-7s%3d", "HP", 30), fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+9, fmt.Sprintf("%-7s%3d", "MP", 10), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d", "HP", 30), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d", "MP", 10), fg, bg)
 
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+11, fmt.Sprintf("%-7s%8s", "FIGHT", "(+2,2d6)"), fg, bg)
-	s.display.Write(statusPanelAnchor.X, statusPanelAnchor.Y+12, fmt.Sprintf("%-7s%8s", "DEF", "[+0,1-3]"), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%8s", "FIGHT", "(+2,2d6)"), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+12, fmt.Sprintf("%-7s%8s", "DEF", "[+0,1-3]"), fg, bg)
 }

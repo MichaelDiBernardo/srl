@@ -16,7 +16,7 @@ type Level struct {
 	Map    Map
 	fac    ObjFactory
 	actors []*Obj
-    bounds math.Rectangle
+	bounds math.Rectangle
 }
 
 // Create a level that uses the given factory to create game objects, and which
@@ -31,7 +31,7 @@ func NewLevel(width, height int, fac ObjFactory, gen func(*Level) *Level) *Level
 		Map:    newmap,
 		fac:    fac,
 		actors: make([]*Obj, 0),
-        bounds: math.Rect(math.Origin, math.Pt(width, height)),
+		bounds: math.Rect(math.Origin, math.Pt(width, height)),
 	}
 	return gen(level)
 }
