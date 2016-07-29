@@ -93,6 +93,9 @@ func NewRandomAI(obj *Obj) AI {
 func (ai *RandomAI) Act(l *Level) bool {
 	x, y := rand.Intn(3)-1, rand.Intn(3)-1
 	dir := math.Pt(x, y)
+	if dir == math.Origin {
+		return ai.Act(l)
+	}
 	log.Printf("AI: Moving from %v by %v", ai.obj.Pos(), dir)
 
 	return ai.obj.Mover.Move(dir)
