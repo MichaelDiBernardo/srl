@@ -13,7 +13,7 @@ func TestOriginWorksAsZeroValue(t *testing.T) {
 }
 
 func TestAddPoints(t *testing.T) {
-	p1, p2, want := Point{1, 2}, Point{3, 5}, Point{4, 7}
+	p1, p2, want := Pt(1, 2), Pt(3, 5), Pt(4, 7)
 	sum := p1.Add(p2)
 
 	if sum != want {
@@ -28,17 +28,38 @@ func TestAddPoints(t *testing.T) {
 }
 
 func TestSubPoints(t *testing.T) {
-	p1, p2, want := Point{1, 2}, Point{3, 5}, Point{-2, -3}
+	p1, p2, want := Pt(1, 2), Pt(3, 5), Pt(-2, -3)
 	diff := p1.Sub(p2)
 
 	if diff != want {
 		t.Errorf("%v.Sub(%v) was %v, want %v", p1, p2, diff, want)
 	}
 
-	want = Point{2, 3}
+	want = Pt(2, 3)
 	diff = p2.Sub(p1)
 
 	if diff != want {
 		t.Errorf("%v.Sub(%v) was %v, want %v", p2, p1, diff, want)
+	}
+}
+
+func TestRectDimensions(t *testing.T) {
+	sut := Rect(Pt(2, 3), Pt(11, 5))
+	if expected, actual := 9, sut.Width(); expected != actual {
+		t.Errorf("Rectangle.Width() is %d; want %d", actual, expected)
+	}
+	if expected, actual := 2, sut.Height(); expected != actual {
+		t.Errorf("Rectangle.Height() is %d; want %d", actual, expected)
+	}
+}
+
+func TestRectHasPoint(t *testing.T) {
+	sut := Rect(Pt(1, 2), Pt(4, 5))
+	if pt := Pt(1, 3); !sut.HasPoint(pt) {
+		t.Errorf("%v.HasPoint(%v) is false; want true", sut, pt)
+	}
+
+	if pt := Pt(4, 5); sut.HasPoint(pt) {
+		t.Errorf("%v.HasPoint(%v) is true; want false", sut, pt)
 	}
 }
