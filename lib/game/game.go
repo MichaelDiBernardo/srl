@@ -68,27 +68,13 @@ const (
 	CommandMoveNW
 )
 
-// An event generated _by_ the game that the client should be interested in.
-type EventType int
-
-const (
-	_ = iota
-	EventMessage
-)
-
 // Events are complex objects (unlike commands); you have to type-assert them
 // to their concrete types to get at their payloads.
-type Event interface {
-	EventType() EventType
-}
+type Event interface{}
 
 // A message that we want to show up in the message console.
 type MessageEvent struct {
 	Text string
-}
-
-func (e *MessageEvent) EventType() EventType {
-	return EventMessage
 }
 
 // A queue of events that are produced by the game and consumed by the client.

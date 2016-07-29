@@ -7,10 +7,6 @@ import (
 type testEvent struct {
 }
 
-func (te *testEvent) EventType() EventType {
-	return 1284901284
-}
-
 func TestQueueStartsEmpty(t *testing.T) {
 	sut := newEventQueue()
 	if !sut.Empty() {
