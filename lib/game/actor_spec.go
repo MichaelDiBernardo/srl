@@ -6,7 +6,8 @@ var (
 		Subtype: "Player",
 		Name:    "DEBO",
 		Traits: &Traits{
-			Mover: NewActorMover,
+			Mover:   NewActorMover,
+			Fighter: NewActorFighter,
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 2,
@@ -21,8 +22,9 @@ var (
 		Subtype: "MonOrc",
 		Name:    "ORC",
 		Traits: &Traits{
-			Mover: NewActorMover,
-			AI:    NewRandomAI,
+			Mover:   NewActorMover,
+			AI:      NewRandomAI,
+			Fighter: NewActorFighter,
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 0,

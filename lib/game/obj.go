@@ -14,6 +14,18 @@ const (
 	OTActor = "Actor"
 )
 
+type Objgetter interface {
+	Obj() *Obj
+}
+
+type Trait struct {
+	obj *Obj
+}
+
+func (t *Trait) Obj() *Obj {
+	return t.obj
+}
+
 // A specification for a type of game object.
 type Spec struct {
 	Type    ObjType
@@ -30,20 +42,22 @@ type Obj struct {
 	Level  *Level
 	Events *EventQueue
 	// Actor traits
-	Mover Mover
-	AI    AI
-	Stats Stats
-	Sheet Sheet
+	Mover   Mover
+	AI      AI
+	Stats   Stats
+	Sheet   Sheet
+	Fighter Fighter
 }
 
 // A specification object for newObj. Each key maps to a factory function for
 // the specific implementation of the desired trait. If an object is not
 // supposed to have a specific trait, leave it unspecified.
 type Traits struct {
-	Mover func(*Obj) Mover
-	AI    func(*Obj) AI
-	Stats func(*Obj) Stats
-	Sheet func(*Obj) Sheet
+	Mover   func(*Obj) Mover
+	AI      func(*Obj) AI
+	Stats   func(*Obj) Stats
+	Sheet   func(*Obj) Sheet
+	Fighter func(*Obj) Fighter
 }
 
 // Takes a partially-specified traits obj and fills in the nil ones with
@@ -61,6 +75,9 @@ func (t *Traits) defaults() *Traits {
 	if t.Sheet == nil {
 		t.Sheet = NewNullSheet
 	}
+	if t.Fighter == nil {
+		t.Fighter = NewNullFighter
+	}
 	return t
 }
 
@@ -77,6 +94,7 @@ func newObj(spec *Spec, eq *EventQueue) *Obj {
 	newobj.AI = traits.AI(newobj)
 	newobj.Stats = traits.Stats(newobj)
 	newobj.Sheet = traits.Sheet(newobj)
+	newobj.Fighter = traits.Fighter(newobj)
 
 	return newobj
 }
