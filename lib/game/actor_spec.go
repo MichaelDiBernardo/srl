@@ -7,6 +7,12 @@ var (
 		Name:    "DEBO",
 		Traits: &Traits{
 			Mover: NewActorMover,
+			Stats: NewActorStats(stats{
+				str: 2,
+				agi: 2,
+				vit: 2,
+				mnd: 2,
+			}),
 		},
 	}
 	MonOrc = &Spec{
@@ -16,6 +22,12 @@ var (
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI:    NewRandomAI,
+			Stats: NewActorStats(stats{
+				str: 2,
+				agi: 0,
+				vit: 2,
+				mnd: 0,
+			}),
 		},
 	}
 )

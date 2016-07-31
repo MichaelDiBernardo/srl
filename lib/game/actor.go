@@ -100,3 +100,58 @@ func (ai *RandomAI) Act(l *Level) bool {
 
 	return ai.obj.Mover.Move(dir)
 }
+
+// Accessors for an actor's stats.
+type Stats interface {
+	Str() int
+	Agi() int
+	Vit() int
+	Mnd() int
+}
+
+// Single implementation of this for now; will probably have separate
+// implementations for monsters and player when things get more complicated.
+type stats struct {
+	str int
+	agi int
+	vit int
+	mnd int
+	obj *Obj
+}
+
+// Given a copy of a stats literal, this will return a function that will bind
+// the owner of the stats to it at object creation time. See the syntax for
+// this in actor_spec.go.
+func NewActorStats(stats stats) func(*Obj) Stats {
+	return func(o *Obj) Stats {
+		stats.obj = o
+		return &stats
+	}
+}
+
+func (s *stats) Str() int {
+	return s.str
+}
+
+func (s *stats) Agi() int {
+	return s.agi
+}
+
+func (s *stats) Vit() int {
+	return s.vit
+}
+
+func (s *stats) Mnd() int {
+	return s.mnd
+}
+
+// Stats to assign if the thing has no stats.
+func NewNullStats(o *Obj) Stats {
+	return &stats{
+		str: 0,
+		agi: 0,
+		vit: 0,
+		mnd: 0,
+		obj: o,
+	}
+}

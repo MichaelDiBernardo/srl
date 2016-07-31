@@ -197,14 +197,15 @@ func (s *statusPanel) Handle(e game.Event) {
 func (s *statusPanel) Render(g *game.Game) {
 	player := g.Player
 	fg, bg := termbox.ColorWhite, termbox.ColorBlack
+	stats := player.Stats
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+1, "Human", fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", 1), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", 2), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", 2), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", 0), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", stats.Str()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", stats.Agi()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", stats.Vit()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", stats.Mnd()), fg, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d", "HP", 30), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d", "MP", 10), fg, bg)
