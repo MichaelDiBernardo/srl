@@ -146,12 +146,111 @@ func (s *stats) Mnd() int {
 }
 
 // Stats to assign if the thing has no stats.
-func NewNullStats(o *Obj) Stats {
-	return &stats{
-		str: 0,
-		agi: 0,
-		vit: 0,
-		mnd: 0,
-		obj: o,
+var nullstats = &stats{}
+
+func NewNullStats(_ *Obj) Stats {
+	return nullstats
+}
+
+// A 'character sheet' for an actor. This is where all attributes derived from
+// stats + equipment are stored.
+type Sheet interface {
+	Melee() int
+	Evasion() int
+	HP() int
+	MaxHP() int
+	MP() int
+	MaxMP() int
+}
+
+type sheet struct {
+	obj *Obj
+	hp  int
+	mp  int
+}
+
+// Sheet used for player, which has a lot of derived attributes.
+type PlayerSheet sheet
+
+func NewPlayerSheet(obj *Obj) Sheet {
+	ps := &PlayerSheet{obj: obj}
+	ps.hp = ps.MaxHP()
+	ps.mp = ps.MaxMP()
+	return ps
+}
+
+func (p *PlayerSheet) Melee() int {
+	return p.obj.Stats.Agi()
+}
+
+func (p *PlayerSheet) Evasion() int {
+	return p.obj.Stats.Agi()
+}
+
+func (p *PlayerSheet) HP() int {
+	return p.hp
+}
+
+func (p *PlayerSheet) MP() int {
+	return p.mp
+}
+
+func (p *PlayerSheet) MaxHP() int {
+	return 10 * (1 + p.obj.Stats.Vit())
+}
+
+func (p *PlayerSheet) MaxMP() int {
+	return 10 * (1 + p.obj.Stats.Mnd())
+}
+
+// Sheet used for monsters, which have a lot of hardcoded attributes.
+type MonsterSheet struct {
+	sheet
+	melee   int
+	evasion int
+	maxhp   int
+	maxmp   int
+}
+
+// Given a copy of a MonsterSheet literal, this will return a function that will bind
+// the owner of the sheet to it at object creation time. See the syntax for
+// this in actor_spec.go.
+func NewMonsterSheet(sheet MonsterSheet) func(*Obj) Sheet {
+	return func(o *Obj) Sheet {
+		sheet.obj = o
+		sheet.hp = sheet.maxhp
+		sheet.mp = sheet.maxmp
+		return &sheet
 	}
+}
+
+func (m *MonsterSheet) Melee() int {
+	return m.melee
+}
+
+func (m *MonsterSheet) Evasion() int {
+	return m.evasion
+}
+
+func (m *MonsterSheet) HP() int {
+	return m.hp
+}
+
+func (m *MonsterSheet) MP() int {
+	return m.mp
+}
+
+func (m *MonsterSheet) MaxHP() int {
+	return m.maxhp
+}
+
+func (m *MonsterSheet) MaxMP() int {
+	return m.maxmp
+}
+
+// Sheet to assign if thing has no sheet.
+var nullsheet = &MonsterSheet{}
+
+func NewNullSheet(obj *Obj) Sheet {
+	return nullsheet
 }

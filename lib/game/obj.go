@@ -33,6 +33,7 @@ type Obj struct {
 	Mover Mover
 	AI    AI
 	Stats Stats
+	Sheet Sheet
 }
 
 // A specification object for newObj. Each key maps to a factory function for
@@ -42,6 +43,7 @@ type Traits struct {
 	Mover func(*Obj) Mover
 	AI    func(*Obj) AI
 	Stats func(*Obj) Stats
+	Sheet func(*Obj) Sheet
 }
 
 // Takes a partially-specified traits obj and fills in the nil ones with
@@ -55,6 +57,9 @@ func (t *Traits) defaults() *Traits {
 	}
 	if t.Stats == nil {
 		t.Stats = NewNullStats
+	}
+	if t.Sheet == nil {
+		t.Sheet = NewNullSheet
 	}
 	return t
 }
@@ -71,6 +76,7 @@ func newObj(spec *Spec, eq *EventQueue) *Obj {
 	newobj.Mover = traits.Mover(newobj)
 	newobj.AI = traits.AI(newobj)
 	newobj.Stats = traits.Stats(newobj)
+	newobj.Sheet = traits.Sheet(newobj)
 
 	return newobj
 }

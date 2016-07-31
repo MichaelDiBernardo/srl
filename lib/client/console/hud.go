@@ -198,6 +198,7 @@ func (s *statusPanel) Render(g *game.Game) {
 	player := g.Player
 	fg, bg := termbox.ColorWhite, termbox.ColorBlack
 	stats := player.Stats
+	sheet := player.Sheet
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+1, "Human", fg, bg)
@@ -207,8 +208,8 @@ func (s *statusPanel) Render(g *game.Game) {
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", stats.Vit()), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", stats.Mnd()), fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d", "HP", 30), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d", "MP", 10), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d:%-3d", "HP", sheet.HP(), sheet.MaxHP()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d:%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%8s", "FIGHT", "(+2,2d6)"), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+12, fmt.Sprintf("%-7s%8s", "DEF", "[+0,1-3]"), fg, bg)

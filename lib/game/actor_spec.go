@@ -13,6 +13,7 @@ var (
 				vit: 2,
 				mnd: 2,
 			}),
+			Sheet: NewPlayerSheet,
 		},
 	}
 	MonOrc = &Spec{
@@ -25,8 +26,14 @@ var (
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 0,
-				vit: 2,
+				vit: 1,
 				mnd: 0,
+			}),
+			Sheet: NewMonsterSheet(MonsterSheet{
+				melee:   1,
+				evasion: 1,
+				maxhp:   20,
+				maxmp:   10,
 			}),
 		},
 	}
