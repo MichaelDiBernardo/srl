@@ -63,3 +63,23 @@ func TestActorCollision(t *testing.T) {
 		t.Error(`a1.Move( (1, 0)) = true, want false`)
 	}
 }
+
+func TestPlayerMaxHPCalc(t *testing.T) {
+	obj := &Obj{}
+	obj.Stats = &stats{obj: obj, vit: 1}
+	obj.Sheet = &PlayerSheet{obj: obj}
+
+	if maxhp, want := obj.Sheet.MaxHP(), 20; maxhp != want {
+		t.Errorf(`MaxHP() was %d, want %d`, maxhp, want)
+	}
+}
+
+func TestPlayerMaxMPCalc(t *testing.T) {
+	obj := &Obj{}
+	obj.Stats = &stats{obj: obj, mnd: 2}
+	obj.Sheet = &PlayerSheet{obj: obj}
+
+	if maxmp, want := obj.Sheet.MaxMP(), 30; maxmp != want {
+		t.Errorf(`MaxMP() was %d, want %d`, maxmp, want)
+	}
+}
