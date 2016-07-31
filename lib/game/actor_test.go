@@ -8,25 +8,17 @@ import (
 type aTestFac struct {
 }
 
-var (
-	actorTestQueue   = newEventQueue()
-	actorTestFactory = &aTestFac{}
-)
-
-// Creates a new moving actor for use in these tests.
-func (*aTestFac) NewObj(_ *Spec) *Obj {
-	spec := &Spec{
-		Type:    OTActor,
-		Name:    "Hi",
-		Subtype: "TestMover",
-		Traits:  &Traits{Mover: NewActorMover},
-	}
-	return newObj(spec, actorTestQueue)
+var actorTestQueue = newEventQueue()
+var actorTestSpec = &Spec{
+	Type:    OTActor,
+	Name:    "Hi",
+	Subtype: "TestMover",
+	Traits:  &Traits{Mover: NewActorMover},
 }
 
 func TestOkMove(t *testing.T) {
-	l := NewLevel(4, 4, actorTestFactory, IdentLevel)
-	obj := actorTestFactory.NewObj(nil)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	obj := newObj(actorTestSpec, actorTestQueue)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -52,8 +44,8 @@ func TestOkMove(t *testing.T) {
 }
 
 func TestActorCollision(t *testing.T) {
-	l := NewLevel(4, 4, actorTestFactory, IdentLevel)
-	a1, a2 := actorTestFactory.NewObj(nil), actorTestFactory.NewObj(nil)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	a1, a2 := newObj(actorTestSpec, actorTestQueue), newObj(actorTestSpec, actorTestQueue)
 	l.Place(a1, math.Pt(1, 1))
 	l.Place(a2, math.Pt(2, 1))
 
@@ -65,7 +57,7 @@ func TestActorCollision(t *testing.T) {
 }
 
 func TestPlayerMaxHPCalc(t *testing.T) {
-	obj := &Obj{}
+	obj := newObj(PlayerSpec, actorTestQueue)
 	obj.Stats = &stats{Trait: Trait{obj: obj}, vit: 1}
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
 
@@ -75,7 +67,7 @@ func TestPlayerMaxHPCalc(t *testing.T) {
 }
 
 func TestPlayerMaxMPCalc(t *testing.T) {
-	obj := &Obj{}
+	obj := newObj(PlayerSpec, actorTestQueue)
 	obj.Stats = &stats{Trait: Trait{obj: obj}, mnd: 2}
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
 
