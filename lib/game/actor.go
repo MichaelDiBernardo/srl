@@ -7,8 +7,11 @@ import (
 	"math/rand"
 )
 
-var OSTMonster ObjSubtype = "Monster"
-var OSTPlayer ObjSubtype = "Player"
+// Permissible genera of actors.
+const (
+	GenPlayer  = "player"
+	GenMonster = "monster"
+)
 
 // A thing that can move given a specific direction.
 type Mover interface {

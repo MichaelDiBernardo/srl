@@ -9,10 +9,12 @@ type lTestFac struct {
 }
 
 var levelTestQueue = newEventQueue()
+
 var levelTestSpec = &Spec{
-	Type:    OTActor,
-	Subtype: "TestPlacer",
-	Name:    "hi",
+	Family:  FamActor,
+	Genus:   GenMonster,
+	Species: "TestSpecies",
+	Name:    "Hi",
 	Traits:  &Traits{},
 }
 

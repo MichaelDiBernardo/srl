@@ -10,9 +10,10 @@ type aTestFac struct {
 
 var actorTestQueue = newEventQueue()
 var actorTestSpec = &Spec{
-	Type:    OTActor,
+	Family:  FamActor,
+	Genus:   GenMonster,
+	Species: "TestSpecies",
 	Name:    "Hi",
-	Subtype: "TestMover",
 	Traits:  &Traits{Mover: NewActorMover},
 }
 

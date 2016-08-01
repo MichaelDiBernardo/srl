@@ -1,9 +1,18 @@
 package game
 
+const (
+	// Player species.
+	SpecHuman = "human"
+
+	// Monster species.
+	SpecOrc = "orc"
+)
+
 var (
 	PlayerSpec = &Spec{
-		Type:    OTActor,
-		Subtype: OSTPlayer,
+		Family:  FamActor,
+		Genus:   GenPlayer,
+		Species: SpecHuman,
 		Name:    "DEBO",
 		Traits: &Traits{
 			Mover:   NewActorMover,
@@ -18,8 +27,9 @@ var (
 		},
 	}
 	MonOrc = &Spec{
-		Type:    OTActor,
-		Subtype: OSTMonster,
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: SpecOrc,
 		Name:    "ORC",
 		Traits: &Traits{
 			Mover:   NewActorMover,

@@ -5,13 +5,17 @@ import (
 )
 
 // e.g. "Actor", "Item"
-type ObjType string
+type Family string
+
+// e.g. "Player", "Monster", "Potion"
+type Genus string
 
 // e.g. "Orc", "HealPotion"
-type ObjSubtype string
+type Species string
 
+// Permissible families of objects.
 const (
-	OTActor = "Actor"
+	FamActor = "actor"
 )
 
 type Objgetter interface {
@@ -28,8 +32,9 @@ func (t *Trait) Obj() *Obj {
 
 // A specification for a type of game object.
 type Spec struct {
-	Type    ObjType
-	Subtype ObjSubtype
+	Family  Family
+	Genus   Genus
+	Species Species
 	Name    string
 	Traits  *Traits
 }
@@ -106,5 +111,5 @@ func (o *Obj) Pos() math.Point {
 
 // Does this object represent the player?
 func (o *Obj) isPlayer() bool {
-	return o.Spec.Type == OTActor && o.Spec.Subtype == OSTPlayer
+	return o.Spec.Family == FamActor && o.Spec.Genus == GenPlayer
 }

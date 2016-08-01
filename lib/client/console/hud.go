@@ -90,9 +90,9 @@ type glyph struct {
 }
 
 // Glyphs used to render actors.
-var actorGlyphs = map[game.ObjSubtype]glyph{
-	"Player": glyph{Ch: '@', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
-	"MonOrc": glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
+var actorGlyphs = map[game.Species]glyph{
+	game.SpecHuman: glyph{Ch: '@', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+	game.SpecOrc:   glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 }
 
 // Glyphs used to render tiles.
@@ -129,7 +129,7 @@ func (m *mapPanel) Render(g *game.Game) {
 			drawpos := cur.Add(maptrans)
 
 			if tile.Actor != nil {
-				gl := actorGlyphs[tile.Actor.Spec.Subtype]
+				gl := actorGlyphs[tile.Actor.Spec.Species]
 				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
