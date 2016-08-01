@@ -75,3 +75,58 @@ func TestPlayerMaxMPCalc(t *testing.T) {
 		t.Errorf(`MaxMP() was %d, want %d`, maxmp, want)
 	}
 }
+
+type fakefighter struct {
+	Trait
+	Called bool
+}
+
+func (f *fakefighter) Hit(other Fighter) {
+	f.Called = true
+}
+
+func TestPlayerMonsterCollisionsHit(t *testing.T) {
+	player := newObj(PlayerSpec, actorTestQueue)
+	pf := &fakefighter{Trait: Trait{obj: player}}
+	player.Fighter = pf
+
+	monster := newObj(actorTestSpec, actorTestQueue)
+	mf := &fakefighter{Trait: Trait{obj: player}}
+	monster.Fighter = mf
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(player, math.Pt(0, 0))
+	l.Place(monster, math.Pt(1, 1))
+
+	player.Mover.Move(math.Pt(1, 1))
+
+	if !pf.Called {
+		t.Error("Moving player into other did not try to hit.")
+	}
+
+	monster.Mover.Move(math.Pt(-1, -1))
+
+	if !mf.Called {
+		t.Error("Moving other into player did not try to hit.")
+	}
+}
+
+func TestMonsterMonsterCollisionsHit(t *testing.T) {
+	mon1 := newObj(actorTestSpec, actorTestQueue)
+	mf1 := &fakefighter{Trait: Trait{obj: mon1}}
+	mon1.Fighter = mf1
+
+	mon2 := newObj(actorTestSpec, actorTestQueue)
+	mf2 := &fakefighter{Trait: Trait{obj: mon2}}
+	mon2.Fighter = mf2
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(mon1, math.Pt(0, 0))
+	l.Place(mon2, math.Pt(1, 1))
+
+	mon1.Mover.Move(math.Pt(1, 1))
+
+	if mf1.Called {
+		t.Error("Moving monster into monster tried to hit.")
+	}
+}

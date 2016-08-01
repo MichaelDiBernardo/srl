@@ -103,3 +103,8 @@ func newObj(spec *Spec, eq *EventQueue) *Obj {
 func (o *Obj) Pos() math.Point {
 	return o.Tile.Pos
 }
+
+// Does this object represent the player?
+func (o *Obj) isPlayer() bool {
+	return o.Spec.Type == OTActor && o.Spec.Subtype == OSTPlayer
+}

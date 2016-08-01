@@ -3,7 +3,7 @@ package game
 var (
 	PlayerSpec = &Spec{
 		Type:    OTActor,
-		Subtype: "Player",
+		Subtype: OSTPlayer,
 		Name:    "DEBO",
 		Traits: &Traits{
 			Mover:   NewActorMover,
@@ -19,7 +19,7 @@ var (
 	}
 	MonOrc = &Spec{
 		Type:    OTActor,
-		Subtype: "MonOrc",
+		Subtype: OSTMonster,
 		Name:    "ORC",
 		Traits: &Traits{
 			Mover:   NewActorMover,

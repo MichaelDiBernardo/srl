@@ -7,6 +7,9 @@ import (
 	"math/rand"
 )
 
+var OSTMonster ObjSubtype = "Monster"
+var OSTPlayer ObjSubtype = "Player"
+
 // A thing that can move given a specific direction.
 type Mover interface {
 	Objgetter
@@ -50,7 +53,9 @@ func (p *ActorMover) Move(dir math.Point) bool {
 
 	endtile := obj.Level.At(endpos)
 	if other := endtile.Actor; other != nil {
-		p.obj.Fighter.Hit(other.Fighter)
+		if opposing := obj.isPlayer() != other.isPlayer(); opposing {
+			p.obj.Fighter.Hit(other.Fighter)
+		}
 		return false
 	}
 
