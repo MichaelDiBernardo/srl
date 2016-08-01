@@ -1,7 +1,7 @@
 - Very basic mechanics:
     - Fighting weaponless
-        - Could start as single Fighter impl for both monsters and player, and
-          then specialize from there when player equipment is implemented.
+        - figure out why orcs sometimes hit for 0 damage when protrolls are
+          forced to 0???
 - Equipment
     - Player can wield, monster cannot (too complicated)
 - repositories

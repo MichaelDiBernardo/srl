@@ -272,6 +272,10 @@ func NewNullSheet(obj *Obj) Sheet {
 type Fighter interface {
 	Objgetter
 	Hit(other Fighter)
+	MeleeRoll() int
+	EvasionRoll() int
+	DamRoll() int
+	ProtRoll() int
 }
 
 // An attacker that works for all actors.
@@ -284,10 +288,32 @@ func NewActorFighter(obj *Obj) Fighter {
 }
 
 func (a *ActorFighter) Hit(other Fighter) {
-	dmg := 1
-	other.Obj().Sheet.Hurt(dmg)
-	msg := fmt.Sprintf("%v hit %v (%d).", a.obj.Spec.Name, other.Obj().Spec.Name, dmg)
-	a.obj.Events.Message(msg)
+	mroll, eroll := a.MeleeRoll(), other.EvasionRoll()
+	if mroll > eroll {
+		dmg := a.DamRoll() - other.ProtRoll()
+		other.Obj().Sheet.Hurt(dmg)
+		msg := fmt.Sprintf("%v hit %v (%d).", a.obj.Spec.Name, other.Obj().Spec.Name, dmg)
+		a.obj.Events.Message(msg)
+	} else {
+		msg := fmt.Sprintf("%v missed %v.", a.obj.Spec.Name, other.Obj().Spec.Name)
+		a.obj.Events.Message(msg)
+	}
+}
+
+func (a *ActorFighter) MeleeRoll() int {
+	return DieRoll(1, 20) + a.obj.Sheet.Melee()
+}
+
+func (a *ActorFighter) EvasionRoll() int {
+	return DieRoll(1, 20) + a.obj.Sheet.Evasion()
+}
+
+func (a *ActorFighter) DamRoll() int {
+	return DieRoll(1, a.obj.Stats.Str())
+}
+
+func (a *ActorFighter) ProtRoll() int {
+	return 0
 }
 
 type NullFighter struct {
@@ -299,4 +325,20 @@ func NewNullFighter(obj *Obj) Fighter {
 }
 
 func (n *NullFighter) Hit(other Fighter) {
+}
+
+func (n *NullFighter) MeleeRoll() int {
+	return 0
+}
+
+func (n *NullFighter) EvasionRoll() int {
+	return 0
+}
+
+func (n *NullFighter) DamRoll() int {
+	return 0
+}
+
+func (n *NullFighter) ProtRoll() int {
+	return 0
 }

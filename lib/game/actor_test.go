@@ -86,6 +86,22 @@ func (f *fakefighter) Hit(other Fighter) {
 	f.Called = true
 }
 
+func (_ *fakefighter) MeleeRoll() int {
+	return 0
+}
+
+func (_ *fakefighter) EvasionRoll() int {
+	return 0
+}
+
+func (_ *fakefighter) DamRoll() int {
+	return 0
+}
+
+func (_ *fakefighter) ProtRoll() int {
+	return 0
+}
+
 func TestPlayerMonsterCollisionsHit(t *testing.T) {
 	player := newObj(PlayerSpec, actorTestQueue)
 	pf := &fakefighter{Trait: Trait{obj: player}}
