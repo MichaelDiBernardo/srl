@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 	"math/rand"
 )
 
@@ -105,8 +104,6 @@ func (ai *RandomAI) Act(l *Level) bool {
 	if dir == math.Origin {
 		return ai.Act(l)
 	}
-	log.Printf("AI: Moving from %v by %v", ai.obj.Pos(), dir)
-
 	return ai.obj.Mover.Move(dir)
 }
 
