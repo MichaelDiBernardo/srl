@@ -95,6 +95,11 @@ var actorGlyphs = map[game.Species]glyph{
 	game.SpecOrc:   glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 }
 
+// Glyphs used to render items.
+var itemGlyphs = map[game.Species]glyph{
+	game.SpecSword: glyph{Ch: '|', Fg: termbox.ColorBlue, Bg: termbox.ColorBlack},
+}
+
 // Glyphs used to render tiles.
 var featureGlyphs = map[game.FeatureType]glyph{
 	"FeatWall":  glyph{Ch: '#', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
@@ -131,6 +136,14 @@ func (m *mapPanel) Render(g *game.Game) {
 			if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Spec.Species]
 				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
+			} else if !tile.Items.Empty() {
+				item, stack := tile.Items.Top(), tile.Items.Len() > 1
+				gl := itemGlyphs[item.Spec.Species]
+				bg := gl.Bg
+				if stack {
+					bg = termbox.ColorCyan
+				}
+				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, bg)
 			} else {
 				gl := featureGlyphs[tile.Feature.Type]
 				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)

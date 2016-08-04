@@ -62,6 +62,18 @@ func (p *ActorMover) Move(dir math.Point) bool {
 	}
 
 	moved := obj.Level.Place(obj, endpos)
+	if moved {
+		if items := endtile.Items; !items.Empty() && obj.isPlayer() {
+			var msg string
+			topname, n := items.Top().Spec.Name, items.Len()
+			if n == 1 {
+				msg = fmt.Sprintf("%v sees %v here.", obj.Spec.Name, topname)
+			} else {
+				msg = fmt.Sprintf("%v sees %v and %d other items here.", obj.Spec.Name, topname, n-1)
+			}
+			obj.Events.Message(msg)
+		}
+	}
 	return moved
 }
 
