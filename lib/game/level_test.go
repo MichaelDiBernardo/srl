@@ -8,9 +8,9 @@ import (
 type lTestFac struct {
 }
 
-var levelTestQueue = newEventQueue()
+var lTestQueue = newEventQueue()
 
-var levelTestSpec = &Spec{
+var lTestActor = &Spec{
 	Family:  FamActor,
 	Genus:   GenMonster,
 	Species: "TestSpecies",
@@ -18,9 +18,17 @@ var levelTestSpec = &Spec{
 	Traits:  &Traits{},
 }
 
-func TestOkPlace(t *testing.T) {
+var lTestItem = &Spec{
+	Family:  FamItem,
+	Genus:   GenEquip,
+	Species: "TestSpecies",
+	Name:    "Hiiii",
+	Traits:  &Traits{},
+}
+
+func TestOkPlaceActor(t *testing.T) {
 	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(levelTestSpec, levelTestQueue)
+	obj := newObj(lTestActor, lTestQueue)
 	pos := math.Pt(1, 1)
 
 	ok := l.Place(obj, pos)
@@ -38,9 +46,9 @@ func TestOkPlace(t *testing.T) {
 	}
 }
 
-func TestSecondPlaceCleansUp(t *testing.T) {
+func TestSecondPlaceActorCleansUp(t *testing.T) {
 	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(levelTestSpec, levelTestQueue)
+	obj := newObj(lTestActor, lTestQueue)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
 
@@ -55,9 +63,9 @@ func TestSecondPlaceCleansUp(t *testing.T) {
 	}
 }
 
-func TestBadPlaceOntoSolid(t *testing.T) {
+func TestBadActorPlaceOntoSolid(t *testing.T) {
 	l := NewLevel(4, 4, nil, SquareLevel)
-	obj := newObj(levelTestSpec, levelTestQueue)
+	obj := newObj(lTestActor, lTestQueue)
 	pos := math.Pt(0, 0)
 
 	ok := l.Place(obj, pos)
@@ -69,7 +77,7 @@ func TestBadPlaceOntoSolid(t *testing.T) {
 
 func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 	l := NewLevel(4, 4, nil, IdentLevel)
-	a1, a2 := newObj(levelTestSpec, levelTestQueue), newObj(levelTestSpec, levelTestQueue)
+	a1, a2 := newObj(lTestActor, lTestQueue), newObj(lTestActor, lTestQueue)
 	pos := math.Pt(0, 0)
 
 	l.Place(a1, pos)
@@ -82,7 +90,7 @@ func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 
 func TestPlaceAddsActorToList(t *testing.T) {
 	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(levelTestSpec, levelTestQueue)
+	obj := newObj(lTestActor, lTestQueue)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -97,12 +105,30 @@ func TestPlaceAddsActorToList(t *testing.T) {
 
 func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
 	l := NewLevel(4, 4, nil, SquareLevel)
-	obj := newObj(levelTestSpec, levelTestQueue)
+	obj := newObj(lTestActor, lTestQueue)
 	startpos := math.Pt(0, 0)
 
 	l.Place(obj, startpos)
 
 	if actual := len(l.actors); actual != 0 {
 		t.Errorf(`Place(obj) put %d actors in list; want 0`, actual)
+	}
+}
+
+func TestPlaceSingleItem(t *testing.T) {
+	l := NewLevel(4, 4, nil, SquareLevel)
+	obj := newObj(lTestItem, lTestQueue)
+	dest := math.Pt(1, 1)
+
+	l.Place(obj, dest)
+
+	items := l.At(dest).Items
+
+	if size := items.Len(); size != 1 {
+		t.Errorf(`Place(item) put %d items; want 1`)
+	}
+
+	if item := items.Top(); item != obj {
+		t.Errorf(`Place(item) was %v, want %v`, item, obj)
 	}
 }

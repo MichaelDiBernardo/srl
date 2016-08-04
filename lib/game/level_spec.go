@@ -14,7 +14,7 @@ func SquareLevel(l *Level) *Level {
 			if x == 0 || y == 0 || y == height-1 || x == width-1 {
 				feature = FeatWall
 			}
-			m[y][x] = &Tile{Pos: math.Pt(x, y), Feature: feature}
+			m[y][x].Feature = feature
 		}
 	}
 	return l
@@ -24,7 +24,7 @@ func IdentLevel(l *Level) *Level {
 	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			m[y][x] = &Tile{Pos: math.Pt(x, y), Feature: FeatFloor}
+			m[y][x].Feature = FeatFloor
 		}
 	}
 	return l

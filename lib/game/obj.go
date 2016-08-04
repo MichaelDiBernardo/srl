@@ -16,6 +16,7 @@ type Species string
 // Permissible families of objects.
 const (
 	FamActor = "actor"
+	FamItem  = "item"
 )
 
 type Objgetter interface {
