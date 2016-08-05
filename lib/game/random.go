@@ -13,7 +13,7 @@ func init() {
 func DieRoll(d, s int) int {
 	total := 0
 	for i := 0; i < d; i++ {
-		total += intsource(s + 1)
+		total += 1 + intsource(s)
 	}
 	return total
 }
@@ -28,8 +28,10 @@ var intsource IntSource = rand.Intn
 // The backup, if the "normal" source has been swapped out.
 var oldintsource IntSource = nil
 
-// "Fix" the random generator to return ints from the given sequence.
-func FixRandom(ints []int) {
+// "Fix" the random generator to return ints from the given sequence. Also
+// returns the closure that substitutes intsource, if you want to chain it in
+// subsequent fakes.
+func FixRandomSource(ints []int) func(int) int {
 	oldintsource = intsource
 	n := 0
 	intsource = func(_ int) int {
@@ -37,6 +39,18 @@ func FixRandom(ints []int) {
 		n++
 		return x
 	}
+    return intsource
+}
+
+// An intsource that subtracts 1 to each element in the list. This makes it
+// compatible with rigging dierolls directly, since DieRoll has to add one to
+// each int to represent a roll from 1 to n (instead of 0 to n-1).
+func FixRandomDie(ints []int) func(int) int {
+    f := FixRandomSource(ints)
+    intsource = func(i int) int {
+        return f(i) - 1
+    }
+    return intsource
 }
 
 // Restore the random generator the way it was.
