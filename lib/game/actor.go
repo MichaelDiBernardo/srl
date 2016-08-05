@@ -354,3 +354,45 @@ func (n *NullFighter) DamRoll() int {
 func (n *NullFighter) ProtRoll() int {
 	return 0
 }
+
+// A thing that that can hold items in inventory. (A "pack".)
+type Packer interface {
+	Objgetter
+	Pickup() bool
+}
+
+// An attacker that works for all actors.
+type ActorPacker struct {
+	Trait
+	Inventory *Inventory
+}
+
+func NewActorPacker(obj *Obj) Packer {
+	return &ActorPacker{
+		Trait:     Trait{obj: obj},
+		Inventory: NewInventory(),
+	}
+}
+
+func (a *ActorPacker) Pickup() bool {
+	tile := a.obj.Tile
+	if tile.Items.Empty() {
+		a.obj.Events.Message(fmt.Sprintf("Nothing there."))
+		return false
+	}
+	item := tile.Items.Take(0)
+	a.obj.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
+	return a.Inventory.Add(item)
+}
+
+type NullPacker struct {
+	Trait
+}
+
+func NewNullPacker(obj *Obj) Packer {
+	return &NullPacker{Trait: Trait{obj: obj}}
+}
+
+func (a *NullPacker) Pickup() bool {
+	return false
+}

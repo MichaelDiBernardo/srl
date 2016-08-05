@@ -1,9 +1,15 @@
+- Equipment
+    - inventory on ground and for actors
+    - Picking up off ground (just the top)
+    - showing what's in inventory
+    - Write tests for this stuff ^
+    - wielding or wearing what's in inventory
+    - pickup up off ground (select what you want)
 - Very basic mechanics:
     - Fighting weaponless
         - figure out why orcs sometimes hit for 0 damage when protrolls are
           forced to 0???
-- Equipment
-    - Player can wield, monster cannot (too complicated)
+    
 - repositories
 - user-level configs for
     - keymaps

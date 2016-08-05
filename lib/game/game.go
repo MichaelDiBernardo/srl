@@ -48,6 +48,8 @@ func (w *Game) Handle(e Command) {
 		w.Player.Mover.Move(math.Pt(-1, 0))
 	case CommandMoveE:
 		w.Player.Mover.Move(math.Pt(1, 0))
+	case CommandPickup:
+		w.Player.Packer.Pickup()
 	}
 	w.Level.Evolve()
 }
@@ -66,6 +68,7 @@ const (
 	CommandMoveSW
 	CommandMoveW
 	CommandMoveNW
+	CommandPickup
 )
 
 // Events are complex objects (unlike commands); you have to type-assert them

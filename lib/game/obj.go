@@ -19,6 +19,7 @@ const (
 	FamItem  = "item"
 )
 
+// Trait basics; the ability to backreference the attached object.
 type Objgetter interface {
 	Obj() *Obj
 }
@@ -53,6 +54,7 @@ type Obj struct {
 	Stats   Stats
 	Sheet   Sheet
 	Fighter Fighter
+	Packer  Packer
 }
 
 // A specification object for newObj. Each key maps to a factory function for
@@ -64,6 +66,7 @@ type Traits struct {
 	Stats   func(*Obj) Stats
 	Sheet   func(*Obj) Sheet
 	Fighter func(*Obj) Fighter
+	Packer  func(*Obj) Packer
 }
 
 // Takes a partially-specified traits obj and fills in the nil ones with
@@ -84,6 +87,9 @@ func (t *Traits) defaults() *Traits {
 	if t.Fighter == nil {
 		t.Fighter = NewNullFighter
 	}
+	if t.Packer == nil {
+		t.Packer = NewNullPacker
+	}
 	return t
 }
 
@@ -101,6 +107,7 @@ func newObj(spec *Spec, eq *EventQueue) *Obj {
 	newobj.Stats = traits.Stats(newobj)
 	newobj.Sheet = traits.Sheet(newobj)
 	newobj.Fighter = traits.Fighter(newobj)
+	newobj.Packer = traits.Packer(newobj)
 
 	return newobj
 }

@@ -39,18 +39,18 @@ func FixRandomSource(ints []int) func(int) int {
 		n++
 		return x
 	}
-    return intsource
+	return intsource
 }
 
 // An intsource that subtracts 1 to each element in the list. This makes it
 // compatible with rigging dierolls directly, since DieRoll has to add one to
 // each int to represent a roll from 1 to n (instead of 0 to n-1).
 func FixRandomDie(ints []int) func(int) int {
-    f := FixRandomSource(ints)
-    intsource = func(i int) int {
-        return f(i) - 1
-    }
-    return intsource
+	f := FixRandomSource(ints)
+	intsource = func(i int) int {
+		return f(i) - 1
+	}
+	return intsource
 }
 
 // Restore the random generator the way it was.

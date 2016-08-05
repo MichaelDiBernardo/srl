@@ -17,6 +17,7 @@ var (
 		Traits: &Traits{
 			Mover:   NewActorMover,
 			Fighter: NewActorFighter,
+			Packer:  NewActorPacker,
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 2,
@@ -35,6 +36,7 @@ var (
 			Mover:   NewActorMover,
 			AI:      NewRandomAI,
 			Fighter: NewActorFighter,
+			Packer:  NewActorPacker,
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 0,

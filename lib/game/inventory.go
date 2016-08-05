@@ -43,3 +43,14 @@ func (inv *Inventory) Top() *Obj {
 	}
 	return inv.items.Front().Value.(*Obj)
 }
+
+// Returns the item at index 'index' and removes it from the inventory.
+func (inv *Inventory) Take(index int) *Obj {
+	if inv.Empty() {
+		panic(fmt.Sprintf(`Tried to Take(%v) from empty inventory.`, index))
+	}
+	// TODO: Actually use index.
+	itemElem := inv.items.Front()
+	inv.items.Remove(itemElem)
+	return itemElem.Value.(*Obj)
+}
