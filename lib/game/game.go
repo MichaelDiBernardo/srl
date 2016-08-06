@@ -53,6 +53,8 @@ func (g *Game) Handle(e Command) {
 		g.Player.Packer.Pickup()
 	case CommandSeeInventory:
 		g.Events.SwitchMode(ModeInventory)
+	case CommandSeeHud:
+		g.Events.SwitchMode(ModeHud)
 	}
 	g.Level.Evolve()
 }
@@ -73,6 +75,7 @@ const (
 	CommandMoveNW
 	CommandPickup
 	CommandSeeInventory
+	CommandSeeHud
 )
 
 // Events are complex objects (unlike commands); you have to type-assert them
