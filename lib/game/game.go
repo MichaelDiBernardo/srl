@@ -16,6 +16,7 @@ type Game struct {
 	Player *Obj
 	Level  *Level
 	Events *EventQueue
+	mode   Mode
 }
 
 // Create a new game.
@@ -25,6 +26,7 @@ func NewGame() *Game {
 
 // Temp convenience method to init the game before playing.
 func (g *Game) Start() {
+	g.mode = ModeHud
 	g.Player = g.NewObj(PlayerSpec)
 
 	level := NewLevel(40, 40, g, TestLevel)
@@ -41,30 +43,14 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 }
 
 // Handle a command from the client, and then evolve the world.
-func (g *Game) Handle(e Command) {
-	// TODO: This will have to be based on Mode when we take input from more than one screen.
-	evolve := true
-	switch e {
-	case CommandMoveN:
-		g.Player.Mover.Move(math.Pt(0, -1))
-	case CommandMoveS:
-		g.Player.Mover.Move(math.Pt(0, 1))
-	case CommandMoveW:
-		g.Player.Mover.Move(math.Pt(-1, 0))
-	case CommandMoveE:
-		g.Player.Mover.Move(math.Pt(1, 0))
-	case CommandPickup:
-		g.Player.Packer.Pickup()
-	case CommandSeeInventory:
-		g.Events.SwitchMode(ModeInventory)
-		evolve = false
-	case CommandSeeHud:
-		g.Events.SwitchMode(ModeHud)
-		evolve = false
-	}
-	if evolve {
-		g.Level.Evolve()
-	}
+func (g *Game) Handle(c Command) {
+	controllers[g.mode](g, c)
+}
+
+func (g *Game) switchMode(m Mode) {
+	g.mode = m
+	// Signal to client that yes, we have switched.
+	g.Events.SwitchMode(m)
 }
 
 // A command given _to_ the game.
@@ -85,6 +71,45 @@ const (
 	CommandSeeInventory
 	CommandSeeHud
 )
+
+// Controller functions that take commands for each given mode and run them on
+// the game.
+var controllers = map[Mode]func(*Game, Command){
+	ModeHud:       hudController,
+	ModeInventory: inventoryController,
+}
+
+// Do stuff when player is actually playing the game.
+func hudController(g *Game, c Command) {
+	evolve := true
+	switch c {
+	case CommandMoveN:
+		g.Player.Mover.Move(math.Pt(0, -1))
+	case CommandMoveS:
+		g.Player.Mover.Move(math.Pt(0, 1))
+	case CommandMoveW:
+		g.Player.Mover.Move(math.Pt(-1, 0))
+	case CommandMoveE:
+		g.Player.Mover.Move(math.Pt(1, 0))
+	case CommandPickup:
+		g.Player.Packer.Pickup()
+		evolve = false
+	case CommandSeeInventory:
+		g.switchMode(ModeInventory)
+		evolve = false
+	}
+	if evolve {
+		g.Level.Evolve()
+	}
+}
+
+// Do stuff when player is looking at inventory.
+func inventoryController(g *Game, c Command) {
+	switch c {
+	case CommandSeeHud:
+		g.switchMode(ModeHud)
+	}
+}
 
 // Events are complex objects (unlike commands); you have to type-assert them
 // to their concrete types to get at their payloads.

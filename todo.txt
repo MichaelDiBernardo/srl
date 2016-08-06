@@ -3,9 +3,8 @@
     x Picking up off ground (just the top)
     x showing what's in inventory
     - pickup up off ground (select what you want)
-        - Needs to see what's on the ground when you , on a stack
         - We need modes ingame now.
-        - Probably this is a time to make commands a struct instead of a billion ints.
+        - Needs to see what's on the ground when you , on a stack
     - Inv has capacity
     - Write tests for this stuff ^
     - wielding or wearing what's in inventory
