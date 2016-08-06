@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-var invTestQueue = newEventQueue()
-
 var invTestItem = &Spec{
 	Family:  FamItem,
 	Genus:   GenEquip,
@@ -15,11 +13,12 @@ var invTestItem = &Spec{
 }
 
 func TestTake(t *testing.T) {
+	g := NewGame()
 	inv := NewInventory()
 
-	item1 := newObj(invTestItem, invTestQueue)
-	item2 := newObj(invTestItem, invTestQueue)
-	item3 := newObj(invTestItem, invTestQueue)
+	item1 := g.NewObj(invTestItem)
+	item2 := g.NewObj(invTestItem)
+	item3 := g.NewObj(invTestItem)
 
 	inv.Add(item1)
 	inv.Add(item2)

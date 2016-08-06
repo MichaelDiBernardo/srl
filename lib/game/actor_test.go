@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-type aTestFac struct {
-}
-
-var actorTestQueue = newEventQueue()
 var actorTestSpec = &Spec{
 	Family:  FamActor,
 	Genus:   GenMonster,
@@ -18,8 +14,9 @@ var actorTestSpec = &Spec{
 }
 
 func TestOkMove(t *testing.T) {
-	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(actorTestSpec, actorTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	obj := g.NewObj(actorTestSpec)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -45,8 +42,9 @@ func TestOkMove(t *testing.T) {
 }
 
 func TestActorCollision(t *testing.T) {
-	l := NewLevel(4, 4, nil, IdentLevel)
-	a1, a2 := newObj(actorTestSpec, actorTestQueue), newObj(actorTestSpec, actorTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	a1, a2 := g.NewObj(actorTestSpec), g.NewObj(actorTestSpec)
 	l.Place(a1, math.Pt(1, 1))
 	l.Place(a2, math.Pt(2, 1))
 
@@ -58,7 +56,8 @@ func TestActorCollision(t *testing.T) {
 }
 
 func TestPlayerMaxHPCalc(t *testing.T) {
-	obj := newObj(PlayerSpec, actorTestQueue)
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
 	obj.Stats = &stats{Trait: Trait{obj: obj}, vit: 1}
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
 
@@ -68,7 +67,8 @@ func TestPlayerMaxHPCalc(t *testing.T) {
 }
 
 func TestPlayerMaxMPCalc(t *testing.T) {
-	obj := newObj(PlayerSpec, actorTestQueue)
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
 	obj.Stats = &stats{Trait: Trait{obj: obj}, mnd: 2}
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
 
@@ -103,11 +103,12 @@ func (_ *fakefighter) ProtRoll() int {
 }
 
 func TestPlayerMonsterCollisionsHit(t *testing.T) {
-	player := newObj(PlayerSpec, actorTestQueue)
+	g := NewGame()
+	player := g.NewObj(PlayerSpec)
 	pf := &fakefighter{Trait: Trait{obj: player}}
 	player.Fighter = pf
 
-	monster := newObj(actorTestSpec, actorTestQueue)
+	monster := g.NewObj(actorTestSpec)
 	mf := &fakefighter{Trait: Trait{obj: player}}
 	monster.Fighter = mf
 
@@ -129,11 +130,12 @@ func TestPlayerMonsterCollisionsHit(t *testing.T) {
 }
 
 func TestMonsterMonsterCollisionsHit(t *testing.T) {
-	mon1 := newObj(actorTestSpec, actorTestQueue)
+	g := NewGame()
+	mon1 := g.NewObj(actorTestSpec)
 	mf1 := &fakefighter{Trait: Trait{obj: mon1}}
 	mon1.Fighter = mf1
 
-	mon2 := newObj(actorTestSpec, actorTestQueue)
+	mon2 := g.NewObj(actorTestSpec)
 	mf2 := &fakefighter{Trait: Trait{obj: mon2}}
 	mon2.Fighter = mf2
 

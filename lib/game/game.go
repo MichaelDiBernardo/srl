@@ -20,21 +20,24 @@ type Game struct {
 
 // Create a new game.
 func NewGame() *Game {
-	eq := newEventQueue()
+	return &Game{Events: newEventQueue()}
+}
 
-	game := &Game{Events: eq}
-	game.Player = game.NewObj(PlayerSpec)
+// Temp convenience method to init the game before playing.
+func (g *Game) Start() {
+	g.Player = g.NewObj(PlayerSpec)
 
-	level := NewLevel(40, 40, game, TestLevel)
-	game.Level = level
+	level := NewLevel(40, 40, g, TestLevel)
+	g.Level = level
 
-	level.Place(game.Player, math.Pt(1, 1))
-	return game
+	level.Place(g.Player, math.Pt(1, 1))
 }
 
 // Create a new object for use in this game.
 func (g *Game) NewObj(spec *Spec) *Obj {
-	return newObj(spec, g.Events)
+	obj := newObj(spec)
+	obj.Game = g
+	return obj
 }
 
 // Handle a command from the client, and then evolve the world.

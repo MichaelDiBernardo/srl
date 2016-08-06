@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-type lTestFac struct {
-}
-
-var lTestQueue = newEventQueue()
-
 var lTestActor = &Spec{
 	Family:  FamActor,
 	Genus:   GenMonster,
@@ -27,8 +22,9 @@ var lTestItem = &Spec{
 }
 
 func TestOkPlaceActor(t *testing.T) {
-	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(lTestActor, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	obj := newObj(lTestActor)
 	pos := math.Pt(1, 1)
 
 	ok := l.Place(obj, pos)
@@ -47,8 +43,9 @@ func TestOkPlaceActor(t *testing.T) {
 }
 
 func TestSecondPlaceActorCleansUp(t *testing.T) {
-	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(lTestActor, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	obj := g.NewObj(lTestActor)
 	startpos := math.Pt(1, 1)
 	endpos := math.Pt(2, 2)
 
@@ -64,8 +61,9 @@ func TestSecondPlaceActorCleansUp(t *testing.T) {
 }
 
 func TestBadActorPlaceOntoSolid(t *testing.T) {
-	l := NewLevel(4, 4, nil, SquareLevel)
-	obj := newObj(lTestActor, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, SquareLevel)
+	obj := g.NewObj(lTestActor)
 	pos := math.Pt(0, 0)
 
 	ok := l.Place(obj, pos)
@@ -76,8 +74,9 @@ func TestBadActorPlaceOntoSolid(t *testing.T) {
 }
 
 func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
-	l := NewLevel(4, 4, nil, IdentLevel)
-	a1, a2 := newObj(lTestActor, lTestQueue), newObj(lTestActor, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	a1, a2 := g.NewObj(lTestActor), g.NewObj(lTestActor)
 	pos := math.Pt(0, 0)
 
 	l.Place(a1, pos)
@@ -89,8 +88,9 @@ func TestBadPlaceActorOntoOccupiedTile(t *testing.T) {
 }
 
 func TestPlaceAddsActorToList(t *testing.T) {
+	g := NewGame()
 	l := NewLevel(4, 4, nil, IdentLevel)
-	obj := newObj(lTestActor, lTestQueue)
+	obj := g.NewObj(lTestActor)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -104,8 +104,9 @@ func TestPlaceAddsActorToList(t *testing.T) {
 }
 
 func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
-	l := NewLevel(4, 4, nil, SquareLevel)
-	obj := newObj(lTestActor, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, SquareLevel)
+	obj := g.NewObj(lTestActor)
 	startpos := math.Pt(0, 0)
 
 	l.Place(obj, startpos)
@@ -116,8 +117,9 @@ func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
 }
 
 func TestPlaceSingleItem(t *testing.T) {
-	l := NewLevel(4, 4, nil, SquareLevel)
-	obj := newObj(lTestItem, lTestQueue)
+	g := NewGame()
+	l := NewLevel(4, 4, g, SquareLevel)
+	obj := g.NewObj(lTestItem)
 	dest := math.Pt(1, 1)
 
 	l.Place(obj, dest)

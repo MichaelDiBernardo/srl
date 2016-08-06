@@ -18,9 +18,11 @@ type Session struct {
 }
 
 func NewSession() *Session {
+	g := game.NewGame()
+	g.Start()
 	return &Session{
 		client: console.New(),
-		game:   game.NewGame(),
+		game:   g,
 	}
 }
 

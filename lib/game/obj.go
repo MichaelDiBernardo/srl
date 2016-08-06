@@ -44,11 +44,12 @@ type Spec struct {
 // Specifically, an in-game object that can be placed on a map and can Do
 // Something. Its traits determine what it can do.
 type Obj struct {
-	Spec   *Spec
-	Tile   *Tile
-	Level  *Level
-	Events *EventQueue
-	// Actor traits
+	Spec *Spec
+
+	Tile  *Tile
+	Level *Level
+	Game  *Game
+
 	Mover   Mover
 	AI      AI
 	Stats   Stats
@@ -100,12 +101,13 @@ func (t *Traits) defaults() *Traits {
 	return t
 }
 
-// Create a new game object with the given traits. This shouldn't be used
+// Create a new game object from the given spec. This shouldn't be used
 // directly; you should instead use a *Game as a factory for any game objects
-// that need creating.
-func newObj(spec *Spec, eq *EventQueue) *Obj {
+// that need creating. This will not initialize the fields on the obj that have
+// nothing to do with specs or traits (e.g. game, eventqueue, tile etc.)
+func newObj(spec *Spec) *Obj {
 	// Create.
-	newobj := &Obj{Spec: spec, Events: eq}
+	newobj := &Obj{Spec: spec}
 
 	// Assign traits.
 	traits := spec.Traits.defaults()

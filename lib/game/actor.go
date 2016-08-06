@@ -71,7 +71,7 @@ func (p *ActorMover) Move(dir math.Point) bool {
 			} else {
 				msg = fmt.Sprintf("%v sees %v and %d other items here.", obj.Spec.Name, topname, n-1)
 			}
-			obj.Events.Message(msg)
+			obj.Game.Events.Message(msg)
 		}
 	}
 	return moved
@@ -305,10 +305,10 @@ func (a *ActorFighter) Hit(other Fighter) {
 		dmg := a.DamRoll() - other.ProtRoll()
 		other.Obj().Sheet.Hurt(dmg)
 		msg := fmt.Sprintf("%v hit %v (%d).", a.obj.Spec.Name, other.Obj().Spec.Name, dmg)
-		a.obj.Events.Message(msg)
+		a.obj.Game.Events.Message(msg)
 	} else {
 		msg := fmt.Sprintf("%v missed %v.", a.obj.Spec.Name, other.Obj().Spec.Name)
-		a.obj.Events.Message(msg)
+		a.obj.Game.Events.Message(msg)
 	}
 }
 
@@ -378,14 +378,14 @@ func NewActorPacker(obj *Obj) Packer {
 func (a *ActorPacker) Pickup() bool {
 	tile := a.obj.Tile
 	if tile.Items.Empty() {
-		a.obj.Events.Message(fmt.Sprintf("Nothing there."))
+		a.obj.Game.Events.Message(fmt.Sprintf("Nothing there."))
 		return false
 	} else if tile.Items.Len() == 1 {
 		item := tile.Items.Take(0)
-		a.obj.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
+		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
 		return a.inventory.Add(item)
 	} else {
-		a.obj.Events.SwitchMode(ModeInventory)
+		a.obj.Game.Events.SwitchMode(ModeInventory)
 		return true
 	}
 }
