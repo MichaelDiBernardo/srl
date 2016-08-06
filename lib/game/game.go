@@ -47,7 +47,7 @@ func (g *Game) Handle(c Command) {
 	controllers[g.mode](g, c)
 }
 
-func (g *Game) switchMode(m Mode) {
+func (g *Game) SwitchMode(m Mode) {
 	g.mode = m
 	// Signal to client that yes, we have switched.
 	g.Events.SwitchMode(m)
@@ -77,6 +77,7 @@ const (
 var controllers = map[Mode]func(*Game, Command){
 	ModeHud:       hudController,
 	ModeInventory: inventoryController,
+	ModePickup:    pickupController,
 }
 
 // Do stuff when player is actually playing the game.
@@ -95,7 +96,7 @@ func hudController(g *Game, c Command) {
 		g.Player.Packer.Pickup()
 		evolve = false
 	case CommandSeeInventory:
-		g.switchMode(ModeInventory)
+		g.SwitchMode(ModeInventory)
 		evolve = false
 	}
 	if evolve {
@@ -107,7 +108,15 @@ func hudController(g *Game, c Command) {
 func inventoryController(g *Game, c Command) {
 	switch c {
 	case CommandSeeHud:
-		g.switchMode(ModeHud)
+		g.SwitchMode(ModeHud)
+	}
+}
+
+// Do stuff when player is looking at ground.
+func pickupController(g *Game, c Command) {
+	switch c {
+	case CommandSeeHud:
+		g.SwitchMode(ModeHud)
 	}
 }
 
@@ -126,6 +135,7 @@ type Mode int
 const (
 	ModeHud       Mode = iota // Playing the game
 	ModeInventory             // Looking at inventory.
+	ModePickup                // Looking at the items on the floor.
 )
 
 // Tells the client that we've switched game 'modes'.

@@ -18,6 +18,7 @@ func New() *Console {
 	screens := map[game.Mode]screen{
 		game.ModeHud:       newHudScreen(display),
 		game.ModeInventory: newInventoryScreen(display),
+		game.ModePickup:    newPickupScreen(display),
 	}
 	console := &Console{
 		display: display,

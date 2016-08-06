@@ -385,7 +385,7 @@ func (a *ActorPacker) Pickup() bool {
 		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
 		return a.inventory.Add(item)
 	} else {
-		a.obj.Game.Events.SwitchMode(ModeInventory)
+		a.obj.Game.SwitchMode(ModePickup)
 		return true
 	}
 }
