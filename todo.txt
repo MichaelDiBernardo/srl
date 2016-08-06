@@ -3,8 +3,8 @@
     x Picking up off ground (just the top)
     x showing what's in inventory
     - pickup up off ground (select what you want)
-        - We need modes ingame now.
-        - Needs to see what's on the ground when you , on a stack
+        - pick from menu
+        - we really need commands to also be structs. keymaps be damned.
     - Inv has capacity
     - Write tests for this stuff ^
     - wielding or wearing what's in inventory

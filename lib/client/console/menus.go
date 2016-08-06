@@ -86,8 +86,26 @@ func (p *pickupScreen) Handle(ev game.Event) {
 func (inv *pickupScreen) NextCommand() game.Command {
 	for {
 		tboxev := inv.display.PollEvent()
-		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+		if tboxev.Type != termbox.EventKey {
+			continue
+		}
+		if tboxev.Key == termbox.KeyEsc {
 			return game.CommandSeeHud
+		} else if ch := tboxev.Ch; ch != 0 {
+			// TODO: Help!
+			thing := []game.Command{
+				game.CommandMenu0,
+				game.CommandMenu1,
+				game.CommandMenu2,
+				game.CommandMenu3,
+				game.CommandMenu4,
+				game.CommandMenu5,
+				game.CommandMenu6,
+			}
+			opt := selectOption(ch)
+			if opt != -1 {
+				return thing[opt]
+			}
 		}
 	}
 }
@@ -119,7 +137,21 @@ func renderInventory(display display, title string, inv *game.Inventory) {
 	i := 0
 	for e := items.Back(); e != nil; e = e.Prev() {
 		item := e.Value.(*game.Obj)
-		display.Write(1, 1+i, fmt.Sprintf("%v - %v", alphabet[i], item.Spec.Name), termbox.ColorWhite, termbox.ColorBlack)
+		display.Write(1, 1+i, fmt.Sprintf("%c - %v", alphabet[i], item.Spec.Name), termbox.ColorWhite, termbox.ColorBlack)
 		i++
 	}
+}
+
+// Basic choosy things.
+var alphabet = []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+
+// Converts a selected menu option into an index that the game will use.
+// Returns -1 if not found.
+func selectOption(ch rune) int {
+	for i, r := range alphabet {
+		if r == ch {
+			return i
+		}
+	}
+	return -1
 }

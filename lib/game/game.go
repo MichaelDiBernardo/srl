@@ -67,9 +67,16 @@ const (
 	CommandMoveSW
 	CommandMoveW
 	CommandMoveNW
-	CommandPickup
+	CommandTryPickup
 	CommandSeeInventory
 	CommandSeeHud
+	CommandMenu0
+	CommandMenu1
+	CommandMenu2
+	CommandMenu3
+	CommandMenu4
+	CommandMenu5
+	CommandMenu6
 )
 
 // Controller functions that take commands for each given mode and run them on
@@ -92,8 +99,8 @@ func hudController(g *Game, c Command) {
 		g.Player.Mover.Move(math.Pt(-1, 0))
 	case CommandMoveE:
 		g.Player.Mover.Move(math.Pt(1, 0))
-	case CommandPickup:
-		g.Player.Packer.Pickup()
+	case CommandTryPickup:
+		g.Player.Packer.TryPickup()
 		evolve = false
 	case CommandSeeInventory:
 		g.SwitchMode(ModeInventory)
@@ -117,6 +124,20 @@ func pickupController(g *Game, c Command) {
 	switch c {
 	case CommandSeeHud:
 		g.SwitchMode(ModeHud)
+	case CommandMenu0:
+		g.Player.Packer.Pickup(0)
+	case CommandMenu1:
+		g.Player.Packer.Pickup(1)
+	case CommandMenu2:
+		g.Player.Packer.Pickup(2)
+	case CommandMenu3:
+		g.Player.Packer.Pickup(3)
+	case CommandMenu4:
+		g.Player.Packer.Pickup(4)
+	case CommandMenu5:
+		g.Player.Packer.Pickup(5)
+	case CommandMenu6:
+		g.Player.Packer.Pickup(6)
 	}
 }
 

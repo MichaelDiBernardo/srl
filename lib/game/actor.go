@@ -358,7 +358,12 @@ func (n *NullFighter) ProtRoll() int {
 // A thing that that can hold items in inventory. (A "pack".)
 type Packer interface {
 	Objgetter
-	Pickup() bool
+	// Tries to pickup something at current square. If there are many things,
+	// will invoke stack menu.
+	TryPickup()
+	// Pickup the item on the floor stack at given index. Returns false if
+	// there was no room in player inventory to do this.
+	Pickup(index int)
 	Inventory() *Inventory
 }
 
@@ -375,19 +380,24 @@ func NewActorPacker(obj *Obj) Packer {
 	}
 }
 
-func (a *ActorPacker) Pickup() bool {
+func (a *ActorPacker) TryPickup() {
 	tile := a.obj.Tile
 	if tile.Items.Empty() {
 		a.obj.Game.Events.Message(fmt.Sprintf("Nothing there."))
-		return false
 	} else if tile.Items.Len() == 1 {
 		item := tile.Items.Take(0)
 		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
-		return a.inventory.Add(item)
+		a.inventory.Add(item)
 	} else {
 		a.obj.Game.SwitchMode(ModePickup)
-		return true
 	}
+}
+
+func (a *ActorPacker) Pickup(index int) {
+	item := a.obj.Tile.Items.Take(index)
+	a.inventory.Add(item)
+	a.obj.Game.SwitchMode(ModeHud)
+	a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
 }
 
 func (a *ActorPacker) Inventory() *Inventory {
@@ -402,10 +412,12 @@ func NewNullPacker(obj *Obj) Packer {
 	return &NullPacker{Trait: Trait{obj: obj}}
 }
 
-func (a *NullPacker) Pickup() bool {
-	return false
+func (a *NullPacker) TryPickup() {
 }
 
 func (a *NullPacker) Inventory() *Inventory {
 	return nil
+}
+
+func (a *NullPacker) Pickup(index int) {
 }

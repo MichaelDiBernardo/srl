@@ -62,7 +62,7 @@ func (h *hudScreen) NextCommand() game.Command {
 		'k': game.CommandMoveN,
 		'l': game.CommandMoveE,
 		'q': game.CommandQuit,
-		',': game.CommandPickup,
+		',': game.CommandTryPickup,
 		'i': game.CommandSeeInventory,
 	}
 	for {
