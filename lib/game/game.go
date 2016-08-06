@@ -38,20 +38,23 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 }
 
 // Handle a command from the client, and then evolve the world.
-func (w *Game) Handle(e Command) {
+func (g *Game) Handle(e Command) {
+	// TODO: This will have to be based on Mode when we take input from more than one screen.
 	switch e {
 	case CommandMoveN:
-		w.Player.Mover.Move(math.Pt(0, -1))
+		g.Player.Mover.Move(math.Pt(0, -1))
 	case CommandMoveS:
-		w.Player.Mover.Move(math.Pt(0, 1))
+		g.Player.Mover.Move(math.Pt(0, 1))
 	case CommandMoveW:
-		w.Player.Mover.Move(math.Pt(-1, 0))
+		g.Player.Mover.Move(math.Pt(-1, 0))
 	case CommandMoveE:
-		w.Player.Mover.Move(math.Pt(1, 0))
+		g.Player.Mover.Move(math.Pt(1, 0))
 	case CommandPickup:
-		w.Player.Packer.Pickup()
+		g.Player.Packer.Pickup()
+	case CommandSeeInventory:
+		g.Events.SwitchMode(ModeInventory)
 	}
-	w.Level.Evolve()
+	g.Level.Evolve()
 }
 
 // A command given _to_ the game.
@@ -69,6 +72,7 @@ const (
 	CommandMoveW
 	CommandMoveNW
 	CommandPickup
+	CommandSeeInventory
 )
 
 // Events are complex objects (unlike commands); you have to type-assert them
@@ -78,6 +82,19 @@ type Event interface{}
 // A message that we want to show up in the message console.
 type MessageEvent struct {
 	Text string
+}
+
+// Modes that the game can be in.
+type Mode int
+
+const (
+	ModeHud       Mode = iota // Playing the game
+	ModeInventory             // Looking at inventory.
+)
+
+// Tells the client that we've switched game 'modes'.
+type ModeEvent struct {
+	Mode Mode
 }
 
 // A queue of events that are produced by the game and consumed by the client.
@@ -113,6 +130,11 @@ func (eq *EventQueue) Next() Event {
 // Send a message to be rendered in the message console.
 func (eq *EventQueue) Message(msg string) {
 	eq.push(&MessageEvent{Text: msg})
+}
+
+// Tell client we're switching game modes to mode.
+func (eq *EventQueue) SwitchMode(mode Mode) {
+	eq.push(&ModeEvent{Mode: mode})
 }
 
 // Push a new event onto the queue.

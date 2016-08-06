@@ -5,12 +5,13 @@
     - Write tests for this stuff ^
     - wielding or wearing what's in inventory
     - pickup up off ground (select what you want)
-- Very basic mechanics:
-    - Fighting weaponless
-        - figure out why orcs sometimes hit for 0 damage when protrolls are
-          forced to 0???
-    
-- repositories
+    - hit with weapons
+    - protect with armor
+- Actors can die
+- Items / consumables
+    - 
+- XP spending on skills
+- Stairs and level progression
 - user-level configs for
     - keymaps
     - morgues

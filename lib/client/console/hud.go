@@ -63,6 +63,7 @@ func (h *hudScreen) NextCommand() game.Command {
 		'l': game.CommandMoveE,
 		'q': game.CommandQuit,
 		',': game.CommandPickup,
+		'i': game.CommandSeeInventory,
 	}
 	for {
 		tboxev := h.display.PollEvent()

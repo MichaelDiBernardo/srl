@@ -7,22 +7,22 @@ import (
 
 // A container that holds any type of item.
 type Inventory struct {
-	items *list.List
+	Items *list.List
 }
 
 // Create a new empty inventory.
 func NewInventory() *Inventory {
-	return &Inventory{items: list.New()}
+	return &Inventory{Items: list.New()}
 }
 
 // The number of items in this inventory.
 func (inv *Inventory) Len() int {
-	return inv.items.Len()
+	return inv.Items.Len()
 }
 
 // Is this inventory empty?
 func (inv *Inventory) Empty() bool {
-	return inv.items.Len() == 0
+	return inv.Items.Len() == 0
 }
 
 // Tries to add item to this inventory. Returns false if the item doesn't fit.
@@ -30,7 +30,7 @@ func (inv *Inventory) Add(item *Obj) bool {
 	if fam := item.Spec.Family; fam != FamItem {
 		panic(fmt.Sprintf("Tried to add obj of family %v to inventory.", fam))
 	}
-	inv.items.PushFront(item)
+	inv.Items.PushFront(item)
 	return true
 }
 
@@ -41,7 +41,7 @@ func (inv *Inventory) Top() *Obj {
 	if inv.Empty() {
 		return nil
 	}
-	return inv.items.Front().Value.(*Obj)
+	return inv.Items.Front().Value.(*Obj)
 }
 
 // Returns the item at index 'index' and removes it from the inventory.
@@ -50,7 +50,7 @@ func (inv *Inventory) Take(index int) *Obj {
 		panic(fmt.Sprintf(`Tried to Take(%v) from empty inventory.`, index))
 	}
 	// TODO: Actually use index.
-	itemElem := inv.items.Front()
-	inv.items.Remove(itemElem)
+	itemElem := inv.Items.Front()
+	inv.Items.Remove(itemElem)
 	return itemElem.Value.(*Obj)
 }

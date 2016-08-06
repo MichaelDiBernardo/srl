@@ -359,18 +359,19 @@ func (n *NullFighter) ProtRoll() int {
 type Packer interface {
 	Objgetter
 	Pickup() bool
+	Inventory() *Inventory
 }
 
 // An attacker that works for all actors.
 type ActorPacker struct {
 	Trait
-	Inventory *Inventory
+	inventory *Inventory
 }
 
 func NewActorPacker(obj *Obj) Packer {
 	return &ActorPacker{
 		Trait:     Trait{obj: obj},
-		Inventory: NewInventory(),
+		inventory: NewInventory(),
 	}
 }
 
@@ -382,7 +383,11 @@ func (a *ActorPacker) Pickup() bool {
 	}
 	item := tile.Items.Take(0)
 	a.obj.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
-	return a.Inventory.Add(item)
+	return a.inventory.Add(item)
+}
+
+func (a *ActorPacker) Inventory() *Inventory {
+	return a.inventory
 }
 
 type NullPacker struct {
@@ -395,4 +400,8 @@ func NewNullPacker(obj *Obj) Packer {
 
 func (a *NullPacker) Pickup() bool {
 	return false
+}
+
+func (a *NullPacker) Inventory() *Inventory {
+	return nil
 }
