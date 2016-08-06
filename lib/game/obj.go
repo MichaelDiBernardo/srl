@@ -57,6 +57,13 @@ type Obj struct {
 	Packer  Packer
 }
 
+func (o *Obj) String() string {
+	if o.Spec != nil {
+		return "Obj: " + o.Spec.Name
+	}
+	return "Obj: ???"
+}
+
 // A specification object for newObj. Each key maps to a factory function for
 // the specific implementation of the desired trait. If an object is not
 // supposed to have a specific trait, leave it unspecified.

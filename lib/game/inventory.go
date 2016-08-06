@@ -49,8 +49,15 @@ func (inv *Inventory) Take(index int) *Obj {
 	if inv.Empty() {
 		panic(fmt.Sprintf(`Tried to Take(%v) from empty inventory.`, index))
 	}
-	// TODO: Actually use index.
-	itemElem := inv.Items.Front()
+	if size := inv.Len(); size <= index {
+		panic(fmt.Sprintf(`Tried to Take(%v) from inventory of size %v.`, index, size))
+	}
+
+	itemElem := inv.Items.Back()
+	for i := 0; i != index; i++ {
+		itemElem = itemElem.Prev()
+	}
+
 	inv.Items.Remove(itemElem)
 	return itemElem.Value.(*Obj)
 }

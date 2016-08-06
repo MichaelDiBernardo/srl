@@ -380,10 +380,14 @@ func (a *ActorPacker) Pickup() bool {
 	if tile.Items.Empty() {
 		a.obj.Events.Message(fmt.Sprintf("Nothing there."))
 		return false
+	} else if tile.Items.Len() == 1 {
+		item := tile.Items.Take(0)
+		a.obj.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
+		return a.inventory.Add(item)
+	} else {
+		a.obj.Events.SwitchMode(ModeInventory)
+		return true
 	}
-	item := tile.Items.Take(0)
-	a.obj.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
-	return a.inventory.Add(item)
 }
 
 func (a *ActorPacker) Inventory() *Inventory {
