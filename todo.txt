@@ -1,10 +1,10 @@
 - Equipment
-    - inventory on ground and for actors
-    - Picking up off ground (just the top)
-    - showing what's in inventory
+    x inventory on ground and for actors
+    x Picking up off ground (just the top)
+    x showing what's in inventory
+    - pickup up off ground (select what you want)
     - Write tests for this stuff ^
     - wielding or wearing what's in inventory
-    - pickup up off ground (select what you want)
     - hit with weapons
     - protect with armor
 - Actors can die

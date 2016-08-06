@@ -40,6 +40,7 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 // Handle a command from the client, and then evolve the world.
 func (g *Game) Handle(e Command) {
 	// TODO: This will have to be based on Mode when we take input from more than one screen.
+	evolve := true
 	switch e {
 	case CommandMoveN:
 		g.Player.Mover.Move(math.Pt(0, -1))
@@ -53,10 +54,14 @@ func (g *Game) Handle(e Command) {
 		g.Player.Packer.Pickup()
 	case CommandSeeInventory:
 		g.Events.SwitchMode(ModeInventory)
+		evolve = false
 	case CommandSeeHud:
 		g.Events.SwitchMode(ModeHud)
+		evolve = false
 	}
-	g.Level.Evolve()
+	if evolve {
+		g.Level.Evolve()
+	}
 }
 
 // A command given _to_ the game.
