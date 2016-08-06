@@ -16,7 +16,7 @@ func TestQueueStartsEmpty(t *testing.T) {
 
 func TestPushPopEvent(t *testing.T) {
 	sut := newEventQueue()
-	e1 := &testEvent{}
+	e1 := testEvent{}
 
 	sut.push(e1)
 
@@ -27,7 +27,7 @@ func TestPushPopEvent(t *testing.T) {
 		t.Errorf(`After push(e) Len() was %d, want 1`, l)
 	}
 
-	e2 := sut.Next().(*testEvent)
+	e2 := sut.Next().(testEvent)
 
 	if e1 != e2 {
 		t.Errorf(`push(e) != Next(); %p != %p`, e1, e2)
@@ -39,7 +39,7 @@ func TestMessage(t *testing.T) {
 	msg := "OMG!!!"
 
 	sut.Message(msg)
-	e := sut.Next().(*MessageEvent)
+	e := sut.Next().(MessageEvent)
 
 	if actual := e.Text; actual != msg {
 		t.Errorf(`Message(msg): Text was %v, want %v`, actual, msg)

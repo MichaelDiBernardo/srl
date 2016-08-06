@@ -7,7 +7,7 @@ import (
 
 func TestMessagePanelHandleMessageEvent(t *testing.T) {
 	sut := newMessagePanel(1, &fakedisplay{})
-	ev := &game.MessageEvent{Text: "hi"}
+	ev := game.MessageEvent{Text: "hi"}
 	sut.Handle(ev)
 
 	if l := sut.lines.Len(); l != 1 {

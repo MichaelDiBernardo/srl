@@ -173,12 +173,12 @@ func (eq *EventQueue) Next() Event {
 
 // Send a message to be rendered in the message console.
 func (eq *EventQueue) Message(msg string) {
-	eq.push(&MessageEvent{Text: msg})
+	eq.push(MessageEvent{Text: msg})
 }
 
 // Tell client we're switching game modes to mode.
 func (eq *EventQueue) SwitchMode(mode Mode) {
-	eq.push(&ModeEvent{Mode: mode})
+	eq.push(ModeEvent{Mode: mode})
 }
 
 // Push a new event onto the queue.

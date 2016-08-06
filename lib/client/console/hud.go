@@ -174,7 +174,7 @@ func newMessagePanel(size int, display display) *messagePanel {
 // Listens for new message events to build the message list.
 func (m *messagePanel) Handle(e game.Event) {
 	switch ev := e.(type) {
-	case *game.MessageEvent:
+	case game.MessageEvent:
 		m.message(ev.Text)
 	}
 }
