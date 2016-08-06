@@ -36,7 +36,8 @@ func (s *Session) Loop() {
 	for {
 		s.client.Render(s.game)
 		command := s.client.NextCommand()
-		if command == game.CommandQuit {
+		_, quit := command.(game.QuitCommand)
+		if quit {
 			return
 		}
 		s.game.Handle(command)

@@ -54,30 +54,25 @@ func (g *Game) SwitchMode(m Mode) {
 }
 
 // A command given _to_ the game.
-type Command int
+type Command interface{}
 
-const (
-	_ Command = iota
-	CommandQuit
-	CommandMoveN
-	CommandMoveNE
-	CommandMoveE
-	CommandMoveSE
-	CommandMoveS
-	CommandMoveSW
-	CommandMoveW
-	CommandMoveNW
-	CommandTryPickup
-	CommandSeeInventory
-	CommandSeeHud
-	CommandMenu0
-	CommandMenu1
-	CommandMenu2
-	CommandMenu3
-	CommandMenu4
-	CommandMenu5
-	CommandMenu6
-)
+type QuitCommand struct {
+}
+
+type MoveCommand struct {
+	Dir math.Point
+}
+
+type TryPickupCommand struct {
+}
+
+type ModeCommand struct {
+	Mode Mode
+}
+
+type MenuCommand struct {
+	Option int
+}
 
 // Controller functions that take commands for each given mode and run them on
 // the game.
@@ -88,22 +83,16 @@ var controllers = map[Mode]func(*Game, Command){
 }
 
 // Do stuff when player is actually playing the game.
-func hudController(g *Game, c Command) {
+func hudController(g *Game, com Command) {
 	evolve := true
-	switch c {
-	case CommandMoveN:
-		g.Player.Mover.Move(math.Pt(0, -1))
-	case CommandMoveS:
-		g.Player.Mover.Move(math.Pt(0, 1))
-	case CommandMoveW:
-		g.Player.Mover.Move(math.Pt(-1, 0))
-	case CommandMoveE:
-		g.Player.Mover.Move(math.Pt(1, 0))
-	case CommandTryPickup:
+	switch c := com.(type) {
+	case MoveCommand:
+		g.Player.Mover.Move(c.Dir)
+	case TryPickupCommand:
 		g.Player.Packer.TryPickup()
 		evolve = false
-	case CommandSeeInventory:
-		g.SwitchMode(ModeInventory)
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
 		evolve = false
 	}
 	if evolve {
@@ -112,32 +101,20 @@ func hudController(g *Game, c Command) {
 }
 
 // Do stuff when player is looking at inventory.
-func inventoryController(g *Game, c Command) {
-	switch c {
-	case CommandSeeHud:
-		g.SwitchMode(ModeHud)
+func inventoryController(g *Game, com Command) {
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
 	}
 }
 
 // Do stuff when player is looking at ground.
-func pickupController(g *Game, c Command) {
-	switch c {
-	case CommandSeeHud:
-		g.SwitchMode(ModeHud)
-	case CommandMenu0:
-		g.Player.Packer.Pickup(0)
-	case CommandMenu1:
-		g.Player.Packer.Pickup(1)
-	case CommandMenu2:
-		g.Player.Packer.Pickup(2)
-	case CommandMenu3:
-		g.Player.Packer.Pickup(3)
-	case CommandMenu4:
-		g.Player.Packer.Pickup(4)
-	case CommandMenu5:
-		g.Player.Packer.Pickup(5)
-	case CommandMenu6:
-		g.Player.Packer.Pickup(6)
+func pickupController(g *Game, com Command) {
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
+	case MenuCommand:
+		g.Player.Packer.Pickup(c.Option)
 	}
 }
 

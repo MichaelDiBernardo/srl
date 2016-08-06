@@ -54,17 +54,18 @@ func (h *hudScreen) Handle(ev game.Event) {
 	}
 }
 
+var hudKeymap = map[rune]game.Command{
+	'h': game.MoveCommand{Dir: math.Pt(-1, 0)},
+	'j': game.MoveCommand{Dir: math.Pt(0, 1)},
+	'k': game.MoveCommand{Dir: math.Pt(0, -1)},
+	'l': game.MoveCommand{Dir: math.Pt(1, 0)},
+	'q': game.QuitCommand{},
+	',': game.TryPickupCommand{},
+	'i': game.ModeCommand{Mode: game.ModeInventory},
+}
+
 // Get the next command from the player to be sent to the game instance.
 func (h *hudScreen) NextCommand() game.Command {
-	keymap := map[rune]game.Command{
-		'h': game.CommandMoveW,
-		'j': game.CommandMoveS,
-		'k': game.CommandMoveN,
-		'l': game.CommandMoveE,
-		'q': game.CommandQuit,
-		',': game.CommandTryPickup,
-		'i': game.CommandSeeInventory,
-	}
 	for {
 		tboxev := h.display.PollEvent()
 
@@ -72,7 +73,7 @@ func (h *hudScreen) NextCommand() game.Command {
 			continue
 		}
 
-		srlev := keymap[tboxev.Ch]
+		srlev := hudKeymap[tboxev.Ch]
 		if srlev != 0 {
 			return srlev
 		}

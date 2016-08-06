@@ -34,7 +34,7 @@ func (inv *inventoryScreen) NextCommand() game.Command {
 	for {
 		tboxev := inv.display.PollEvent()
 		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
-			return game.CommandSeeHud
+			return game.ModeCommand{Mode: game.ModeHud}
 		}
 	}
 }
@@ -90,21 +90,11 @@ func (inv *pickupScreen) NextCommand() game.Command {
 			continue
 		}
 		if tboxev.Key == termbox.KeyEsc {
-			return game.CommandSeeHud
+			return game.ModeCommand{Mode: game.ModeHud}
 		} else if ch := tboxev.Ch; ch != 0 {
-			// TODO: Help!
-			thing := []game.Command{
-				game.CommandMenu0,
-				game.CommandMenu1,
-				game.CommandMenu2,
-				game.CommandMenu3,
-				game.CommandMenu4,
-				game.CommandMenu5,
-				game.CommandMenu6,
-			}
 			opt := selectOption(ch)
 			if opt != -1 {
-				return thing[opt]
+				return game.MenuCommand{Option: opt}
 			}
 		}
 	}
