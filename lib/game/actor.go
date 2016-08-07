@@ -380,28 +380,35 @@ func NewActorPacker(obj *Obj) Packer {
 	}
 }
 
+func (a *ActorPacker) Inventory() *Inventory {
+	return a.inventory
+}
+
 func (a *ActorPacker) TryPickup() {
-	tile := a.obj.Tile
-	if tile.Items.Empty() {
+	ground := a.obj.Tile.Items
+	if ground.Empty() {
 		a.obj.Game.Events.Message(fmt.Sprintf("Nothing there."))
-	} else if tile.Items.Len() == 1 {
-		item := tile.Items.Take(0)
-		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
-		a.inventory.Add(item)
+	} else if ground.Len() == 1 {
+		a.moveFromGround(0)
 	} else {
 		a.obj.Game.SwitchMode(ModePickup)
 	}
 }
 
 func (a *ActorPacker) Pickup(index int) {
-	item := a.obj.Tile.Items.Take(index)
-	a.inventory.Add(item)
 	a.obj.Game.SwitchMode(ModeHud)
-	a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
+	a.moveFromGround(index)
 }
 
-func (a *ActorPacker) Inventory() *Inventory {
-	return a.inventory
+func (a *ActorPacker) moveFromGround(index int) {
+	if a.inventory.Full() {
+		item := a.obj.Tile.Items.At(index)
+		a.obj.Game.Events.Message(fmt.Sprintf("%v has no room for %v.", a.obj.Spec.Name, item.Spec.Name))
+	} else {
+		item := a.obj.Tile.Items.Take(index)
+		a.inventory.Add(item)
+		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
+	}
 }
 
 type NullPacker struct {

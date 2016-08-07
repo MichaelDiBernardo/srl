@@ -44,3 +44,23 @@ func TestTake(t *testing.T) {
 		t.Errorf(`inv.Len() was %v after taking, want 2`, size)
 	}
 }
+
+func TestAddOverCapacity(t *testing.T) {
+	g := NewGame()
+	inv := NewInventoryWithCap(2)
+
+	item1 := g.NewObj(invTestItem)
+	item2 := g.NewObj(invTestItem)
+	item3 := g.NewObj(invTestItem)
+
+	inv.Add(item1)
+	inv.Add(item2)
+
+	if inv.Add(item3) {
+		t.Errorf(`inv.Add(item) over capacity was true, want false`)
+	}
+
+	if inv.Len() > 2 {
+		t.Errorf(`inv.Add(item) over capacity 2 still added past 2`)
+	}
+}

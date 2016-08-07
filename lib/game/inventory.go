@@ -5,14 +5,21 @@ import (
 	"fmt"
 )
 
+const inventoryCapacity = 20
+
 // A container that holds any type of item.
 type Inventory struct {
-	Items *list.List
+	Items    *list.List
+	capacity int
 }
 
-// Create a new empty inventory.
+// Create a new empty inventory with capacity `inventoryCapacity`.
 func NewInventory() *Inventory {
-	return &Inventory{Items: list.New()}
+	return &Inventory{Items: list.New(), capacity: inventoryCapacity}
+}
+
+func NewInventoryWithCap(capacity int) *Inventory {
+	return &Inventory{Items: list.New(), capacity: capacity}
 }
 
 // The number of items in this inventory.
@@ -25,10 +32,18 @@ func (inv *Inventory) Empty() bool {
 	return inv.Items.Len() == 0
 }
 
+// Is this inventory at capacity?
+func (inv *Inventory) Full() bool {
+	return inv.Items.Len() >= inv.capacity
+}
+
 // Tries to add item to this inventory. Returns false if the item doesn't fit.
 func (inv *Inventory) Add(item *Obj) bool {
 	if fam := item.Spec.Family; fam != FamItem {
 		panic(fmt.Sprintf("Tried to add obj of family %v to inventory.", fam))
+	}
+	if inv.Full() {
+		return false
 	}
 	inv.Items.PushFront(item)
 	return true
@@ -44,6 +59,11 @@ func (inv *Inventory) Top() *Obj {
 	return inv.Items.Front().Value.(*Obj)
 }
 
+// Peeks at the item at the given index without removing it.
+func (inv *Inventory) At(index int) *Obj {
+	return inv.itemElemAt(index).Value.(*Obj)
+}
+
 // Returns the item at index 'index' and removes it from the inventory.
 func (inv *Inventory) Take(index int) *Obj {
 	if inv.Empty() {
@@ -53,11 +73,15 @@ func (inv *Inventory) Take(index int) *Obj {
 		panic(fmt.Sprintf(`Tried to Take(%v) from inventory of size %v.`, index, size))
 	}
 
+	itemElem := inv.itemElemAt(index)
+	inv.Items.Remove(itemElem)
+	return itemElem.Value.(*Obj)
+}
+
+func (inv *Inventory) itemElemAt(index int) *list.Element {
 	itemElem := inv.Items.Back()
 	for i := 0; i != index; i++ {
 		itemElem = itemElem.Prev()
 	}
-
-	inv.Items.Remove(itemElem)
-	return itemElem.Value.(*Obj)
+	return itemElem
 }
