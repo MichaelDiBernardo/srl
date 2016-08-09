@@ -2,12 +2,18 @@
     x inventory on ground and for actors
     x Picking up off ground (just the top)
     x showing what's in inventory
-    - pickup up off ground (select what you want)
-        - pick from menu
-        - we really need commands to also be structs. keymaps be damned.
-    - Inv has capacity
-    - Write tests for this stuff ^
+    s pickup up off ground (select what you want)
+        x pick from menu
+        x we really need commands to also be structs. keymaps be damned.
+    x Inv has capacity
+    x Write tests for this stuff ^
     - wielding or wearing what's in inventory
+        - Weapons need a way to:
+            - Describe their weight, damage dice, tohit.
+            - Contribute these stats to hit()
+            - Identify what equipment slot they should go in
+            - Items need a trait "Weapon"
+        - Should equipment go on PlayerFighter?
     - hit with weapons
     - protect with armor
 - Actors can die

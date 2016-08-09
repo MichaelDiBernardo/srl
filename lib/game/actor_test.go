@@ -5,13 +5,23 @@ import (
 	"testing"
 )
 
-var actorTestSpec = &Spec{
-	Family:  FamActor,
-	Genus:   GenMonster,
-	Species: "TestSpecies",
-	Name:    "Hi",
-	Traits:  &Traits{Mover: NewActorMover},
-}
+var (
+	actorTestSpec = &Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: "TestSpecies",
+		Name:    "Hi",
+		Traits:  &Traits{Mover: NewActorMover, Packer: NewActorPacker},
+	}
+
+	actorTestItemSpec = &Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: "testspec",
+		Name:    "Item",
+		Traits:  &Traits{},
+	}
+)
 
 func TestOkMove(t *testing.T) {
 	g := NewGame()
@@ -148,4 +158,67 @@ func TestMonsterMonsterCollisionsHit(t *testing.T) {
 	if mf1.Called {
 		t.Error("Moving monster into monster tried to hit.")
 	}
+}
+
+func TestTryPickupNoItemsOnGround(t *testing.T) {
+	g := NewGame()
+	taker := g.NewObj(actorTestSpec)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(taker, math.Pt(0, 0))
+
+	taker.Packer.TryPickup()
+	if size := taker.Packer.Inventory().Len(); size > 0 {
+		t.Errorf(`TryPickup() on empty square gave inven size %d; want 0`, size)
+	}
+}
+
+func TestTryPickupOneItemOnGround(t *testing.T) {
+	g := NewGame()
+	taker := g.NewObj(actorTestSpec)
+	item := g.NewObj(actorTestItemSpec)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(taker, math.Pt(0, 0))
+	l.Place(item, math.Pt(0, 0))
+
+	taker.Packer.TryPickup()
+	if size := taker.Packer.Inventory().Len(); size != 1 {
+		t.Errorf(`TryPickup() on 1-item square gave inven size %d; want 1`, size)
+	}
+	if size := l.At(math.Pt(0, 0)).Items.Len(); size != 0 {
+		t.Errorf(`TryPickup() on 1-item square left %d items on ground; want 0`, size)
+	}
+}
+
+func TestTryPickupFromStack(t *testing.T) {
+	g := NewGame()
+	taker := g.NewObj(actorTestSpec)
+	item := g.NewObj(actorTestItemSpec)
+	item2 := g.NewObj(actorTestItemSpec)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(taker, math.Pt(0, 0))
+	l.Place(item, math.Pt(0, 0))
+	l.Place(item2, math.Pt(0, 0))
+
+	taker.Packer.TryPickup()
+	if size := taker.Packer.Inventory().Len(); size != 0 {
+		t.Errorf(`TryPickup() on stack took something instead of opening menu; took %d things`, size)
+	}
+	if size := l.At(math.Pt(0, 0)).Items.Len(); size != 2 {
+		t.Errorf(`TryPickup() took from ground instead of opening menu; left %d things`, size)
+	}
+	if size := g.Events.Len(); size != 1 {
+		t.Errorf(`TryPickup() pushed wrong # of events to queue; found %d, want 1`, size)
+	}
+
+	e, ok := g.Events.Next().(ModeEvent)
+	if !ok {
+		t.Error(`TryPickup pushed wrong event type to queue.`)
+	}
+	if e.Mode != ModePickup {
+		t.Errorf(`TryPickup switched to mode %v, want %v`, e.Mode, ModePickup)
+	}
+
 }
