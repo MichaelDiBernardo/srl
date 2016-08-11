@@ -58,3 +58,20 @@ func RestoreRandom() {
 	intsource = oldintsource
 	oldintsource = nil
 }
+
+type Dice struct {
+	Dice  int
+	Sides int
+}
+
+func NewDice(dice, sides int) Dice {
+	return Dice{Dice: dice, Sides: sides}
+}
+
+func (d Dice) Add(dice, sides int) Dice {
+	return NewDice(d.Dice+dice, d.Sides+sides)
+}
+
+func (d Dice) Roll() int {
+	return DieRoll(d.Dice, d.Sides)
+}

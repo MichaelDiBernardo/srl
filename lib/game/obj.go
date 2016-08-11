@@ -50,12 +50,17 @@ type Obj struct {
 	Level *Level
 	Game  *Game
 
+	// Actor traits.
 	Mover   Mover
 	AI      AI
 	Stats   Stats
 	Sheet   Sheet
 	Fighter Fighter
 	Packer  Packer
+
+	// Item traits. Since these don't ever conceivably need alternate
+	// implementations, they are not interface types.
+	Equip *Equip
 }
 
 func (o *Obj) String() string {
@@ -75,6 +80,8 @@ type Traits struct {
 	Sheet   func(*Obj) Sheet
 	Fighter func(*Obj) Fighter
 	Packer  func(*Obj) Packer
+
+	Equip func(*Obj) *Equip
 }
 
 // Takes a partially-specified traits obj and fills in the nil ones with
@@ -98,6 +105,10 @@ func (t *Traits) defaults() *Traits {
 	if t.Packer == nil {
 		t.Packer = NewNullPacker
 	}
+
+	if t.Equip == nil {
+		t.Equip = NewNullEquip
+	}
 	return t
 }
 
@@ -117,6 +128,8 @@ func newObj(spec *Spec) *Obj {
 	newobj.Sheet = traits.Sheet(newobj)
 	newobj.Fighter = traits.Fighter(newobj)
 	newobj.Packer = traits.Packer(newobj)
+
+	newobj.Equip = traits.Equip(newobj)
 
 	return newobj
 }

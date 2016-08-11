@@ -428,3 +428,11 @@ func (a *NullPacker) Inventory() *Inventory {
 
 func (a *NullPacker) Pickup(index int) {
 }
+
+// Slots where equipment can fit on an Equipper.
+type Slot int
+
+const (
+	SlotHand = iota
+	SlotOffHand
+)
