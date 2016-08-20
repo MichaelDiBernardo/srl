@@ -13,7 +13,7 @@ type Equip struct {
 	Melee    int
 	Evasion  int
 	Weight   int
-    Slot     Slot
+	Slot     Slot
 }
 
 // See New*Stats in actor.go to understand why this is written this way.

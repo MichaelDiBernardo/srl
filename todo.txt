@@ -10,11 +10,18 @@
     - wielding or wearing what's in inventory
         - Weapons need a way to:
             x Describe their weight, damage dice, tohit.
-            - Identify what equipment slot they should go in
+            x Identify what equipment slot they should go in
             x Items need a trait "Equip"
-        - Should equipment go on PlayerFighter?
     - hit with weapons
     - protect with armor
+    - Monsters should have same bodytype, fighting setup as player in first version. 
+- Monster fighting:
+    - Monsters get a list of attacks w/ probs, with heft and dice, melee
+    - Also get a single armor slot
+    - Maybe MonsterSheet and PlayerSheet should not share interface, and
+      instead the monsterfighter defers to monstersheet to get what it
+      needs. But since both the AI and Fighter probably need it, it
+      shouldn't be owned by either.
 - Actors can die
 - Items / consumables
     - 

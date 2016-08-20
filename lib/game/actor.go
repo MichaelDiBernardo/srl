@@ -296,7 +296,9 @@ type PlayerFighter struct {
 }
 
 func NewPlayerFighter(obj *Obj) Fighter {
-	return &PlayerFighter{Trait: Trait{obj: obj}}
+	return &PlayerFighter{
+		Trait: Trait{obj: obj},
+	}
 }
 
 func (p *PlayerFighter) Hit(other Fighter) {
@@ -429,10 +431,4 @@ func (a *NullPacker) Inventory() *Inventory {
 func (a *NullPacker) Pickup(index int) {
 }
 
-// Slots where equipment can fit on an Equipper.
-type Slot int
-
-const (
-	SlotHand = iota
-	SlotOffHand
-)
+// We need Equipper now.
