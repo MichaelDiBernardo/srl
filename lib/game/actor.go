@@ -291,40 +291,40 @@ type Fighter interface {
 }
 
 // An attacker that works for all actors.
-type PlayerFighter struct {
+type ActorFighter struct {
 	Trait
 }
 
-func NewPlayerFighter(obj *Obj) Fighter {
-	return &PlayerFighter{Trait: Trait{obj: obj}}
+func NewActorFighter(obj *Obj) Fighter {
+	return &ActorFighter{Trait: Trait{obj: obj}}
 }
 
-func (p *PlayerFighter) Hit(other Fighter) {
-	mroll, eroll := p.MeleeRoll(), other.EvasionRoll()
+func (a *ActorFighter) Hit(other Fighter) {
+	mroll, eroll := a.MeleeRoll(), other.EvasionRoll()
 	if mroll > eroll {
-		dmg := p.DamRoll() - other.ProtRoll()
+		dmg := a.DamRoll() - other.ProtRoll()
 		other.Obj().Sheet.Hurt(dmg)
-		msg := fmt.Sprintf("%v hit %v (%d).", p.obj.Spec.Name, other.Obj().Spec.Name, dmg)
-		p.obj.Game.Events.Message(msg)
+		msg := fmt.Sprintf("%v hit %v (%d).", a.obj.Spec.Name, other.Obj().Spec.Name, dmg)
+		a.obj.Game.Events.Message(msg)
 	} else {
-		msg := fmt.Sprintf("%v missed %v.", p.obj.Spec.Name, other.Obj().Spec.Name)
-		p.obj.Game.Events.Message(msg)
+		msg := fmt.Sprintf("%v missed %v.", a.obj.Spec.Name, other.Obj().Spec.Name)
+		a.obj.Game.Events.Message(msg)
 	}
 }
 
-func (p *PlayerFighter) MeleeRoll() int {
-	return DieRoll(1, 20) + p.obj.Sheet.Melee()
+func (a *ActorFighter) MeleeRoll() int {
+	return DieRoll(1, 20) + a.obj.Sheet.Melee()
 }
 
-func (p *PlayerFighter) EvasionRoll() int {
-	return DieRoll(1, 20) + p.obj.Sheet.Evasion()
+func (a *ActorFighter) EvasionRoll() int {
+	return DieRoll(1, 20) + a.obj.Sheet.Evasion()
 }
 
-func (p *PlayerFighter) DamRoll() int {
-	return DieRoll(1, p.obj.Stats.Str())
+func (a *ActorFighter) DamRoll() int {
+	return DieRoll(1, a.obj.Stats.Str())
 }
 
-func (p *PlayerFighter) ProtRoll() int {
+func (a *ActorFighter) ProtRoll() int {
 	return 0
 }
 

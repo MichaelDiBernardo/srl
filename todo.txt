@@ -9,9 +9,10 @@
     x Write tests for this stuff ^
     - wielding or wearing what's in inventory
         - Weapons need a way to:
-            x Describe their weight, damage dice, tohit.
+            - Describe their weight, damage dice, tohit.
+            - Contribute these stats to hit()
             - Identify what equipment slot they should go in
-            x Items need a trait "Equip"
+            - Items need a trait "Weapon"
         - Should equipment go on PlayerFighter?
     - hit with weapons
     - protect with armor
