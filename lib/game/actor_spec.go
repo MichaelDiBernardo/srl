@@ -16,7 +16,7 @@ var (
 		Name:    "DEBO",
 		Traits: &Traits{
 			Mover:   NewActorMover,
-			Fighter: NewActorFighter,
+			Fighter: NewPlayerFighter,
 			Packer:  NewActorPacker,
 			Stats: NewActorStats(stats{
 				str: 2,
@@ -35,7 +35,7 @@ var (
 		Traits: &Traits{
 			Mover:   NewActorMover,
 			AI:      NewRandomAI,
-			Fighter: NewActorFighter,
+			Fighter: NewPlayerFighter,
 			Packer:  NewActorPacker,
 			Stats: NewActorStats(stats{
 				str: 2,
