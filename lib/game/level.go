@@ -77,7 +77,9 @@ func (l *Level) Place(o *Obj, p math.Point) bool {
 
 func (l *Level) Evolve() {
 	for _, actor := range l.actors {
-		actor.AI.Act(l)
+		if actor.HasAI() {
+			actor.AI.Act(l)
+		}
 	}
 }
 

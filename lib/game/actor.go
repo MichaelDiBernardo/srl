@@ -18,21 +18,6 @@ type Mover interface {
 	Move(dir math.Point) bool
 }
 
-// A dummy mover used in cases where a thing can't move.
-type nullMover struct {
-	Trait
-}
-
-// Do nothing and return false.
-func (_ *nullMover) Move(dir math.Point) bool {
-	return false
-}
-
-// Constructor for null movers.
-func NewNullMover(obj *Obj) Mover {
-	return &nullMover{Trait: Trait{obj: obj}}
-}
-
 // A universally-applicable mover for actors.
 type ActorMover struct {
 	Trait
@@ -81,21 +66,6 @@ func (p *ActorMover) Move(dir math.Point) bool {
 type AI interface {
 	Objgetter
 	Act(l *Level) bool
-}
-
-// A dummy AI used when a thing doesn't need a computer to think for it.
-type nullAI struct {
-	Trait
-}
-
-// Do nothing and return false.
-func (_ *nullAI) Act(l *Level) bool {
-	return false
-}
-
-// Constructor for null movers.
-func NewNullAI(obj *Obj) AI {
-	return &nullAI{Trait: Trait{obj: obj}}
 }
 
 // An AI that directs an actor to move completely randomly.
@@ -162,10 +132,6 @@ func (s *stats) Vit() int {
 
 func (s *stats) Mnd() int {
 	return s.mnd
-}
-
-func NewNullStats(obj *Obj) Stats {
-	return &stats{Trait: Trait{obj: obj}}
 }
 
 // A 'character sheet' for an actor. This is where all attributes derived from
@@ -276,10 +242,6 @@ func (m *MonsterSheet) Hurt(dmg int) {
 	m.hp -= dmg
 }
 
-func NewNullSheet(obj *Obj) Sheet {
-	return &MonsterSheet{Trait: Trait{obj: obj}}
-}
-
 // Anything that fights in melee.
 type Fighter interface {
 	Objgetter
@@ -327,33 +289,6 @@ func (p *PlayerFighter) DamRoll() int {
 }
 
 func (p *PlayerFighter) ProtRoll() int {
-	return 0
-}
-
-type NullFighter struct {
-	Trait
-}
-
-func NewNullFighter(obj *Obj) Fighter {
-	return &NullFighter{Trait: Trait{obj: obj}}
-}
-
-func (n *NullFighter) Hit(other Fighter) {
-}
-
-func (n *NullFighter) MeleeRoll() int {
-	return 0
-}
-
-func (n *NullFighter) EvasionRoll() int {
-	return 0
-}
-
-func (n *NullFighter) DamRoll() int {
-	return 0
-}
-
-func (n *NullFighter) ProtRoll() int {
 	return 0
 }
 
@@ -412,23 +347,3 @@ func (a *ActorPacker) moveFromGround(index int) {
 		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
 	}
 }
-
-type NullPacker struct {
-	Trait
-}
-
-func NewNullPacker(obj *Obj) Packer {
-	return &NullPacker{Trait: Trait{obj: obj}}
-}
-
-func (a *NullPacker) TryPickup() {
-}
-
-func (a *NullPacker) Inventory() *Inventory {
-	return nil
-}
-
-func (a *NullPacker) Pickup(index int) {
-}
-
-// We need Equipper now.

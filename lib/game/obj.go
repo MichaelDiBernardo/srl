@@ -84,34 +84,6 @@ type Traits struct {
 	Equip func(*Obj) *Equip
 }
 
-// Takes a partially-specified traits obj and fills in the nil ones with
-// nullobj versions.
-func (t *Traits) defaults() *Traits {
-	if t.Mover == nil {
-		t.Mover = NewNullMover
-	}
-	if t.AI == nil {
-		t.AI = NewNullAI
-	}
-	if t.Stats == nil {
-		t.Stats = NewNullStats
-	}
-	if t.Sheet == nil {
-		t.Sheet = NewNullSheet
-	}
-	if t.Fighter == nil {
-		t.Fighter = NewNullFighter
-	}
-	if t.Packer == nil {
-		t.Packer = NewNullPacker
-	}
-
-	if t.Equip == nil {
-		t.Equip = NewNullEquip
-	}
-	return t
-}
-
 // Create a new game object from the given spec. This shouldn't be used
 // directly; you should instead use a *Game as a factory for any game objects
 // that need creating. This will not initialize the fields on the obj that have
@@ -121,16 +93,28 @@ func newObj(spec *Spec) *Obj {
 	newobj := &Obj{Spec: spec}
 
 	// Assign traits.
-	traits := spec.Traits.defaults()
-	newobj.Mover = traits.Mover(newobj)
-	newobj.AI = traits.AI(newobj)
-	newobj.Stats = traits.Stats(newobj)
-	newobj.Sheet = traits.Sheet(newobj)
-	newobj.Fighter = traits.Fighter(newobj)
-	newobj.Packer = traits.Packer(newobj)
-
-	newobj.Equip = traits.Equip(newobj)
-
+	traits := spec.Traits
+	if traits.Mover != nil {
+		newobj.Mover = traits.Mover(newobj)
+	}
+	if traits.AI != nil {
+		newobj.AI = traits.AI(newobj)
+	}
+	if traits.Stats != nil {
+		newobj.Stats = traits.Stats(newobj)
+	}
+	if traits.Sheet != nil {
+		newobj.Sheet = traits.Sheet(newobj)
+	}
+	if traits.Fighter != nil {
+		newobj.Fighter = traits.Fighter(newobj)
+	}
+	if traits.Packer != nil {
+		newobj.Packer = traits.Packer(newobj)
+	}
+	if traits.Equip != nil {
+		newobj.Equip = traits.Equip(newobj)
+	}
 	return newobj
 }
 
@@ -142,4 +126,8 @@ func (o *Obj) Pos() math.Point {
 // Does this object represent the player?
 func (o *Obj) isPlayer() bool {
 	return o.Spec.Family == FamActor && o.Spec.Genus == GenPlayer
+}
+
+func (o *Obj) HasAI() bool {
+	return o.AI != nil
 }

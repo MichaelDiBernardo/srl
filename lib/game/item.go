@@ -24,10 +24,6 @@ func NewEquip(equip Equip) func(*Obj) *Equip {
 	}
 }
 
-func NewNullEquip(o *Obj) *Equip {
-	return &Equip{Trait: Trait{obj: o}}
-}
-
 func (e *Equip) Desc() string {
 	return fmt.Sprintf("(+%v)", e.Melee)
 }
