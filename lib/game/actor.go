@@ -347,3 +347,45 @@ func (a *ActorPacker) moveFromGround(index int) {
 		a.obj.Game.Events.Message(fmt.Sprintf("%v got %v.", a.obj.Spec.Name, item.Spec.Name))
 	}
 }
+
+type Equipper interface {
+	Objgetter
+	// Bring up the equipper screen if anything in inventory can be equipped.
+	TryEquip()
+	// Bring up the remover screen if anything on body can be removed.
+	TryRemove()
+	// Equip the item at index 'index' in inventory.
+	Equip(index int)
+	// Remove the item equipped in the given slot.
+	Remove(slot Slot)
+}
+
+type ActorEquipper struct {
+	Trait
+	body *Body
+}
+
+func NewActorEquipper(obj *Obj) Equipper {
+	return &ActorEquipper{
+		Trait: Trait{obj: obj},
+		body:  NewBody(),
+	}
+}
+
+// TODO
+func (a *ActorEquipper) TryEquip() {
+	// Check if any item in inventory equippable. If so, change game mode to equipping.
+}
+
+func (a *ActorEquipper) TryRemove() {
+	// Check if any items equipped on body. If so, change game mode to removing.
+}
+
+func (a *ActorEquipper) Equip(index int) {
+	// Switch mode back to hud, wear the given thing.
+}
+
+func (a *ActorEquipper) Remove(slot Slot) {
+	// Switch mode back to hud, take off the given thing and put it in
+	// inventory. If it doesn't fit, drop it on the floor.
+}

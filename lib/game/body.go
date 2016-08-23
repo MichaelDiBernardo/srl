@@ -15,6 +15,10 @@ type Body struct {
 	Slots [numSlots]*Obj
 }
 
+func NewBody() *Body {
+	return &Body{}
+}
+
 func (b *Body) Wear(item *Obj) *Obj {
 	slot := item.Equip.Slot
 	equipped := b.Slots[slot]
