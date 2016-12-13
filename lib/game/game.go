@@ -66,6 +66,9 @@ type MoveCommand struct {
 type TryPickupCommand struct {
 }
 
+type TryEquipCommand struct {
+}
+
 type ModeCommand struct {
 	Mode Mode
 }
@@ -80,20 +83,22 @@ var controllers = map[Mode]func(*Game, Command){
 	ModeHud:       hudController,
 	ModeInventory: inventoryController,
 	ModePickup:    pickupController,
+	ModeEquip:     equipController,
 }
 
 // Do stuff when player is actually playing the game.
 func hudController(g *Game, com Command) {
-	evolve := true
+	evolve := false
 	switch c := com.(type) {
 	case MoveCommand:
 		g.Player.Mover.Move(c.Dir)
+		evolve = true
 	case TryPickupCommand:
 		g.Player.Packer.TryPickup()
-		evolve = false
+	case TryEquipCommand:
+		g.Player.Equipper.TryEquip()
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
-		evolve = false
 	}
 	if evolve {
 		g.Level.Evolve()
@@ -118,6 +123,14 @@ func pickupController(g *Game, com Command) {
 	}
 }
 
+// Do stuff when player is looking at equipment.
+func equipController(g *Game, com Command) {
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
+	}
+}
+
 // Events are complex objects (unlike commands); you have to type-assert them
 // to their concrete types to get at their payloads.
 type Event interface{}
@@ -134,6 +147,7 @@ const (
 	ModeHud       Mode = iota // Playing the game
 	ModeInventory             // Looking at inventory.
 	ModePickup                // Looking at the items on the floor.
+	ModeEquip                 // Looking at equipment in inventory.
 )
 
 // Tells the client that we've switched game 'modes'.

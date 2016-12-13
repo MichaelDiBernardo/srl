@@ -120,6 +120,57 @@ func (m *pickupPanel) Render(g *game.Game) {
 	renderInventory(m.display, "Ground", inv)
 }
 
+// The equip screen.
+type equipScreen struct {
+	display display
+	menu    panel
+}
+
+// Create a new equip screen.
+func newEquipScreen(display display) *equipScreen {
+	return &equipScreen{
+		display: display,
+		menu:    newEquipPanel(display),
+	}
+}
+
+// Render the inventory screen.
+func (inv *equipScreen) Render(g *game.Game) {
+	inv.menu.Render(g)
+}
+
+func (inv *equipScreen) Handle(ev game.Event) {
+}
+
+func (inv *equipScreen) NextCommand() game.Command {
+	for {
+		tboxev := inv.display.PollEvent()
+		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+			return game.ModeCommand{Mode: game.ModeHud}
+		}
+	}
+}
+
+// Panel that renders the equipment list.
+type equipPanel struct {
+	display display
+}
+
+// Create a new equipPanel.
+func newEquipPanel(display display) *equipPanel {
+	return &equipPanel{display: display}
+}
+
+// Listens to nothing.
+func (m *equipPanel) Handle(e game.Event) {
+}
+
+// Render the menu.
+func (m *equipPanel) Render(g *game.Game) {
+	inv := g.Player.Packer.Inventory()
+	renderInventory(m.display, "Equipment", inv)
+}
+
 // Function that renders a single inventory within an inventory menu panel.
 func renderInventory(display display, title string, inv *game.Inventory) {
 	items := inv.Items

@@ -33,3 +33,9 @@
     - etc
 - Map generation 
 - Monster AI
+
+HAX:
+- items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???
+- Actor would have everything it has now
+- Item would have Game, Level, (no tile), only have item traits, actor would only have actor traits
+- OK, different idea -- maybe "placed on a map" is just merged into Mover, and you always go through Mover to get the tile. Then move Pos and all that crap over to Mover. 

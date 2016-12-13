@@ -15,9 +15,10 @@ var (
 		Species: SpecHuman,
 		Name:    "DEBO",
 		Traits: &Traits{
-			Mover:   NewActorMover,
-			Fighter: NewPlayerFighter,
-			Packer:  NewActorPacker,
+			Mover:    NewActorMover,
+			Fighter:  NewPlayerFighter,
+			Packer:   NewActorPacker,
+			Equipper: NewActorEquipper,
 			Stats: NewActorStats(stats{
 				str: 2,
 				agi: 2,

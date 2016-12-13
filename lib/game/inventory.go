@@ -78,6 +78,17 @@ func (inv *Inventory) Take(index int) *Obj {
 	return itemElem.Value.(*Obj)
 }
 
+// Does this inventory have anything to equip in it?
+func (inv *Inventory) HasEquips() bool {
+	for e := inv.Items.Front(); e != nil; e = e.Next() {
+		item := e.Value.(*Obj)
+		if item.Spec.Genus == GenEquip {
+			return true
+		}
+	}
+	return false
+}
+
 func (inv *Inventory) itemElemAt(index int) *list.Element {
 	itemElem := inv.Items.Back()
 	for i := 0; i != index; i++ {

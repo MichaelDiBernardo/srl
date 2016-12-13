@@ -51,12 +51,13 @@ type Obj struct {
 	Game  *Game
 
 	// Actor traits.
-	Mover   Mover
-	AI      AI
-	Stats   Stats
-	Sheet   Sheet
-	Fighter Fighter
-	Packer  Packer
+	Mover    Mover
+	AI       AI
+	Stats    Stats
+	Sheet    Sheet
+	Fighter  Fighter
+	Packer   Packer
+	Equipper Equipper
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
@@ -74,12 +75,13 @@ func (o *Obj) String() string {
 // the specific implementation of the desired trait. If an object is not
 // supposed to have a specific trait, leave it unspecified.
 type Traits struct {
-	Mover   func(*Obj) Mover
-	AI      func(*Obj) AI
-	Stats   func(*Obj) Stats
-	Sheet   func(*Obj) Sheet
-	Fighter func(*Obj) Fighter
-	Packer  func(*Obj) Packer
+	Mover    func(*Obj) Mover
+	AI       func(*Obj) AI
+	Stats    func(*Obj) Stats
+	Sheet    func(*Obj) Sheet
+	Fighter  func(*Obj) Fighter
+	Packer   func(*Obj) Packer
+	Equipper func(*Obj) Equipper
 
 	Equip func(*Obj) *Equip
 }
@@ -112,6 +114,10 @@ func newObj(spec *Spec) *Obj {
 	if traits.Packer != nil {
 		newobj.Packer = traits.Packer(newobj)
 	}
+	if traits.Equipper != nil {
+		newobj.Equipper = traits.Equipper(newobj)
+	}
+
 	if traits.Equip != nil {
 		newobj.Equip = traits.Equip(newobj)
 	}

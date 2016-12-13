@@ -324,7 +324,7 @@ func (a *ActorPacker) Inventory() *Inventory {
 func (a *ActorPacker) TryPickup() {
 	ground := a.obj.Tile.Items
 	if ground.Empty() {
-		a.obj.Game.Events.Message(fmt.Sprintf("Nothing there."))
+		a.obj.Game.Events.Message("Nothing there.")
 	} else if ground.Len() == 1 {
 		a.moveFromGround(0)
 	} else {
@@ -372,9 +372,12 @@ func NewActorEquipper(obj *Obj) Equipper {
 	}
 }
 
-// TODO
 func (a *ActorEquipper) TryEquip() {
-	// Check if any item in inventory equippable. If so, change game mode to equipping.
+	if !a.obj.Packer.Inventory().HasEquips() {
+		a.obj.Game.Events.Message("Nothing to wield/wear.")
+	} else {
+		a.obj.Game.SwitchMode(ModeEquip)
+	}
 }
 
 func (a *ActorEquipper) TryRemove() {
