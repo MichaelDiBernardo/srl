@@ -64,3 +64,17 @@ func TestAddOverCapacity(t *testing.T) {
 		t.Errorf(`inv.Add(item) over capacity 2 still added past 2`)
 	}
 }
+
+func TestHasEquips(t *testing.T) {
+	g := NewGame()
+	inv := NewInventoryWithCap(2)
+
+	if inv.HasEquips() {
+		t.Errorf(`inv.HasEquips() was true, want false`)
+	}
+	inv.Add(g.NewObj(invTestItem))
+
+	if !inv.HasEquips() {
+		t.Errorf(`inv.HasEquips() was false, want true`)
+	}
+}

@@ -11,7 +11,11 @@ var (
 		Genus:   GenMonster,
 		Species: "TestSpecies",
 		Name:    "Hi",
-		Traits:  &Traits{Mover: NewActorMover, Packer: NewActorPacker},
+		Traits: &Traits{
+			Mover:    NewActorMover,
+			Packer:   NewActorPacker,
+			Equipper: NewActorEquipper,
+		},
 	}
 
 	actorTestItemSpec = &Spec{
@@ -221,4 +225,29 @@ func TestTryPickupFromStack(t *testing.T) {
 		t.Errorf(`TryPickup switched to mode %v, want %v`, e.Mode, ModePickup)
 	}
 
+}
+
+func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
+	g := NewGame()
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryEquip()
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`TryEquip w no equips switched to mode %v, want %v`, mode, ModeHud)
+	}
+}
+
+func TestTryEquipWithEquipsInInventory(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryEquip()
+
+	equip := g.NewObj(actorTestItemSpec)
+	equipper.Packer.Inventory().Add(equip)
+
+	equipper.Equipper.TryEquip()
+
+	if mode := g.mode; mode != ModeEquip {
+		t.Errorf(`TryEquip switched to mode %v, want %v`, mode, ModeEquip)
+	}
 }
