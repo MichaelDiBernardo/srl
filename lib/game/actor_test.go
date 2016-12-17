@@ -23,7 +23,9 @@ var (
 		Genus:   GenEquip,
 		Species: "testspec",
 		Name:    "Item",
-		Traits:  &Traits{},
+		Traits: &Traits{
+			Equip: NewEquip(Equip{Slot: SlotHand}),
+		},
 	}
 )
 
@@ -249,5 +251,62 @@ func TestTryEquipWithEquipsInInventory(t *testing.T) {
 
 	if mode := g.mode; mode != ModeEquip {
 		t.Errorf(`TryEquip switched to mode %v, want %v`, mode, ModeEquip)
+	}
+}
+
+func TestEquipIntoEmptySlot(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryEquip()
+
+	equip := g.NewObj(actorTestItemSpec)
+	inv := equipper.Packer.Inventory()
+	inv.Add(equip)
+
+	equipper.Equipper.TryEquip()
+	equipper.Equipper.Equip(0)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Was mode %v after equip; want %v`, mode, ModeHud)
+	}
+
+	if !inv.Empty() {
+		t.Errorf(`Item did not leave inventory after equipping.`)
+	}
+
+	slot := equip.Equip.Slot
+	if equipped := equipper.Equipper.(*ActorEquipper).body.Slots[slot]; equipped != equip {
+		t.Errorf(`Equipped item was %v, want %v`, equipped, equip)
+	}
+}
+
+func TestEquipIntoOccupiedSlot(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryEquip()
+
+	equip1 := g.NewObj(actorTestItemSpec)
+	equip2 := g.NewObj(actorTestItemSpec)
+
+	inv := equipper.Packer.Inventory()
+	inv.Add(equip1)
+	inv.Add(equip2)
+
+	// Wield equip1
+	equipper.Equipper.TryEquip()
+	equipper.Equipper.Equip(0)
+	// Wield equip2, swapping out equip1
+	equipper.Equipper.TryEquip()
+	equipper.Equipper.Equip(0)
+
+	if swapped := inv.Top(); swapped != equip1 {
+		t.Errorf(`First wield was not swapped out; got %v, want %v.`, swapped, equip1)
+	}
+
+	slot := equip2.Equip.Slot
+	if equipped := equipper.Equipper.(*ActorEquipper).body.Slots[slot]; equipped != equip2 {
+		t.Errorf(`Equipped item was %v, want %v`, equipped, equip2)
 	}
 }
