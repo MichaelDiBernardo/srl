@@ -117,7 +117,7 @@ func (m *pickupPanel) Handle(e game.Event) {
 // Render the menu.
 func (m *pickupPanel) Render(g *game.Game) {
 	inv := g.Player.Tile.Items
-	renderInventory(m.display, "Ground", inv)
+	renderInventory(m.display, "Take what?", inv)
 }
 
 // The equip screen.
@@ -173,7 +173,66 @@ func (m *equipPanel) Handle(e game.Event) {
 // Render the menu.
 func (m *equipPanel) Render(g *game.Game) {
 	inv := g.Player.Packer.Inventory()
-	renderInventory(m.display, "Equipment", inv)
+	renderInventory(m.display, "Equip what?", inv)
+}
+
+// The remove screen.
+type removeScreen struct {
+	display display
+	menu    panel
+}
+
+// Create a new remove screen.
+func newRemoveScreen(display display) *removeScreen {
+	return &removeScreen{
+		display: display,
+		menu:    newRemovePanel(display),
+	}
+}
+
+// Render the remove screen.
+func (r *removeScreen) Render(g *game.Game) {
+	r.menu.Render(g)
+}
+
+func (r *removeScreen) Handle(ev game.Event) {
+}
+
+func (r *removeScreen) NextCommand() game.Command {
+	for {
+		tboxev := r.display.PollEvent()
+		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+			return game.ModeCommand{Mode: game.ModeHud}
+		}
+	}
+}
+
+// Panel that renders the remove list.
+type removePanel struct {
+	display display
+}
+
+// Create a new removePanel.
+func newRemovePanel(display display) *removePanel {
+	return &removePanel{display: display}
+}
+
+// Listens to nothing.
+func (m *removePanel) Handle(e game.Event) {
+}
+
+// Render the menu.
+func (r *removePanel) Render(g *game.Game) {
+	display := r.display
+	body := g.Player.Equipper.Body()
+
+	display.Write(0, 0, "Remove what?", termbox.ColorWhite, termbox.ColorBlack)
+
+	for slot, i := 0, 0; slot < len(body.Slots); slot++ {
+		if equip := body.Slots[slot]; equip != nil {
+			display.Write(1, 1+i, fmt.Sprintf("%c - %v", alphabet[i], equip.Spec.Name), termbox.ColorWhite, termbox.ColorBlack)
+		}
+	}
 }
 
 // Function that renders a single inventory within an inventory menu panel.

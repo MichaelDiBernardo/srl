@@ -31,3 +31,12 @@ func (b *Body) Remove(slot Slot) *Obj {
 	b.Slots[slot] = nil
 	return equipped
 }
+
+func (b *Body) Naked() bool {
+	for i := 0; i < numSlots; i++ {
+		if b.Slots[i] != nil {
+			return false
+		}
+	}
+	return true
+}

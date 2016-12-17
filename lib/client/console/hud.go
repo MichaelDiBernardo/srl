@@ -62,6 +62,7 @@ var hudKeymap = map[rune]game.Command{
 	'q': game.QuitCommand{},
 	',': game.TryPickupCommand{},
 	'w': game.TryEquipCommand{},
+	'r': game.TryRemoveCommand{},
 	'i': game.ModeCommand{Mode: game.ModeInventory},
 }
 

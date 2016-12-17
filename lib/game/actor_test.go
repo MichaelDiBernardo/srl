@@ -276,7 +276,7 @@ func TestEquipIntoEmptySlot(t *testing.T) {
 	}
 
 	slot := equip.Equip.Slot
-	if equipped := equipper.Equipper.(*ActorEquipper).body.Slots[slot]; equipped != equip {
+	if equipped := equipper.Equipper.Body().Slots[slot]; equipped != equip {
 		t.Errorf(`Equipped item was %v, want %v`, equipped, equip)
 	}
 }
@@ -306,7 +306,7 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 	}
 
 	slot := equip2.Equip.Slot
-	if equipped := equipper.Equipper.(*ActorEquipper).body.Slots[slot]; equipped != equip2 {
+	if equipped := equipper.Equipper.Body().Slots[slot]; equipped != equip2 {
 		t.Errorf(`Equipped item was %v, want %v`, equipped, equip2)
 	}
 }

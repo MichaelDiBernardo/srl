@@ -358,6 +358,8 @@ type Equipper interface {
 	Equip(index int)
 	// Remove the item equipped in the given slot.
 	Remove(slot Slot)
+	// Get the underlying entity's Body.
+	Body() *Body
 }
 
 type ActorEquipper struct {
@@ -381,7 +383,11 @@ func (a *ActorEquipper) TryEquip() {
 }
 
 func (a *ActorEquipper) TryRemove() {
-	// Check if any items equipped on body. If so, change game mode to removing.
+	if a.body.Naked() {
+		a.obj.Game.Events.Message("Not wearing anything.")
+	} else {
+		a.obj.Game.SwitchMode(ModeRemove)
+	}
 }
 
 func (a *ActorEquipper) Equip(index int) {
@@ -402,4 +408,8 @@ func (a *ActorEquipper) Equip(index int) {
 func (a *ActorEquipper) Remove(slot Slot) {
 	// Switch mode back to hud, take off the given thing and put it in
 	// inventory. If it doesn't fit, drop it on the floor.
+}
+
+func (a *ActorEquipper) Body() *Body {
+	return a.body
 }
