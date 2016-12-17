@@ -128,6 +128,8 @@ func equipController(g *Game, com Command) {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
+	case MenuCommand:
+		g.Player.Equipper.Equip(c.Option)
 	}
 }
 

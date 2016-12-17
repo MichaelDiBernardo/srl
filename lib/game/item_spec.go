@@ -10,6 +10,14 @@ var (
 		Genus:   GenEquip,
 		Species: SpecSword,
 		Name:    "SWORD",
-		Traits:  &Traits{},
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Damroll: NewDice(2, 5),
+				Melee:   0,
+				Evasion: 1,
+				Weight:  2,
+				Slot:    SlotHand,
+			}),
+		},
 	}
 )

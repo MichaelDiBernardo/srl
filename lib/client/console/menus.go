@@ -147,6 +147,11 @@ func (inv *equipScreen) NextCommand() game.Command {
 		tboxev := inv.display.PollEvent()
 		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 			return game.ModeCommand{Mode: game.ModeHud}
+		} else if ch := tboxev.Ch; ch != 0 {
+			opt := selectOption(ch)
+			if opt != -1 {
+				return game.MenuCommand{Option: opt}
+			}
 		}
 	}
 }

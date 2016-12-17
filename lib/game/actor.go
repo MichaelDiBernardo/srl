@@ -385,7 +385,18 @@ func (a *ActorEquipper) TryRemove() {
 }
 
 func (a *ActorEquipper) Equip(index int) {
-	// Switch mode back to hud, wear the given thing.
+	a.obj.Game.SwitchMode(ModeHud)
+
+	equip := a.obj.Packer.Inventory().Take(index)
+
+	if equip.Spec.Genus != GenEquip {
+		a.obj.Game.Events.Message(fmt.Sprintf("Cannot equip %v.", equip.Spec.Name))
+		return
+	}
+
+	if swapped := a.body.Wear(equip); swapped != nil {
+		a.obj.Packer.Inventory().Add(swapped)
+	}
 }
 
 func (a *ActorEquipper) Remove(slot Slot) {
