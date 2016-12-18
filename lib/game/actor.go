@@ -353,13 +353,23 @@ func (a *ActorPacker) TryDrop() {
 func (a *ActorPacker) Drop(index int) {
 	a.obj.Game.SwitchMode(ModeHud)
 	item := a.inventory.Take(index)
+
+	// Bounds-check the index the player requested.
+	if item == nil {
+		return
+	}
 	a.obj.Tile.Items.Add(item)
 	a.obj.Game.Events.Message(fmt.Sprintf("%v dropped %v.", a.obj.Spec.Name, item.Spec.Name))
 }
 
 func (a *ActorPacker) moveFromGround(index int) {
+	// Bounds-check the index the player requested.
+	item := a.obj.Tile.Items.At(index)
+	if item == nil {
+		return
+	}
+
 	if a.inventory.Full() {
-		item := a.obj.Tile.Items.At(index)
 		a.obj.Game.Events.Message(fmt.Sprintf("%v has no room for %v.", a.obj.Spec.Name, item.Spec.Name))
 	} else {
 		item := a.obj.Tile.Items.Take(index)
@@ -415,6 +425,11 @@ func (a *ActorEquipper) Equip(index int) {
 
 	equip := a.obj.Packer.Inventory().Take(index)
 
+	// Bounds-check the index the player requested.
+	if equip == nil {
+		return
+	}
+
 	if equip.Spec.Genus != GenEquip {
 		a.obj.Game.Events.Message(fmt.Sprintf("Cannot equip %v.", equip.Spec.Name))
 		return
@@ -430,7 +445,6 @@ func (a *ActorEquipper) Remove(slot Slot) {
 
 	removed := a.body.Remove(slot)
 	if removed == nil {
-		a.obj.Game.Events.Message("Nothing there to remove.")
 		return
 	}
 

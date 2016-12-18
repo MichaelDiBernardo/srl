@@ -31,6 +31,9 @@ func (b *Body) Wear(item *Obj) *Obj {
 }
 
 func (b *Body) Remove(slot Slot) *Obj {
+	if slot >= numSlots {
+		return nil
+	}
 	equipped := b.Slots[slot]
 	b.Slots[slot] = nil
 	return equipped

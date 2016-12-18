@@ -60,17 +60,19 @@ func (inv *Inventory) Top() *Obj {
 }
 
 // Peeks at the item at the given index without removing it.
+// Returns nil if there is no item at that index.
 func (inv *Inventory) At(index int) *Obj {
+	if size := inv.Len(); size <= index {
+		return nil
+	}
 	return inv.itemElemAt(index).Value.(*Obj)
 }
 
 // Returns the item at index 'index' and removes it from the inventory.
+// Returns nil if there was no item at the given index.
 func (inv *Inventory) Take(index int) *Obj {
-	if inv.Empty() {
-		panic(fmt.Sprintf(`Tried to Take(%v) from empty inventory.`, index))
-	}
 	if size := inv.Len(); size <= index {
-		panic(fmt.Sprintf(`Tried to Take(%v) from inventory of size %v.`, index, size))
+		return nil
 	}
 
 	itemElem := inv.itemElemAt(index)
