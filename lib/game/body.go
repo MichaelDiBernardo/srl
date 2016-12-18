@@ -7,7 +7,11 @@ type Slot int
 
 const (
 	SlotHand = iota
-	SlotOffHand
+	SlotHead
+	SlotBody
+	SlotArms
+	SlotLegs
+	SlotRelic
 	numSlots
 )
 

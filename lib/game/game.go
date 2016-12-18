@@ -144,6 +144,11 @@ func removeController(g *Game, com Command) {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
+	case MenuCommand:
+		// Will probably need to be changed to a SlotCommand or
+		// something if slots become complicated enough that
+		// type-converting them from ints isn't enough.
+		g.Player.Equipper.Remove(Slot(c.Option))
 	}
 }
 

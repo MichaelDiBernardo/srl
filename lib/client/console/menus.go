@@ -203,6 +203,11 @@ func (r *removeScreen) NextCommand() game.Command {
 		tboxev := r.display.PollEvent()
 		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 			return game.ModeCommand{Mode: game.ModeHud}
+		} else if ch := tboxev.Ch; ch != 0 {
+			opt := selectOption(ch)
+			if opt != -1 {
+				return game.MenuCommand{Option: opt}
+			}
 		}
 	}
 }
@@ -228,10 +233,12 @@ func (r *removePanel) Render(g *game.Game) {
 
 	display.Write(0, 0, "Remove what?", termbox.ColorWhite, termbox.ColorBlack)
 
-	for slot, i := 0, 0; slot < len(body.Slots); slot++ {
-		if equip := body.Slots[slot]; equip != nil {
-			display.Write(1, 1+i, fmt.Sprintf("%c - %v", alphabet[i], equip.Spec.Name), termbox.ColorWhite, termbox.ColorBlack)
+	for i := 0; i < len(body.Slots); i++ {
+		name := "(nothing)"
+		if equip := body.Slots[i]; equip != nil {
+			name = equip.Spec.Name
 		}
+		display.Write(1, 1+i, fmt.Sprintf("%c - %v", alphabet[i], name), termbox.ColorWhite, termbox.ColorBlack)
 	}
 }
 

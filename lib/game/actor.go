@@ -406,8 +406,21 @@ func (a *ActorEquipper) Equip(index int) {
 }
 
 func (a *ActorEquipper) Remove(slot Slot) {
-	// Switch mode back to hud, take off the given thing and put it in
-	// inventory. If it doesn't fit, drop it on the floor.
+	a.obj.Game.SwitchMode(ModeHud)
+
+	removed := a.body.Remove(slot)
+	if removed == nil {
+		a.obj.Game.Events.Message("Nothing there to remove.")
+		return
+	}
+
+	if added := a.obj.Packer.Inventory().Add(removed); added {
+		return
+	}
+
+	// No room for unequipped item in inventory; drop it.
+	a.obj.Tile.Items.Add(removed)
+	a.obj.Game.Events.Message(fmt.Sprintf("No room in pack! Dropped %v.", removed.Spec.Name))
 }
 
 func (a *ActorEquipper) Body() *Body {
