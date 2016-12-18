@@ -298,9 +298,13 @@ type Packer interface {
 	// Tries to pickup something at current square. If there are many things,
 	// will invoke stack menu.
 	TryPickup()
-	// Pickup the item on the floor stack at given index. Returns false if
-	// there was no room in player inventory to do this.
+	// Pickup the item on the floor stack at given index.
 	Pickup(index int)
+	// Tries to drop something at current square.
+	TryDrop()
+	// Drop the item at index in inventory to the floor stack.
+	Drop(index int)
+	// Get this Packer's inventory.
 	Inventory() *Inventory
 }
 
@@ -335,6 +339,22 @@ func (a *ActorPacker) TryPickup() {
 func (a *ActorPacker) Pickup(index int) {
 	a.obj.Game.SwitchMode(ModeHud)
 	a.moveFromGround(index)
+}
+
+func (a *ActorPacker) TryDrop() {
+	ground := a.obj.Tile.Items
+	if ground.Full() {
+		a.obj.Game.Events.Message("Can't drop here.")
+	} else {
+		a.obj.Game.SwitchMode(ModeDrop)
+	}
+}
+
+func (a *ActorPacker) Drop(index int) {
+	a.obj.Game.SwitchMode(ModeHud)
+	item := a.inventory.Take(index)
+	a.obj.Tile.Items.Add(item)
+	a.obj.Game.Events.Message(fmt.Sprintf("%v dropped %v.", a.obj.Spec.Name, item.Spec.Name))
 }
 
 func (a *ActorPacker) moveFromGround(index int) {
