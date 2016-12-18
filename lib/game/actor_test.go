@@ -310,3 +310,71 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 		t.Errorf(`Equipped item was %v, want %v`, equipped, equip2)
 	}
 }
+
+func TestTryRemoveNothingEquipped(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryRemove()
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`TryRemove switched to mode %v; want %v`, mode, ModeHud)
+	}
+}
+
+func TestTryRemoveSomethingEquipped(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equip := g.NewObj(actorTestItemSpec)
+
+	equipper.Equipper.Body().Wear(equip)
+	equipper.Equipper.TryRemove()
+
+	if mode := g.mode; mode != ModeRemove {
+		t.Errorf(`TryRemove switched to mode %v; want %v`, mode, ModeRemove)
+	}
+}
+
+func TestRemove(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equip := g.NewObj(actorTestItemSpec)
+
+	equipper.Equipper.Body().Wear(equip)
+	equipper.Equipper.TryRemove()
+	equipper.Equipper.Remove(equip.Equip.Slot)
+
+	if removed := equipper.Equipper.Body().Slots[equip.Equip.Slot]; removed != nil {
+		t.Errorf(`Found %v in removed slot; want nil`, removed)
+	}
+
+	if removed := equipper.Packer.Inventory().Top(); removed != equip {
+		t.Errorf(`Found %v in pack; want %v`, removed, equip)
+	}
+}
+
+func TestRemoveOverflowsToGround(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equip := g.NewObj(actorTestItemSpec)
+	equipper.Equipper.Body().Wear(equip)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(equipper, math.Pt(0, 0))
+
+	equipper.Packer.Inventory().capacity = 0
+
+	equipper.Equipper.TryRemove()
+	equipper.Equipper.Remove(equip.Equip.Slot)
+
+	if removed := equipper.Packer.Inventory().Top(); removed != nil {
+		t.Errorf(`Found %v in pack; want nil`, removed)
+	}
+
+	if removed := equipper.Tile.Items.Top(); removed != equip {
+		t.Errorf(`Found %v on floor; want %v`, removed, equip)
+	}
+}

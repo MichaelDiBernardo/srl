@@ -7,7 +7,7 @@
         x we really need commands to also be structs. keymaps be damned.
     x Inv has capacity
     x Write tests for this stuff ^
-    - wielding or wearing what's in inventory
+    x wielding or wearing what's in inventory
         - Weapons need a way to:
             x Describe their weight, damage dice, tohit.
             x Identify what equipment slot they should go in
