@@ -378,3 +378,89 @@ func TestRemoveOverflowsToGround(t *testing.T) {
 		t.Errorf(`Found %v on floor; want %v`, removed, equip)
 	}
 }
+
+func TestRemoveWhenInvAndGroundAreFull(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equip := g.NewObj(actorTestItemSpec)
+	equipper.Equipper.Body().Wear(equip)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(equipper, math.Pt(0, 0))
+
+	equipper.Packer.Inventory().capacity = 0
+	equipper.Tile.Items.capacity = 0
+
+	equipper.Equipper.TryRemove()
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`TryRemove switched to mode %v; want %v`, mode, ModeHud)
+	}
+
+}
+
+func TestTryDropWithNothingInInventory(t *testing.T) {
+	g := NewGame()
+
+	packer := g.NewObj(actorTestSpec)
+	packer.Packer.TryDrop()
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`TryDrop w no items switched to mode %v, want %v`, mode, ModeHud)
+	}
+}
+
+func TestTryDropWithFullGround(t *testing.T) {
+	g := NewGame()
+
+	packer := g.NewObj(actorTestSpec)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(packer, math.Pt(0, 0))
+
+	packer.Tile.Items.capacity = 0
+	packer.Packer.TryDrop()
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`TryDrop w full ground switched to mode %v, want %v`, mode, ModeHud)
+	}
+}
+
+func TestTryDrop(t *testing.T) {
+	g := NewGame()
+
+	packer := g.NewObj(actorTestSpec)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(packer, math.Pt(0, 0))
+
+	item := g.NewObj(actorTestItemSpec)
+	packer.Packer.Inventory().Add(item)
+
+	packer.Packer.TryDrop()
+
+	if mode := g.mode; mode != ModeDrop {
+		t.Errorf(`TryDrop switched to mode %v, want %v`, mode, ModeDrop)
+	}
+}
+
+func TestDrop(t *testing.T) {
+	g := NewGame()
+
+	packer := g.NewObj(actorTestSpec)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(packer, math.Pt(0, 0))
+
+	item := g.NewObj(actorTestItemSpec)
+	packer.Packer.Inventory().Add(item)
+
+	packer.Packer.TryDrop()
+	packer.Packer.Drop(0)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Dropping switched mode to %v, want %v`, mode, ModeHud)
+	}
+
+	if dropped := packer.Tile.Items.Top(); dropped != item {
+		t.Errorf(`Dropped item was %v; want %v`, dropped, item)
+	}
+}

@@ -1,3 +1,20 @@
+NEXT:
+- Tests for boundschecky things on each Drop, Pickup, etc.
+
+Then:
+- Finish non-ability melee combat, with mob death and proper stats display.
+- Basic consumables.
+- Level generation. 
+    - Monster generation
+    - Item generation
+    - Map generation
+- Monsters drop loot
+- Monsters have tracking / movement+attacking AI. 
+- Add stairs / progression.
+- Add a basic "you got to level 5 you win"
+- Egos (?), artefacts.
+
+Stuff:
 - Equipment
     x inventory on ground and for actors
     x Picking up off ground (just the top)

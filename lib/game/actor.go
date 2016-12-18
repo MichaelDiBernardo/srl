@@ -342,6 +342,11 @@ func (a *ActorPacker) Pickup(index int) {
 }
 
 func (a *ActorPacker) TryDrop() {
+	if a.inventory.Empty() {
+		a.obj.Game.Events.Message("Nothing to drop.")
+		return
+	}
+
 	ground := a.obj.Tile.Items
 	if ground.Full() {
 		a.obj.Game.Events.Message("Can't drop here.")
@@ -415,6 +420,8 @@ func (a *ActorEquipper) TryEquip() {
 func (a *ActorEquipper) TryRemove() {
 	if a.body.Naked() {
 		a.obj.Game.Events.Message("Not wearing anything.")
+	} else if a.obj.Packer.Inventory().Full() && a.obj.Tile.Items.Full() {
+		a.obj.Game.Events.Message("Can't remove; pack and ground are full.")
 	} else {
 		a.obj.Game.SwitchMode(ModeRemove)
 	}
