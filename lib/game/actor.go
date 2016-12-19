@@ -292,19 +292,56 @@ func (p *PlayerFighter) Hit(other Fighter) {
 }
 
 func (p *PlayerFighter) MeleeRoll() int {
-	return DieRoll(1, 20) + p.obj.Sheet.Melee()
+	bonus := p.obj.Equipper.Body().Melee() + p.obj.Sheet.Melee()
+	return DieRoll(1, 20) + bonus
 }
 
 func (p *PlayerFighter) EvasionRoll() int {
-	return DieRoll(1, 20) + p.obj.Sheet.Evasion()
+	bonus := p.obj.Equipper.Body().Evasion() + p.obj.Sheet.Evasion()
+	return DieRoll(1, 20) + bonus
 }
 
 func (p *PlayerFighter) DamRoll() int {
-	return DieRoll(1, p.obj.Sheet.Str())
+	weap := p.weapon()
+	str := p.obj.Sheet.Str()
+	bonus := math.Min(math.Abs(str), weap.Equip.Weight) * math.Sgn(str)
+	return weap.Equip.Damroll.Add(0, bonus).Roll()
 }
 
 func (p *PlayerFighter) ProtRoll() int {
-	return 0
+	dice := p.obj.Equipper.Body().ProtDice()
+	sum := 0
+
+	for i := 0; i < len(dice); i++ {
+		sum += dice[i].Roll()
+	}
+
+	return sum
+}
+
+func (p *PlayerFighter) weapon() *Obj {
+	weap := p.obj.Equipper.Body().Weapon()
+	if weap != nil {
+		return weap
+	}
+	return p.fist()
+}
+
+func (p *PlayerFighter) fist() *Obj {
+	return p.obj.Game.NewObj(&Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: SpecFist,
+		Name:    "FIST",
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Damroll: NewDice(1, p.obj.Sheet.Str()+1),
+				Melee:   0,
+				Weight:  0,
+				Slot:    SlotHand,
+			}),
+		},
+	})
 }
 
 // A thing that that can hold items in inventory. (A "pack".)

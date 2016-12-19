@@ -1,4 +1,5 @@
 NEXT:
+- Make Damroll/DamRoll consistent, same with Protroll/ProtRoll
 - Finish non-ability melee combat, with mob death and proper stats display.
 
 Then:

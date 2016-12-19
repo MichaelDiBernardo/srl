@@ -28,10 +28,11 @@ var (
 		Species: SpecOrc,
 		Name:    "ORC",
 		Traits: &Traits{
-			Mover:   NewActorMover,
-			AI:      NewRandomAI,
-			Fighter: NewPlayerFighter,
-			Packer:  NewActorPacker,
+			Mover:    NewActorMover,
+			AI:       NewRandomAI,
+			Fighter:  NewPlayerFighter,
+			Packer:   NewActorPacker,
+			Equipper: NewActorEquipper, // TEMP
 			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 2,
 				agi: 0,

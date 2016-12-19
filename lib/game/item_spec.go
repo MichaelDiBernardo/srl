@@ -1,6 +1,7 @@
 package game
 
 const (
+	SpecFist  = "fist"
 	SpecSword = "sword"
 )
 
