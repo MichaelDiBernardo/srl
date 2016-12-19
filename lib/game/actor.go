@@ -89,87 +89,78 @@ func (ai *RandomAI) Act(l *Level) bool {
 	return ai.obj.Mover.Move(dir)
 }
 
-// Accessors for an actor's stats.
-type Stats interface {
+// A 'character sheet' for an actor. Basically, all the attributes for an actor
+// that are required to make calculations and game decisions live here.
+type Sheet interface {
 	Objgetter
+
+	// Stats
 	Str() int
 	Agi() int
 	Vit() int
 	Mnd() int
-}
 
-// Single implementation of this for now; will probably have separate
-// implementations for monsters and player when things get more complicated.
-type stats struct {
-	Trait
-	str int
-	agi int
-	vit int
-	mnd int
-}
-
-// Given a copy of a stats literal, this will return a function that will bind
-// the owner of the stats to it at object creation time. See the syntax for
-// this in actor_spec.go.
-func NewActorStats(stats stats) func(*Obj) Stats {
-	return func(o *Obj) Stats {
-		stats.obj = o
-		return &stats
-	}
-}
-
-func (s *stats) Str() int {
-	return s.str
-}
-
-func (s *stats) Agi() int {
-	return s.agi
-}
-
-func (s *stats) Vit() int {
-	return s.vit
-}
-
-func (s *stats) Mnd() int {
-	return s.mnd
-}
-
-// A 'character sheet' for an actor. This is where all attributes derived from
-// stats + equipment are stored.
-type Sheet interface {
-	Objgetter
+	// Skills.
 	Melee() int
 	Evasion() int
+
+	// Vitals.
 	HP() int
 	MaxHP() int
 	MP() int
 	MaxMP() int
 
+	// Hurt me.
 	Hurt(dmg int)
 }
 
-type sheet struct {
+// Sheet used for player, which has a lot of derived attributes.
+type PlayerSheet struct {
 	Trait
+	str int
+	agi int
+	vit int
+	mnd int
+
 	hp int
 	mp int
 }
 
-// Sheet used for player, which has a lot of derived attributes.
-type PlayerSheet sheet
-
 func NewPlayerSheet(obj *Obj) Sheet {
-	ps := &PlayerSheet{Trait: Trait{obj: obj}}
+	ps := &PlayerSheet{
+		Trait: Trait{obj: obj},
+		str:   2,
+		agi:   2,
+		vit:   2,
+		mnd:   2,
+	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
 	return ps
 }
 
+func (s *PlayerSheet) Str() int {
+	return s.str
+}
+
+func (s *PlayerSheet) Agi() int {
+	return s.agi
+}
+
+func (s *PlayerSheet) Vit() int {
+	return s.vit
+}
+
+func (s *PlayerSheet) Mnd() int {
+	return s.mnd
+}
+
 func (p *PlayerSheet) Melee() int {
-	return p.obj.Stats.Agi()
+	return p.Agi()
 }
 
 func (p *PlayerSheet) Evasion() int {
-	return p.obj.Stats.Agi()
+	return p.Agi()
 }
 
 func (p *PlayerSheet) HP() int {
@@ -181,11 +172,11 @@ func (p *PlayerSheet) MP() int {
 }
 
 func (p *PlayerSheet) MaxHP() int {
-	return 10 * (1 + p.obj.Stats.Vit())
+	return 10 * (1 + p.Vit())
 }
 
 func (p *PlayerSheet) MaxMP() int {
-	return 10 * (1 + p.obj.Stats.Mnd())
+	return 10 * (1 + p.Mnd())
 }
 
 func (p *PlayerSheet) Hurt(dmg int) {
@@ -195,11 +186,19 @@ func (p *PlayerSheet) Hurt(dmg int) {
 // Sheet used for monsters, which have a lot of hardcoded attributes.
 type MonsterSheet struct {
 	Trait
-	sheet
+
+	str int
+	agi int
+	vit int
+	mnd int
+
+	hp    int
+	mp    int
+	maxhp int
+	maxmp int
+
 	melee   int
 	evasion int
-	maxhp   int
-	maxmp   int
 }
 
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
@@ -212,6 +211,22 @@ func NewMonsterSheet(sheet MonsterSheet) func(*Obj) Sheet {
 		sheet.mp = sheet.maxmp
 		return &sheet
 	}
+}
+
+func (s *MonsterSheet) Str() int {
+	return s.str
+}
+
+func (s *MonsterSheet) Agi() int {
+	return s.agi
+}
+
+func (s *MonsterSheet) Vit() int {
+	return s.vit
+}
+
+func (s *MonsterSheet) Mnd() int {
+	return s.mnd
 }
 
 func (m *MonsterSheet) Melee() int {
@@ -252,7 +267,7 @@ type Fighter interface {
 	ProtRoll() int
 }
 
-// An attacker that works for all actors.
+// Player melee combat.
 type PlayerFighter struct {
 	Trait
 }
@@ -285,7 +300,7 @@ func (p *PlayerFighter) EvasionRoll() int {
 }
 
 func (p *PlayerFighter) DamRoll() int {
-	return DieRoll(1, p.obj.Stats.Str())
+	return DieRoll(1, p.obj.Sheet.Str())
 }
 
 func (p *PlayerFighter) ProtRoll() int {

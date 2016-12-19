@@ -74,8 +74,7 @@ func TestActorCollision(t *testing.T) {
 func TestPlayerMaxHPCalc(t *testing.T) {
 	g := NewGame()
 	obj := g.NewObj(PlayerSpec)
-	obj.Stats = &stats{Trait: Trait{obj: obj}, vit: 1}
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1}
 
 	if maxhp, want := obj.Sheet.MaxHP(), 20; maxhp != want {
 		t.Errorf(`MaxHP() was %d, want %d`, maxhp, want)
@@ -85,8 +84,7 @@ func TestPlayerMaxHPCalc(t *testing.T) {
 func TestPlayerMaxMPCalc(t *testing.T) {
 	g := NewGame()
 	obj := g.NewObj(PlayerSpec)
-	obj.Stats = &stats{Trait: Trait{obj: obj}, mnd: 2}
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, mnd: 2}
 
 	if maxmp, want := obj.Sheet.MaxMP(), 30; maxmp != want {
 		t.Errorf(`MaxMP() was %d, want %d`, maxmp, want)

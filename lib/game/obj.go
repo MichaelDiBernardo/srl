@@ -53,7 +53,6 @@ type Obj struct {
 	// Actor traits.
 	Mover    Mover
 	AI       AI
-	Stats    Stats
 	Sheet    Sheet
 	Fighter  Fighter
 	Packer   Packer
@@ -77,7 +76,6 @@ func (o *Obj) String() string {
 type Traits struct {
 	Mover    func(*Obj) Mover
 	AI       func(*Obj) AI
-	Stats    func(*Obj) Stats
 	Sheet    func(*Obj) Sheet
 	Fighter  func(*Obj) Fighter
 	Packer   func(*Obj) Packer
@@ -101,9 +99,6 @@ func newObj(spec *Spec) *Obj {
 	}
 	if traits.AI != nil {
 		newobj.AI = traits.AI(newobj)
-	}
-	if traits.Stats != nil {
-		newobj.Stats = traits.Stats(newobj)
 	}
 	if traits.Sheet != nil {
 		newobj.Sheet = traits.Sheet(newobj)

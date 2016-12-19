@@ -16,7 +16,7 @@ type Equip struct {
 	Slot     Slot
 }
 
-// See New*Stats in actor.go to understand why this is written this way.
+// See NewSheet in actor.go to understand why this is written this way.
 func NewEquip(equip Equip) func(*Obj) *Equip {
 	return func(o *Obj) *Equip {
 		equip.obj = o

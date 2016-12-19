@@ -207,7 +207,7 @@ type statusPanel struct {
 	display display
 }
 
-// Create a new statsPanel.
+// Create a new statusPanel.
 func newStatusPanel(display display) *statusPanel {
 	return &statusPanel{display: display}
 }
@@ -220,16 +220,15 @@ func (s *statusPanel) Handle(e game.Event) {
 func (s *statusPanel) Render(g *game.Game) {
 	player := g.Player
 	fg, bg := termbox.ColorWhite, termbox.ColorBlack
-	stats := player.Stats
 	sheet := player.Sheet
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+1, "Human", fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", stats.Str()), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", stats.Agi()), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", stats.Vit()), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", stats.Mnd()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", sheet.Str()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", sheet.Agi()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", sheet.Vit()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", sheet.Mnd()), fg, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d:%-3d", "HP", sheet.HP(), sheet.MaxHP()), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d:%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)

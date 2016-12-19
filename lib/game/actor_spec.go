@@ -19,13 +19,7 @@ var (
 			Fighter:  NewPlayerFighter,
 			Packer:   NewActorPacker,
 			Equipper: NewActorEquipper,
-			Stats: NewActorStats(stats{
-				str: 2,
-				agi: 2,
-				vit: 2,
-				mnd: 2,
-			}),
-			Sheet: NewPlayerSheet,
+			Sheet:    NewPlayerSheet,
 		},
 	}
 	MonOrc = &Spec{
@@ -38,13 +32,12 @@ var (
 			AI:      NewRandomAI,
 			Fighter: NewPlayerFighter,
 			Packer:  NewActorPacker,
-			Stats: NewActorStats(stats{
+			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 2,
 				agi: 0,
 				vit: 1,
 				mnd: 0,
-			}),
-			Sheet: NewMonsterSheet(MonsterSheet{
+
 				melee:   1,
 				evasion: 1,
 				maxhp:   20,
