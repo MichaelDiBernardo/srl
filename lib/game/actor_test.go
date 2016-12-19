@@ -229,6 +229,24 @@ func TestTryPickupFromStack(t *testing.T) {
 
 }
 
+func TestPickupOutOfBounds(t *testing.T) {
+	g := NewGame()
+	taker := g.NewObj(actorTestSpec)
+	item := g.NewObj(actorTestItemSpec)
+
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(taker, math.Pt(0, 0))
+	l.Place(item, math.Pt(0, 0))
+
+	taker.Packer.TryPickup()
+	taker.Packer.Pickup(5)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Out-of-bounds Pickup switched to mode %v; want %v`, mode, ModeHud)
+	}
+
+}
+
 func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
 	g := NewGame()
 	equipper := g.NewObj(actorTestSpec)
@@ -311,6 +329,24 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 	}
 }
 
+func TestEquipOutOfBounds(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equipper.Equipper.TryEquip()
+
+	equip := g.NewObj(actorTestItemSpec)
+	inv := equipper.Packer.Inventory()
+	inv.Add(equip)
+
+	equipper.Equipper.TryEquip()
+	equipper.Equipper.Equip(5)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Was mode %v after equip; want %v`, mode, ModeHud)
+	}
+}
+
 func TestTryRemoveNothingEquipped(t *testing.T) {
 	g := NewGame()
 
@@ -352,6 +388,21 @@ func TestRemove(t *testing.T) {
 
 	if removed := equipper.Packer.Inventory().Top(); removed != equip {
 		t.Errorf(`Found %v in pack; want %v`, removed, equip)
+	}
+}
+
+func TestRemoveOutOfBounds(t *testing.T) {
+	g := NewGame()
+
+	equipper := g.NewObj(actorTestSpec)
+	equip := g.NewObj(actorTestItemSpec)
+
+	equipper.Equipper.Body().Wear(equip)
+	equipper.Equipper.TryRemove()
+	equipper.Equipper.Remove(100)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Out-of-bounds removed switched mode to %v; want %v`, mode, ModeHud)
 	}
 }
 
@@ -462,5 +513,23 @@ func TestDrop(t *testing.T) {
 
 	if dropped := packer.Tile.Items.Top(); dropped != item {
 		t.Errorf(`Dropped item was %v; want %v`, dropped, item)
+	}
+}
+
+func TestDropOutOfBounds(t *testing.T) {
+	g := NewGame()
+
+	packer := g.NewObj(actorTestSpec)
+	l := NewLevel(4, 4, nil, IdentLevel)
+	l.Place(packer, math.Pt(0, 0))
+
+	item := g.NewObj(actorTestItemSpec)
+	packer.Packer.Inventory().Add(item)
+
+	packer.Packer.TryDrop()
+	packer.Packer.Drop(5)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Dropping switched mode to %v, want %v`, mode, ModeHud)
 	}
 }

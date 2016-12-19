@@ -1,8 +1,7 @@
 NEXT:
-- Tests for boundschecky things on each Drop, Pickup, etc.
+- Finish non-ability melee combat, with mob death and proper stats display.
 
 Then:
-- Finish non-ability melee combat, with mob death and proper stats display.
 - Basic consumables.
 - Level generation. 
     - Monster generation
