@@ -108,11 +108,11 @@ func (_ *fakefighter) EvasionRoll() int {
 	return 0
 }
 
-func (_ *fakefighter) DamRoll() int {
+func (_ *fakefighter) Damroll() int {
 	return 0
 }
 
-func (_ *fakefighter) ProtRoll() int {
+func (_ *fakefighter) Protroll() int {
 	return 0
 }
 

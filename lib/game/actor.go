@@ -266,8 +266,21 @@ type Fighter interface {
 	Hit(other Fighter)
 	MeleeRoll() int
 	EvasionRoll() int
-	DamRoll() int
-	ProtRoll() int
+	Damroll() int
+	Protroll() int
+}
+
+func hit(attacker Fighter, defender Fighter) {
+	mroll, eroll := attacker.MeleeRoll(), defender.EvasionRoll()
+	if mroll > eroll {
+		dmg := attacker.Damroll() - defender.Protroll()
+		defender.Obj().Sheet.Hurt(dmg)
+		msg := fmt.Sprintf("%v hit %v (%d).", attacker.Obj().Spec.Name, defender.Obj().Spec.Name, dmg)
+		attacker.Obj().Game.Events.Message(msg)
+	} else {
+		msg := fmt.Sprintf("%v missed %v.", attacker.Obj().Spec.Name, defender.Obj().Spec.Name)
+		attacker.Obj().Game.Events.Message(msg)
+	}
 }
 
 // Player melee combat.
@@ -281,38 +294,29 @@ func NewPlayerFighter(obj *Obj) Fighter {
 	}
 }
 
-func (p *PlayerFighter) Hit(other Fighter) {
-	mroll, eroll := p.MeleeRoll(), other.EvasionRoll()
-	if mroll > eroll {
-		dmg := p.DamRoll() - other.ProtRoll()
-		other.Obj().Sheet.Hurt(dmg)
-		msg := fmt.Sprintf("%v hit %v (%d).", p.obj.Spec.Name, other.Obj().Spec.Name, dmg)
-		p.obj.Game.Events.Message(msg)
-	} else {
-		msg := fmt.Sprintf("%v missed %v.", p.obj.Spec.Name, other.Obj().Spec.Name)
-		p.obj.Game.Events.Message(msg)
-	}
+func (f *PlayerFighter) Hit(other Fighter) {
+	hit(f, other)
 }
 
-func (p *PlayerFighter) MeleeRoll() int {
-	bonus := p.obj.Equipper.Body().Melee() + p.obj.Sheet.Melee()
+func (f *PlayerFighter) MeleeRoll() int {
+	bonus := f.obj.Equipper.Body().Melee() + f.obj.Sheet.Melee()
 	return DieRoll(1, 20) + bonus
 }
 
-func (p *PlayerFighter) EvasionRoll() int {
-	bonus := p.obj.Equipper.Body().Evasion() + p.obj.Sheet.Evasion()
+func (f *PlayerFighter) EvasionRoll() int {
+	bonus := f.obj.Equipper.Body().Evasion() + f.obj.Sheet.Evasion()
 	return DieRoll(1, 20) + bonus
 }
 
-func (p *PlayerFighter) DamRoll() int {
-	weap := p.weapon()
-	str := p.obj.Sheet.Str()
+func (f *PlayerFighter) Damroll() int {
+	weap := f.weapon()
+	str := f.obj.Sheet.Str()
 	bonus := math.Min(math.Abs(str), weap.Equip.Weight) * math.Sgn(str)
 	return weap.Equip.Damroll.Add(0, bonus).Roll()
 }
 
-func (p *PlayerFighter) ProtRoll() int {
-	dice := p.obj.Equipper.Body().ProtDice()
+func (f *PlayerFighter) Protroll() int {
+	dice := f.obj.Equipper.Body().ProtDice()
 	sum := 0
 
 	for i := 0; i < len(dice); i++ {
@@ -322,23 +326,23 @@ func (p *PlayerFighter) ProtRoll() int {
 	return sum
 }
 
-func (p *PlayerFighter) weapon() *Obj {
-	weap := p.obj.Equipper.Body().Weapon()
+func (f *PlayerFighter) weapon() *Obj {
+	weap := f.obj.Equipper.Body().Weapon()
 	if weap != nil {
 		return weap
 	}
-	return p.fist()
+	return f.fist()
 }
 
-func (p *PlayerFighter) fist() *Obj {
-	return p.obj.Game.NewObj(&Spec{
+func (f *PlayerFighter) fist() *Obj {
+	return f.obj.Game.NewObj(&Spec{
 		Family:  FamItem,
 		Genus:   GenEquip,
 		Species: SpecFist,
 		Name:    "FIST",
 		Traits: &Traits{
 			Equip: NewEquip(Equip{
-				Damroll: NewDice(1, p.obj.Sheet.Str()+1),
+				Damroll: NewDice(1, f.obj.Sheet.Str()+1),
 				Melee:   0,
 				Weight:  0,
 				Slot:    SlotHand,
@@ -361,7 +365,7 @@ func NewMonsterFighter(obj *Obj) Fighter {
 func (f *MonsterFighter) Hit(other Fighter) {
 	mroll, eroll := f.MeleeRoll(), other.EvasionRoll()
 	if mroll > eroll {
-		dmg := f.DamRoll() - other.ProtRoll()
+		dmg := f.Damroll() - other.Protroll()
 		other.Obj().Sheet.Hurt(dmg)
 		msg := fmt.Sprintf("%v hit %v (%d).", f.obj.Spec.Name, other.Obj().Spec.Name, dmg)
 		f.obj.Game.Events.Message(msg)
@@ -379,11 +383,11 @@ func (f *MonsterFighter) EvasionRoll() int {
 	return DieRoll(1, 20) + f.obj.Sheet.Evasion()
 }
 
-func (f *MonsterFighter) DamRoll() int {
+func (f *MonsterFighter) Damroll() int {
 	return f.obj.Sheet.(*MonsterSheet).Damroll.Roll()
 }
 
-func (f *MonsterFighter) ProtRoll() int {
+func (f *MonsterFighter) Protroll() int {
 	return f.obj.Sheet.(*MonsterSheet).Protroll.Roll()
 }
 
