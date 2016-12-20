@@ -200,8 +200,8 @@ type MonsterSheet struct {
 	melee   int
 	evasion int
 
-	Protroll Dice
-	Damroll  Dice
+	protroll Dice
+	damroll  Dice
 }
 
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
@@ -384,11 +384,11 @@ func (f *MonsterFighter) EvasionRoll() int {
 }
 
 func (f *MonsterFighter) Damroll() int {
-	return f.obj.Sheet.(*MonsterSheet).Damroll.Roll()
+	return f.obj.Sheet.(*MonsterSheet).damroll.Roll()
 }
 
 func (f *MonsterFighter) Protroll() int {
-	return f.obj.Sheet.(*MonsterSheet).Protroll.Roll()
+	return f.obj.Sheet.(*MonsterSheet).protroll.Roll()
 }
 
 // A thing that that can hold items in inventory. (A "pack".)

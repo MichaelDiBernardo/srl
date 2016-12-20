@@ -41,18 +41,21 @@ func TestLevel(l *Level) *Level {
 			}
 		}
 	}
-	for i := 0; i < 10; i++ {
-		item := l.fac.NewObj(WeapSword)
+	for i := 0; i < 20; i++ {
+		var pt math.Point
 		for {
-			pt := math.Pt(rand.Intn(l.Bounds.Width()), rand.Intn(l.Bounds.Height()))
-			if l.Place(item, pt) {
-				if rand.Intn(2) == 1 {
-					extras := rand.Intn(4) + 1
-					for j := 0; j < extras; j++ {
-						l.Place(l.fac.NewObj(WeapSword), pt)
-					}
-				}
+			pt = math.Pt(rand.Intn(l.Bounds.Width()), rand.Intn(l.Bounds.Height()))
+			if !l.At(pt).Feature.Solid {
 				break
+			}
+		}
+
+		stacksize := rand.Intn(3) + 1
+		for j := 0; j < stacksize; j++ {
+			if rand.Intn(2) == 1 {
+				l.Place(l.fac.NewObj(WeapSword), pt)
+			} else {
+				l.Place(l.fac.NewObj(ArmorLeather), pt)
 			}
 		}
 	}

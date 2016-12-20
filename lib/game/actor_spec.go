@@ -43,8 +43,8 @@ var (
 				maxhp:   20,
 				maxmp:   10,
 
-				Damroll:  NewDice(2, 5),
-				Protroll: NewDice(1, 4),
+				damroll:  NewDice(2, 5),
+				protroll: NewDice(1, 4),
 			}),
 		},
 	}

@@ -1,8 +1,9 @@
 package game
 
 const (
-	SpecFist  = "fist"
-	SpecSword = "sword"
+	SpecFist         = "fist"
+	SpecSword        = "sword"
+	SpecLeatherArmor = "leatherarmor"
 )
 
 var (
@@ -18,6 +19,21 @@ var (
 				Evasion: 1,
 				Weight:  2,
 				Slot:    SlotHand,
+			}),
+		},
+	}
+	ArmorLeather = &Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: SpecLeatherArmor,
+		Name:    "LEATHER",
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Protroll: NewDice(1, 4),
+				Melee:    0,
+				Evasion:  -1,
+				Weight:   4,
+				Slot:     SlotBody,
 			}),
 		},
 	}
