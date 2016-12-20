@@ -199,6 +199,9 @@ type MonsterSheet struct {
 
 	melee   int
 	evasion int
+
+	Protroll Dice
+	Damroll  Dice
 }
 
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
@@ -342,6 +345,46 @@ func (p *PlayerFighter) fist() *Obj {
 			}),
 		},
 	})
+}
+
+// Monster melee combat.
+type MonsterFighter struct {
+	Trait
+}
+
+func NewMonsterFighter(obj *Obj) Fighter {
+	return &MonsterFighter{
+		Trait: Trait{obj: obj},
+	}
+}
+
+func (f *MonsterFighter) Hit(other Fighter) {
+	mroll, eroll := f.MeleeRoll(), other.EvasionRoll()
+	if mroll > eroll {
+		dmg := f.DamRoll() - other.ProtRoll()
+		other.Obj().Sheet.Hurt(dmg)
+		msg := fmt.Sprintf("%v hit %v (%d).", f.obj.Spec.Name, other.Obj().Spec.Name, dmg)
+		f.obj.Game.Events.Message(msg)
+	} else {
+		msg := fmt.Sprintf("%v missed %v.", f.obj.Spec.Name, other.Obj().Spec.Name)
+		f.obj.Game.Events.Message(msg)
+	}
+}
+
+func (f *MonsterFighter) MeleeRoll() int {
+	return DieRoll(1, 20) + f.obj.Sheet.Melee()
+}
+
+func (f *MonsterFighter) EvasionRoll() int {
+	return DieRoll(1, 20) + f.obj.Sheet.Evasion()
+}
+
+func (f *MonsterFighter) DamRoll() int {
+	return f.obj.Sheet.(*MonsterSheet).Damroll.Roll()
+}
+
+func (f *MonsterFighter) ProtRoll() int {
+	return f.obj.Sheet.(*MonsterSheet).Protroll.Roll()
 }
 
 // A thing that that can hold items in inventory. (A "pack".)
