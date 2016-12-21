@@ -104,6 +104,10 @@ type Sheet interface {
 	Melee() int
 	Evasion() int
 
+	// Attack and defense.
+	Attack() Attack
+	Defense() Defense
+
 	// Vitals.
 	HP() int
 	MaxHP() int
@@ -129,10 +133,10 @@ type PlayerSheet struct {
 func NewPlayerSheet(obj *Obj) Sheet {
 	ps := &PlayerSheet{
 		Trait: Trait{obj: obj},
-		str:   2,
-		agi:   2,
-		vit:   2,
-		mnd:   2,
+		str:   3,
+		agi:   4,
+		vit:   4,
+		mnd:   3,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
@@ -181,6 +185,54 @@ func (p *PlayerSheet) MaxMP() int {
 
 func (p *PlayerSheet) Hurt(dmg int) {
 	p.hp -= dmg
+}
+
+func (p *PlayerSheet) Attack() Attack {
+	melee := p.obj.Equipper.Body().Melee() + p.Melee()
+
+	weap := p.weapon()
+	str := p.Str()
+
+	bonusSides := math.Min(math.Abs(str), weap.Equip.Weight) * math.Sgn(str)
+	return Attack{
+		Melee:   melee,
+		Damroll: weap.Equip.Damroll.Add(0, bonusSides),
+	}
+}
+
+func (p *PlayerSheet) weapon() *Obj {
+	weap := p.obj.Equipper.Body().Weapon()
+	if weap != nil {
+		return weap
+	}
+	return p.fist()
+}
+
+func (p *PlayerSheet) fist() *Obj {
+	return p.obj.Game.NewObj(&Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: SpecFist,
+		Name:    "FIST",
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Damroll: NewDice(1, p.Str()+1),
+				Melee:   0,
+				Weight:  0,
+				Slot:    SlotHand,
+			}),
+		},
+	})
+}
+
+func (p *PlayerSheet) Defense() Defense {
+	body := p.obj.Equipper.Body()
+	evasion := body.Evasion() + p.Evasion()
+	dice := body.ProtDice()
+	return Defense{
+		Evasion:  evasion,
+		ProtDice: dice,
+	}
 }
 
 // Sheet used for monsters, which have a lot of hardcoded attributes.
@@ -260,20 +312,62 @@ func (m *MonsterSheet) Hurt(dmg int) {
 	m.hp -= dmg
 }
 
+func (m *MonsterSheet) Attack() Attack {
+	return Attack{
+		Melee:   m.melee,
+		Damroll: m.damroll,
+	}
+}
+
+func (m *MonsterSheet) Defense() Defense {
+	return Defense{
+		Evasion:  m.evasion,
+		ProtDice: []Dice{m.protroll},
+	}
+}
+
+// Details about an actor's melee attack, before the melee roll is applied --
+// i.e. what melee bonus + damage should be done if no crits happen?
+type Attack struct {
+	Melee   int
+	Damroll Dice
+}
+
+func (atk Attack) RollDamage() int {
+	return atk.Damroll.Roll()
+}
+
+// Details about an actor's defense, before the evasion roll is applied. i.e.
+// what evasion bonus should be added and what protection dice should be rolled
+// when attacked?
+type Defense struct {
+	Evasion  int
+	ProtDice []Dice
+}
+
+func (def Defense) RollProt() int {
+	dice := def.ProtDice
+	sum := 0
+
+	for _, d := range dice {
+		sum += d.Roll()
+	}
+
+	return sum
+}
+
 // Anything that fights in melee.
 type Fighter interface {
 	Objgetter
 	Hit(other Fighter)
-	MeleeRoll() int
-	EvasionRoll() int
-	Damroll() int
-	Protroll() int
 }
 
 func hit(attacker Fighter, defender Fighter) {
-	mroll, eroll := attacker.MeleeRoll(), defender.EvasionRoll()
+	atk, def := attacker.Obj().Sheet.Attack(), defender.Obj().Sheet.Defense()
+	mroll, eroll := DieRoll(1, 20)+atk.Melee, DieRoll(1, 20)+def.Evasion
+
 	if mroll > eroll {
-		dmg := attacker.Damroll() - defender.Protroll()
+		dmg := math.Max(0, atk.RollDamage()-def.RollProt())
 		defender.Obj().Sheet.Hurt(dmg)
 		msg := fmt.Sprintf("%v hit %v (%d).", attacker.Obj().Spec.Name, defender.Obj().Spec.Name, dmg)
 		attacker.Obj().Game.Events.Message(msg)
@@ -298,59 +392,6 @@ func (f *PlayerFighter) Hit(other Fighter) {
 	hit(f, other)
 }
 
-func (f *PlayerFighter) MeleeRoll() int {
-	bonus := f.obj.Equipper.Body().Melee() + f.obj.Sheet.Melee()
-	return DieRoll(1, 20) + bonus
-}
-
-func (f *PlayerFighter) EvasionRoll() int {
-	bonus := f.obj.Equipper.Body().Evasion() + f.obj.Sheet.Evasion()
-	return DieRoll(1, 20) + bonus
-}
-
-func (f *PlayerFighter) Damroll() int {
-	weap := f.weapon()
-	str := f.obj.Sheet.Str()
-	bonus := math.Min(math.Abs(str), weap.Equip.Weight) * math.Sgn(str)
-	return weap.Equip.Damroll.Add(0, bonus).Roll()
-}
-
-func (f *PlayerFighter) Protroll() int {
-	dice := f.obj.Equipper.Body().ProtDice()
-	sum := 0
-
-	for i := 0; i < len(dice); i++ {
-		sum += dice[i].Roll()
-	}
-
-	return sum
-}
-
-func (f *PlayerFighter) weapon() *Obj {
-	weap := f.obj.Equipper.Body().Weapon()
-	if weap != nil {
-		return weap
-	}
-	return f.fist()
-}
-
-func (f *PlayerFighter) fist() *Obj {
-	return f.obj.Game.NewObj(&Spec{
-		Family:  FamItem,
-		Genus:   GenEquip,
-		Species: SpecFist,
-		Name:    "FIST",
-		Traits: &Traits{
-			Equip: NewEquip(Equip{
-				Damroll: NewDice(1, f.obj.Sheet.Str()+1),
-				Melee:   0,
-				Weight:  0,
-				Slot:    SlotHand,
-			}),
-		},
-	})
-}
-
 // Monster melee combat.
 type MonsterFighter struct {
 	Trait
@@ -363,16 +404,7 @@ func NewMonsterFighter(obj *Obj) Fighter {
 }
 
 func (f *MonsterFighter) Hit(other Fighter) {
-	mroll, eroll := f.MeleeRoll(), other.EvasionRoll()
-	if mroll > eroll {
-		dmg := f.Damroll() - other.Protroll()
-		other.Obj().Sheet.Hurt(dmg)
-		msg := fmt.Sprintf("%v hit %v (%d).", f.obj.Spec.Name, other.Obj().Spec.Name, dmg)
-		f.obj.Game.Events.Message(msg)
-	} else {
-		msg := fmt.Sprintf("%v missed %v.", f.obj.Spec.Name, other.Obj().Spec.Name)
-		f.obj.Game.Events.Message(msg)
-	}
+	hit(f, other)
 }
 
 func (f *MonsterFighter) MeleeRoll() int {

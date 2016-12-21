@@ -294,9 +294,9 @@ func (r *removePanel) Render(g *game.Game) {
 
 	display.Write(0, 0, "Remove what?", termbox.ColorWhite, termbox.ColorBlack)
 
-	for i := 0; i < len(body.Slots); i++ {
+	for i, equip := range body.Slots {
 		name := "(nothing)"
-		if equip := body.Slots[i]; equip != nil {
+		if equip != nil {
 			name = equip.Spec.Name
 		}
 		display.Write(1, 1+i, fmt.Sprintf("%c - %v", alphabet[i], name), termbox.ColorWhite, termbox.ColorBlack)

@@ -40,8 +40,8 @@ func (b *Body) Remove(slot Slot) *Obj {
 }
 
 func (b *Body) Naked() bool {
-	for i := 0; i < numSlots; i++ {
-		if b.Slots[i] != nil {
+	for _, slot := range b.Slots {
+		if slot != nil {
 			return false
 		}
 	}
@@ -51,9 +51,8 @@ func (b *Body) Naked() bool {
 // Get the total bonus/malus to melee from equipment worn on this body.
 func (b *Body) Melee() int {
 	melee := 0
-	equips := b.all()
-	for i := 0; i < len(equips); i++ {
-		melee += equips[i].Equip.Melee
+	for _, equip := range b.all() {
+		melee += equip.Equip.Melee
 	}
 	return melee
 }
@@ -61,18 +60,16 @@ func (b *Body) Melee() int {
 // Get the total bonus/malus to evasion from equipment worn on this body.
 func (b *Body) Evasion() int {
 	evasion := 0
-	equips := b.all()
-	for i := 0; i < len(equips); i++ {
-		evasion += equips[i].Equip.Evasion
+	for _, equip := range b.all() {
+		evasion += equip.Equip.Evasion
 	}
 	return evasion
 }
 
 func (b *Body) ProtDice() []Dice {
 	dice := make([]Dice, 0, numSlots)
-	equips := b.all()
-	for i := 0; i < len(equips); i++ {
-		dice = append(dice, equips[i].Equip.Protroll)
+	for _, equip := range b.all() {
+		dice = append(dice, equip.Equip.Protroll)
 	}
 	return dice
 }
@@ -85,10 +82,9 @@ func (b *Body) Weapon() *Obj {
 // nil slots.
 func (b *Body) all() []*Obj {
 	equips := make([]*Obj, 0, numSlots)
-	for i := 0; i < numSlots; i++ {
-		e := b.Slots[i]
-		if e != nil {
-			equips = append(equips, e)
+	for _, equip := range b.Slots {
+		if equip != nil {
+			equips = append(equips, equip)
 		}
 	}
 	return equips
