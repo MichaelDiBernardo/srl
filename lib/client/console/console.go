@@ -22,6 +22,7 @@ func New() *Console {
 		game.ModeEquip:     newEquipScreen(display),
 		game.ModeRemove:    newRemoveScreen(display),
 		game.ModeDrop:      newDropScreen(display),
+		game.ModeSheet:     newSheetScreen(display),
 	}
 	console := &Console{
 		display: display,

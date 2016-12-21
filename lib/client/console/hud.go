@@ -69,6 +69,7 @@ var hudKeymap = map[rune]game.Command{
 	'w': game.TryEquipCommand{},
 	'r': game.TryRemoveCommand{},
 	'i': game.ModeCommand{Mode: game.ModeInventory},
+	'@': game.ModeCommand{Mode: game.ModeSheet},
 }
 
 // Get the next command from the player to be sent to the game instance.

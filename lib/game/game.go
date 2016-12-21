@@ -92,6 +92,7 @@ var controllers = map[Mode]func(*Game, Command){
 	ModeEquip:     equipController,
 	ModeRemove:    removeController,
 	ModeDrop:      dropController,
+	ModeSheet:     sheetController,
 }
 
 // Do stuff when player is actually playing the game.
@@ -158,12 +159,21 @@ func removeController(g *Game, com Command) {
 	}
 }
 
+// Do stuff when player is trying to drop stuff.
 func dropController(g *Game, com Command) {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
 		g.Player.Packer.Drop(c.Option)
+	}
+}
+
+// Do stuff when player is looking at character sheet.
+func sheetController(g *Game, com Command) {
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
 	}
 }
 
@@ -186,6 +196,7 @@ const (
 	ModeEquip
 	ModeRemove
 	ModeDrop
+	ModeSheet
 )
 
 // Tells the client that we've switched game 'modes'.
