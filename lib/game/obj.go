@@ -41,9 +41,12 @@ type Spec struct {
 	Traits  *Traits
 }
 
+var nextobjid = 1
+
 // Specifically, an in-game object that can be placed on a map and can Do
 // Something. Its traits determine what it can do.
 type Obj struct {
+	id   int
 	Spec *Spec
 
 	Tile  *Tile
@@ -90,7 +93,8 @@ type Traits struct {
 // nothing to do with specs or traits (e.g. game, eventqueue, tile etc.)
 func newObj(spec *Spec) *Obj {
 	// Create.
-	newobj := &Obj{Spec: spec}
+	newobj := &Obj{Spec: spec, id: nextobjid}
+	nextobjid++
 
 	// Assign traits.
 	traits := spec.Traits

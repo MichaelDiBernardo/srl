@@ -100,22 +100,6 @@ func (f *fakefighter) Hit(other Fighter) {
 	f.Called = true
 }
 
-func (_ *fakefighter) MeleeRoll() int {
-	return 0
-}
-
-func (_ *fakefighter) EvasionRoll() int {
-	return 0
-}
-
-func (_ *fakefighter) Damroll() int {
-	return 0
-}
-
-func (_ *fakefighter) Protroll() int {
-	return 0
-}
-
 func TestPlayerMonsterCollisionsHit(t *testing.T) {
 	g := NewGame()
 	player := g.NewObj(PlayerSpec)

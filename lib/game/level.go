@@ -72,6 +72,16 @@ func (l *Level) Place(o *Obj, p math.Point) bool {
 	default:
 		panic(fmt.Sprintf("Tried to place object of family %v", o.Spec.Family))
 	}
+}
+
+// Removes 'o' from the level.
+func (l *Level) Remove(o *Obj) {
+	switch o.Spec.Family {
+	case FamActor:
+		l.removeActor(o)
+	default:
+		panic(fmt.Sprintf("Tried to remove object of family %v", o.Spec.Family))
+	}
 
 }
 
@@ -107,4 +117,24 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 
 func (l *Level) placeItem(obj *Obj, tile *Tile) bool {
 	return tile.Items.Add(obj)
+}
+
+func (l *Level) removeActor(obj *Obj) {
+	obj.Tile.Actor = nil
+	obj.Tile = nil
+	obj.Level = nil
+
+	index := -1
+	for i, o := range l.actors {
+		if o == obj {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		panic("Tried to remove actor but wasn't in list.")
+	}
+
+	l.actors = append(l.actors[:index], l.actors[index+1:]...)
 }

@@ -17,8 +17,10 @@ type Equip struct {
 }
 
 // See NewSheet in actor.go to understand why this is written this way.
-func NewEquip(equip Equip) func(*Obj) *Equip {
+func NewEquip(equipspec Equip) func(*Obj) *Equip {
 	return func(o *Obj) *Equip {
+		// Copy.
+		equip := equipspec
 		equip.obj = o
 		return &equip
 	}

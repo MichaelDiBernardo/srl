@@ -185,6 +185,7 @@ func (p *PlayerSheet) MaxMP() int {
 
 func (p *PlayerSheet) Hurt(dmg int) {
 	p.hp -= dmg
+	checkDeath(p)
 }
 
 func (p *PlayerSheet) Attack() Attack {
@@ -259,8 +260,10 @@ type MonsterSheet struct {
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
 // the owner of the sheet to it at object creation time. See the syntax for
 // this in actor_spec.go.
-func NewMonsterSheet(sheet MonsterSheet) func(*Obj) Sheet {
+func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 	return func(o *Obj) Sheet {
+		// Copy sheet.
+		sheet := sheetspec
 		sheet.obj = o
 		sheet.hp = sheet.maxhp
 		sheet.mp = sheet.maxmp
@@ -310,6 +313,7 @@ func (m *MonsterSheet) MaxMP() int {
 
 func (m *MonsterSheet) Hurt(dmg int) {
 	m.hp -= dmg
+	checkDeath(m)
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -324,6 +328,18 @@ func (m *MonsterSheet) Defense() Defense {
 		Evasion:  m.evasion,
 		ProtDice: []Dice{m.protroll},
 	}
+}
+
+func checkDeath(s Sheet) {
+	if s.HP() > 0 {
+		return
+	}
+
+	obj := s.Obj()
+	game := obj.Game
+
+	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
+	game.Kill(obj)
 }
 
 // Details about an actor's melee attack, before the melee roll is applied --
@@ -368,59 +384,28 @@ func hit(attacker Fighter, defender Fighter) {
 
 	if mroll > eroll {
 		dmg := math.Max(0, atk.RollDamage()-def.RollProt())
-		defender.Obj().Sheet.Hurt(dmg)
 		msg := fmt.Sprintf("%v hit %v (%d).", attacker.Obj().Spec.Name, defender.Obj().Spec.Name, dmg)
 		attacker.Obj().Game.Events.Message(msg)
+		defender.Obj().Sheet.Hurt(dmg)
 	} else {
 		msg := fmt.Sprintf("%v missed %v.", attacker.Obj().Spec.Name, defender.Obj().Spec.Name)
 		attacker.Obj().Game.Events.Message(msg)
 	}
 }
 
-// Player melee combat.
-type PlayerFighter struct {
+// Melee combat.
+type ActorFighter struct {
 	Trait
 }
 
-func NewPlayerFighter(obj *Obj) Fighter {
-	return &PlayerFighter{
+func NewActorFighter(obj *Obj) Fighter {
+	return &ActorFighter{
 		Trait: Trait{obj: obj},
 	}
 }
 
-func (f *PlayerFighter) Hit(other Fighter) {
+func (f *ActorFighter) Hit(other Fighter) {
 	hit(f, other)
-}
-
-// Monster melee combat.
-type MonsterFighter struct {
-	Trait
-}
-
-func NewMonsterFighter(obj *Obj) Fighter {
-	return &MonsterFighter{
-		Trait: Trait{obj: obj},
-	}
-}
-
-func (f *MonsterFighter) Hit(other Fighter) {
-	hit(f, other)
-}
-
-func (f *MonsterFighter) MeleeRoll() int {
-	return DieRoll(1, 20) + f.obj.Sheet.Melee()
-}
-
-func (f *MonsterFighter) EvasionRoll() int {
-	return DieRoll(1, 20) + f.obj.Sheet.Evasion()
-}
-
-func (f *MonsterFighter) Damroll() int {
-	return f.obj.Sheet.(*MonsterSheet).damroll.Roll()
-}
-
-func (f *MonsterFighter) Protroll() int {
-	return f.obj.Sheet.(*MonsterSheet).protroll.Roll()
 }
 
 // A thing that that can hold items in inventory. (A "pack".)

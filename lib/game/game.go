@@ -3,6 +3,7 @@ package game
 import (
 	"container/list"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // Among other things, a Game serves as a factory for all types of game
@@ -44,6 +45,7 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 
 // Handle a command from the client, and then evolve the world.
 func (g *Game) Handle(c Command) {
+	log.Printf("Handling command: %#v", c)
 	controllers[g.mode](g, c)
 }
 
@@ -51,6 +53,10 @@ func (g *Game) SwitchMode(m Mode) {
 	g.mode = m
 	// Signal to client that yes, we have switched.
 	g.Events.SwitchMode(m)
+}
+
+func (g *Game) Kill(actor *Obj) {
+	g.Level.Remove(actor)
 }
 
 // A command given _to_ the game.
