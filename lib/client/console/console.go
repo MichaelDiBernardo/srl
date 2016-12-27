@@ -2,8 +2,11 @@ package console
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/game"
+	"github.com/MichaelDiBernardo/srl/lib/math"
 	"github.com/nsf/termbox-go"
 )
+
+var consoleBounds = math.Rect(math.Origin, math.Pt(80, 24))
 
 // A console client.
 type Console struct {
@@ -23,6 +26,7 @@ func New() *Console {
 		game.ModeRemove:    newRemoveScreen(display),
 		game.ModeDrop:      newDropScreen(display),
 		game.ModeSheet:     newSheetScreen(display),
+		game.ModeGameOver:  newGameOverScreen(display),
 	}
 	console := &Console{
 		display: display,

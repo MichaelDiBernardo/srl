@@ -60,9 +60,9 @@ func (g *Game) Kill(actor *Obj) {
 		g.Events.Message("The quest for the TOWER ends...")
 		g.Events.More()
 		g.Events.SwitchMode(ModeGameOver)
+	} else {
+		g.Level.Remove(actor)
 	}
-
-	g.Level.Remove(actor)
 }
 
 // A command given _to_ the game.

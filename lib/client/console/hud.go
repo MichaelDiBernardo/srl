@@ -14,7 +14,7 @@ type hudScreen struct {
 	panels  [3]panel
 }
 
-var hudBounds = math.Rect(math.Origin, math.Pt(80, 24))
+var hudBounds = consoleBounds
 
 // Where the message panel should go.
 var messagePanelBounds = math.Rect(math.Pt(1, 19), math.Pt(1, hudBounds.Max.Y))

@@ -38,12 +38,12 @@ var (
 				vit: 1,
 				mnd: 0,
 
-				melee:   1,
+				melee:   100,
 				evasion: 1,
 				maxhp:   20,
 				maxmp:   10,
 
-				damroll:  NewDice(2, 5),
+				damroll:  NewDice(20, 50),
 				protroll: NewDice(1, 4),
 			}),
 		},

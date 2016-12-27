@@ -42,9 +42,12 @@ func (s *Session) Loop() {
 		}
 		s.game.Handle(command)
 
+		// TODO: HACK fix the render calls, we shouldn't need one for every single
+		// event handled.
 		for !s.game.Events.Empty() {
 			ev := s.game.Events.Next()
 			s.client.Handle(ev)
+			s.client.Render(s.game)
 		}
 	}
 }
