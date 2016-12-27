@@ -134,3 +134,26 @@ func TestPlaceSingleItem(t *testing.T) {
 		t.Errorf(`Place(item) was %v, want %v`, item, obj)
 	}
 }
+
+func TestOkRemoveActor(t *testing.T) {
+	g := NewGame()
+	l := NewLevel(4, 4, g, IdentLevel)
+	obj := newObj(lTestActor)
+	pos := math.Pt(1, 1)
+
+	l.Place(obj, pos)
+	l.Remove(obj)
+
+	if obj.Level != nil {
+		t.Error(`obj.Level was not nil`)
+	}
+	if obj.Tile != nil {
+		t.Error(`obj.Tile was not nil`)
+	}
+	if l.At(pos).Actor != nil {
+		t.Error(`Actor's previous tile had tile.Actor != nil`)
+	}
+	if len(l.actors) > 0 {
+		t.Error(`l.actors was not empty after removal.`)
+	}
+}

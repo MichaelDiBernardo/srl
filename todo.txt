@@ -1,10 +1,7 @@
 NEXT:
- - test Defense()
- - test sheet screen mode change
  - test death mode change
  - test body accumulator methods
  - test describe stuff 
- - test level remove()
  - test mores
  - do crits
  - test hit()
