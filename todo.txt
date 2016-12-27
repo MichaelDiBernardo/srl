@@ -1,7 +1,6 @@
 NEXT:
  - test death mode change
  - test body accumulator methods
- - test describe stuff 
  - test mores
  - do crits
  - test hit()

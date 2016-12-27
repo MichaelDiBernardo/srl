@@ -65,6 +65,8 @@ type Dice struct {
 	Sides int
 }
 
+var ZeroDice = Dice{}
+
 func NewDice(dice, sides int) Dice {
 	return Dice{Dice: dice, Sides: sides}
 }
