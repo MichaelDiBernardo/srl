@@ -56,6 +56,12 @@ func (g *Game) SwitchMode(m Mode) {
 }
 
 func (g *Game) Kill(actor *Obj) {
+	if actor.isPlayer() {
+		g.Events.Message("The quest for the TOWER ends...")
+		g.Events.More()
+		g.Events.SwitchMode(ModeGameOver)
+	}
+
 	g.Level.Remove(actor)
 }
 
@@ -192,6 +198,10 @@ type MessageEvent struct {
 	Text string
 }
 
+// Force the player to --more--.
+type MoreEvent struct {
+}
+
 // Modes that the game can be in.
 type Mode int
 
@@ -203,6 +213,7 @@ const (
 	ModeRemove
 	ModeDrop
 	ModeSheet
+	ModeGameOver
 )
 
 // Tells the client that we've switched game 'modes'.
@@ -248,6 +259,11 @@ func (eq *EventQueue) Message(msg string) {
 // Tell client we're switching game modes to mode.
 func (eq *EventQueue) SwitchMode(mode Mode) {
 	eq.push(ModeEvent{Mode: mode})
+}
+
+// Tell client to force a --more-- confirm.
+func (eq *EventQueue) More() {
+	eq.push(MoreEvent{})
 }
 
 // Push a new event onto the queue.

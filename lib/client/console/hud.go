@@ -30,12 +30,16 @@ var mapPanelBounds = math.Rect(math.Origin, math.Pt(statusPanelBounds.Min.X, mes
 
 // Create a new HUD.
 func newHudScreen(display display) *hudScreen {
+	// The order of panels here is important. Since the messagePanel may
+	// capture --more-- prompts and require a redraw of itself in mid-screen
+	// render, we want to make sure the other panels have already been drawn
+	// first.
 	return &hudScreen{
 		display: display,
 		panels: [3]panel{
 			newMapPanel(display),
-			newMessagePanel(messagePanelNumLines, display),
 			newStatusPanel(display),
+			newMessagePanel(messagePanelNumLines, display),
 		},
 	}
 }
@@ -164,6 +168,14 @@ func (m *mapPanel) Render(g *game.Game) {
 	}
 }
 
+type messageLine struct {
+	text string
+}
+
+type morePrompt struct {
+	acked bool
+}
+
 // The message panel, where messages are rendered at the bottom of the hud.
 type messagePanel struct {
 	display display
@@ -184,23 +196,55 @@ func newMessagePanel(size int, display display) *messagePanel {
 func (m *messagePanel) Handle(e game.Event) {
 	switch ev := e.(type) {
 	case game.MessageEvent:
-		m.message(ev.Text)
+		m.lines.PushBack(&messageLine{text: ev.Text})
+	case game.MoreEvent:
+		m.lines.PushBack(&morePrompt{acked: false})
+	}
+
+	if m.lines.Len() > m.size {
+		m.lines.Remove(m.lines.Front())
 	}
 }
 
 // Render the panel to the display.
-func (m *messagePanel) Render(_ *game.Game) {
-	for e, i := m.lines.Front(), 0; e != nil; e, i = e.Next(), i+1 {
-		line := e.Value.(string)
-		m.display.Write(messagePanelBounds.Min.X, messagePanelBounds.Min.Y+i, line, termbox.ColorWhite, termbox.ColorBlack)
-	}
-}
+func (m *messagePanel) Render(g *game.Game) {
+	more := false
+	var e *list.Element
+	i := 0
 
-// Add a message to the list of messages to render.
-func (m *messagePanel) message(text string) {
-	m.lines.PushBack(text)
-	if m.lines.Len() > m.size {
-		m.lines.Remove(m.lines.Front())
+	for e = m.lines.Front(); e != nil; e = e.Next() {
+		switch line := e.Value.(type) {
+		case *messageLine:
+			m.display.Write(messagePanelBounds.Min.X, messagePanelBounds.Min.Y+i, line.text, termbox.ColorWhite, termbox.ColorBlack)
+			i++
+		case *morePrompt:
+			if line.acked {
+				continue
+			}
+			line.acked = true
+			more = true
+			break
+		}
+	}
+
+	if more {
+		m.display.Write(messagePanelBounds.Min.X, messagePanelBounds.Min.Y+i, "--more--", termbox.ColorWhite, termbox.ColorBlack)
+		m.display.Flush()
+
+		// Wait for player to clear prompt.
+		for {
+			tboxev := m.display.PollEvent()
+			if tboxev.Type == termbox.EventKey && (tboxev.Key == termbox.KeyEsc || tboxev.Key == termbox.KeyEnter) {
+				break
+			}
+		}
+
+		// HACK: Clear the --more-- line.
+		m.display.Write(messagePanelBounds.Min.X, messagePanelBounds.Min.Y+i, "        ", termbox.ColorWhite, termbox.ColorBlack)
+
+		// Rerender the message panel.
+		m.Render(g)
+		m.display.Flush()
 	}
 }
 
