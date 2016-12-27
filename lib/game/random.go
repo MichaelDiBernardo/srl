@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -74,4 +75,8 @@ func (d Dice) Add(dice, sides int) Dice {
 
 func (d Dice) Roll() int {
 	return DieRoll(d.Dice, d.Sides)
+}
+
+func (d Dice) String() string {
+	return fmt.Sprintf("%dd%d", d.Dice, d.Sides)
 }

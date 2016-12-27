@@ -107,15 +107,15 @@ var knifeSpec = &Spec{
 	},
 }
 
-func testAtkEq(t *testing.T, atk Attack, melee int, dice Dice) {
-	if m := atk.Melee; m != melee {
-		t.Errorf(`atk.Melee was %d, want %d`, m, melee)
+func testAtkEq(t *testing.T, atk Attack, want Attack) {
+	if m, w := atk.Melee, want.Melee; m != w {
+		t.Errorf(`atk.Melee was %d, want %d`, m, w)
 	}
-	if d := atk.Damroll.Dice; d != dice.Dice {
-		t.Errorf(`atk.Damroll.Dice was %d, want %d`, d, dice.Dice)
+	if d, w := atk.Damroll.Dice, want.Damroll.Dice; d != w {
+		t.Errorf(`atk.Damroll.Dice was %d, want %d`, d, w)
 	}
-	if s := atk.Damroll.Sides; s != dice.Sides {
-		t.Errorf(`atk.Damroll.Sides was %d, want %d`, s, dice.Sides)
+	if s, w := atk.Damroll.Sides, want.Damroll.Sides; s != w {
+		t.Errorf(`atk.Damroll.Sides was %d, want %d`, s, w)
 	}
 }
 
@@ -128,7 +128,7 @@ func TestPlayerAttackNoBonuses(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 1, NewDice(1, 7))
+	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 7)})
 }
 
 func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
@@ -140,7 +140,7 @@ func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 1, NewDice(1, 8))
+	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 8)})
 }
 
 func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
@@ -152,7 +152,7 @@ func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 1, NewDice(1, 9))
+	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 9)})
 }
 
 func TestPlayerAttackMeleeBonus(t *testing.T) {
@@ -164,7 +164,7 @@ func TestPlayerAttackMeleeBonus(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 4, NewDice(1, 7))
+	testAtkEq(t, atk, Attack{Melee: 4, Damroll: NewDice(1, 7)})
 }
 
 func TestPlayerAttackFistNoStrSides(t *testing.T) {
@@ -173,7 +173,7 @@ func TestPlayerAttackFistNoStrSides(t *testing.T) {
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 0, NewDice(1, 1))
+	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 1)})
 }
 
 func TestPlayerAttackFistStrSides(t *testing.T) {
@@ -182,7 +182,89 @@ func TestPlayerAttackFistStrSides(t *testing.T) {
 	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 10, agi: 0}
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, 0, NewDice(1, 11))
+	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 11)})
+}
+
+func testDefEq(t *testing.T, def Defense, want Defense) {
+	if e, w := def.Evasion, want.Evasion; e != w {
+		t.Errorf(`def.Evasion was %d, want %d`, e, w)
+	}
+	if l, w := len(def.ProtDice), len(want.ProtDice); l != w {
+		t.Errorf(`len(def.ProtDice) was %d, want %d`, l, w)
+	}
+	for i, d := range def.ProtDice {
+		w := want.ProtDice[i]
+		if d != w {
+			t.Errorf(`def.ProtDice[%d] was '%s', want '%s'`, i, d, w)
+		}
+	}
+}
+
+func TestPlayerDefenseNoArmorOrEvasion(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 0}
+
+	def := obj.Sheet.Defense()
+	testDefEq(t, def, Defense{Evasion: 0})
+}
+
+func TestPlayerDefenseNoArmorWithEvasion(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 2}
+
+	def := obj.Sheet.Defense()
+	testDefEq(t, def, Defense{Evasion: 2})
+}
+
+func TestPlayerDefenseWithArmor(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 0}
+
+	armspec1 := &Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: SpecLeatherArmor,
+		Name:    "LEATHER",
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Protroll: NewDice(1, 4),
+				Melee:    0,
+				Evasion:  -1,
+				Weight:   4,
+				Slot:     SlotBody,
+			}),
+		},
+	}
+	armspec2 := &Spec{
+		Family:  FamItem,
+		Genus:   GenEquip,
+		Species: SpecLeatherArmor,
+		Name:    "MASK",
+		Traits: &Traits{
+			Equip: NewEquip(Equip{
+				Protroll: NewDice(1, 3),
+				Melee:    0,
+				Evasion:  -2,
+				Weight:   2,
+				Slot:     SlotHead,
+			}),
+		},
+	}
+
+	obj.Equipper.Body().Wear(g.NewObj(armspec1))
+	obj.Equipper.Body().Wear(g.NewObj(armspec2))
+
+	def := obj.Sheet.Defense()
+	testDefEq(t, def, Defense{
+		Evasion: -3,
+		ProtDice: []Dice{
+			NewDice(1, 3),
+			NewDice(1, 4),
+		},
+	})
 }
 
 type fakefighter struct {
