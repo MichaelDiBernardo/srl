@@ -91,6 +91,100 @@ func TestPlayerMaxMPCalc(t *testing.T) {
 	}
 }
 
+var knifeSpec = &Spec{
+	Family:  FamItem,
+	Genus:   GenEquip,
+	Species: SpecSword,
+	Name:    "KNIFE",
+	Traits: &Traits{
+		Equip: NewEquip(Equip{
+			Damroll: NewDice(1, 7),
+			Melee:   1,
+			Evasion: 1,
+			Weight:  2,
+			Slot:    SlotHand,
+		}),
+	},
+}
+
+func testAtkEq(t *testing.T, atk Attack, melee int, dice Dice) {
+	if m := atk.Melee; m != melee {
+		t.Errorf(`atk.Melee was %d, want %d`, m, melee)
+	}
+	if d := atk.Damroll.Dice; d != dice.Dice {
+		t.Errorf(`atk.Damroll.Dice was %d, want %d`, d, dice.Dice)
+	}
+	if s := atk.Damroll.Sides; s != dice.Sides {
+		t.Errorf(`atk.Damroll.Sides was %d, want %d`, s, dice.Sides)
+	}
+}
+
+func TestPlayerAttackNoBonuses(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
+
+	weap := g.NewObj(knifeSpec)
+	obj.Equipper.Body().Wear(weap)
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 1, NewDice(1, 7))
+}
+
+func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 1, agi: 0}
+
+	weap := g.NewObj(knifeSpec)
+	obj.Equipper.Body().Wear(weap)
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 1, NewDice(1, 8))
+}
+
+func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 3, agi: 0}
+
+	weap := g.NewObj(knifeSpec)
+	obj.Equipper.Body().Wear(weap)
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 1, NewDice(1, 9))
+}
+
+func TestPlayerAttackMeleeBonus(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 3}
+
+	weap := g.NewObj(knifeSpec)
+	obj.Equipper.Body().Wear(weap)
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 4, NewDice(1, 7))
+}
+
+func TestPlayerAttackFistNoStrSides(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 0, NewDice(1, 1))
+}
+
+func TestPlayerAttackFistStrSides(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 10, agi: 0}
+
+	atk := obj.Sheet.Attack()
+	testAtkEq(t, atk, 0, NewDice(1, 11))
+}
+
 type fakefighter struct {
 	Trait
 	Called bool

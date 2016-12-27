@@ -1,5 +1,13 @@
 NEXT:
-- Finish non-ability melee combat, with mob death and proper stats display.
+ - test sheet screen mode change
+ - test death mode change
+ - test body accumulator methods
+ - test describe stuff 
+ - test level remove()
+ - test mores
+ - do crits
+ - test hit()
+ 
 
 Then:
 - Basic consumables.
