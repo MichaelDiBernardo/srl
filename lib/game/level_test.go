@@ -127,7 +127,7 @@ func TestPlaceSingleItem(t *testing.T) {
 	items := l.At(dest).Items
 
 	if size := items.Len(); size != 1 {
-		t.Errorf(`Place(item) put %d items; want 1`)
+		t.Errorf(`Place(item) put %d items; want 1`, size)
 	}
 
 	if item := items.Top(); item != obj {
