@@ -56,6 +56,6 @@ func (p *gameOverPanel) Render(g *game.Game) {
 }
 
 func center(s string, width int, fill string) string {
-	div := width / 2
-	return strings.Repeat(fill, div) + s + strings.Repeat(fill, div)
+	padding := (width - len([]rune(s))) / 2
+	return strings.Repeat(fill, padding) + s + strings.Repeat(fill, padding)
 }
