@@ -12,6 +12,9 @@ const (
 	GenMonster = "monster"
 )
 
+// The base divisor to use for crits.
+const baseCritDiv = 7
+
 // A thing that can move given a specific direction.
 type Mover interface {
 	Objgetter
@@ -198,6 +201,7 @@ func (p *PlayerSheet) Attack() Attack {
 	return Attack{
 		Melee:   melee,
 		Damroll: weap.Equip.Damroll.Add(0, bonusSides),
+		CritDiv: weap.Equip.Weight + baseCritDiv,
 	}
 }
 
@@ -252,6 +256,8 @@ type MonsterSheet struct {
 
 	melee   int
 	evasion int
+	// Basically weapon weight.
+	critdivmod int
 
 	protroll Dice
 	damroll  Dice
@@ -320,6 +326,7 @@ func (m *MonsterSheet) Attack() Attack {
 	return Attack{
 		Melee:   m.melee,
 		Damroll: m.damroll,
+		CritDiv: m.critdivmod + baseCritDiv,
 	}
 }
 
@@ -343,14 +350,17 @@ func checkDeath(s Sheet) {
 }
 
 // Details about an actor's melee attack, before the melee roll is applied --
-// i.e. what melee bonus + damage should be done if no crits happen?
+// i.e. what melee bonus + damage should be done if no crits happen? What's the
+// base divisor to use for calculating # of crits?
 type Attack struct {
 	Melee   int
 	Damroll Dice
+	CritDiv int
 }
 
-func (atk Attack) RollDamage() int {
-	return atk.Damroll.Roll()
+// Roll damage for this attack, given that `crits` crits were rolled.
+func (atk Attack) RollDamage(crits int) int {
+	return atk.Damroll.Add(crits, 0).Roll()
 }
 
 // Details about an actor's defense, before the evasion roll is applied. i.e.
@@ -380,15 +390,23 @@ type Fighter interface {
 
 func hit(attacker Fighter, defender Fighter) {
 	atk, def := attacker.Obj().Sheet.Attack(), defender.Obj().Sheet.Defense()
-	mroll, eroll := DieRoll(1, 20)+atk.Melee, DieRoll(1, 20)+def.Evasion
+	residual := DieRoll(1, 20) + atk.Melee - DieRoll(1, 20) + def.Evasion
+	aname, dname := attacker.Obj().Spec.Name, defender.Obj().Spec.Name
 
-	if mroll > eroll {
-		dmg := math.Max(0, atk.RollDamage()-def.RollProt())
-		msg := fmt.Sprintf("%v hit %v (%d).", attacker.Obj().Spec.Name, defender.Obj().Spec.Name, dmg)
+	if residual > 0 {
+		crits := residual / atk.CritDiv
+		dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
+
+		critstr := ""
+		if crits > 0 {
+			critstr = fmt.Sprintf(" %dx critical!", crits)
+		}
+		msg := fmt.Sprintf("%v hit %v (%d).%s", aname, dname, dmg, critstr)
 		attacker.Obj().Game.Events.Message(msg)
+
 		defender.Obj().Sheet.Hurt(dmg)
 	} else {
-		msg := fmt.Sprintf("%v missed %v.", attacker.Obj().Spec.Name, defender.Obj().Spec.Name)
+		msg := fmt.Sprintf("%v missed %v.", aname, dname)
 		attacker.Obj().Game.Events.Message(msg)
 	}
 }
