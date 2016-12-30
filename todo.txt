@@ -1,5 +1,4 @@
 NEXT:
- - test body accumulator methods
  - test mores
  - do crits
  - test hit()
