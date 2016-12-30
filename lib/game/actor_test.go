@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	actorTestSpec = &Spec{
+	atActorSpec = &Spec{
 		Family:  FamActor,
 		Genus:   GenMonster,
 		Species: "TestSpecies",
@@ -18,7 +18,7 @@ var (
 		},
 	}
 
-	actorTestItemSpec = &Spec{
+	atItemSpec = &Spec{
 		Family:  FamItem,
 		Genus:   GenEquip,
 		Species: "testspec",
@@ -32,7 +32,7 @@ var (
 func TestOkMove(t *testing.T) {
 	g := NewGame()
 	l := NewLevel(4, 4, g, IdentLevel)
-	obj := g.NewObj(actorTestSpec)
+	obj := g.NewObj(atActorSpec)
 	startpos := math.Pt(1, 1)
 
 	l.Place(obj, startpos)
@@ -60,7 +60,7 @@ func TestOkMove(t *testing.T) {
 func TestActorCollision(t *testing.T) {
 	g := NewGame()
 	l := NewLevel(4, 4, g, IdentLevel)
-	a1, a2 := g.NewObj(actorTestSpec), g.NewObj(actorTestSpec)
+	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
 	l.Place(a1, math.Pt(1, 1))
 	l.Place(a2, math.Pt(2, 1))
 
@@ -88,6 +88,18 @@ func TestPlayerMaxMPCalc(t *testing.T) {
 
 	if maxmp, want := obj.Sheet.MaxMP(), 30; maxmp != want {
 		t.Errorf(`MaxMP() was %d, want %d`, maxmp, want)
+	}
+}
+
+func TestHurtingPlayerToDeathEndsGame(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
+	g.Player = obj
+
+	obj.Sheet.Hurt(9999999)
+	if m := g.mode; m != ModeGameOver {
+		t.Errorf(`Killing player changed mode to %v; want %v`, m, ModeGameOver)
 	}
 }
 
@@ -282,7 +294,7 @@ func TestPlayerMonsterCollisionsHit(t *testing.T) {
 	pf := &fakefighter{Trait: Trait{obj: player}}
 	player.Fighter = pf
 
-	monster := g.NewObj(actorTestSpec)
+	monster := g.NewObj(atActorSpec)
 	mf := &fakefighter{Trait: Trait{obj: player}}
 	monster.Fighter = mf
 
@@ -305,11 +317,11 @@ func TestPlayerMonsterCollisionsHit(t *testing.T) {
 
 func TestMonsterMonsterCollisionsHit(t *testing.T) {
 	g := NewGame()
-	mon1 := g.NewObj(actorTestSpec)
+	mon1 := g.NewObj(atActorSpec)
 	mf1 := &fakefighter{Trait: Trait{obj: mon1}}
 	mon1.Fighter = mf1
 
-	mon2 := g.NewObj(actorTestSpec)
+	mon2 := g.NewObj(atActorSpec)
 	mf2 := &fakefighter{Trait: Trait{obj: mon2}}
 	mon2.Fighter = mf2
 
@@ -326,7 +338,7 @@ func TestMonsterMonsterCollisionsHit(t *testing.T) {
 
 func TestTryPickupNoItemsOnGround(t *testing.T) {
 	g := NewGame()
-	taker := g.NewObj(actorTestSpec)
+	taker := g.NewObj(atActorSpec)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(taker, math.Pt(0, 0))
@@ -339,8 +351,8 @@ func TestTryPickupNoItemsOnGround(t *testing.T) {
 
 func TestTryPickupOneItemOnGround(t *testing.T) {
 	g := NewGame()
-	taker := g.NewObj(actorTestSpec)
-	item := g.NewObj(actorTestItemSpec)
+	taker := g.NewObj(atActorSpec)
+	item := g.NewObj(atItemSpec)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(taker, math.Pt(0, 0))
@@ -357,9 +369,9 @@ func TestTryPickupOneItemOnGround(t *testing.T) {
 
 func TestTryPickupFromStack(t *testing.T) {
 	g := NewGame()
-	taker := g.NewObj(actorTestSpec)
-	item := g.NewObj(actorTestItemSpec)
-	item2 := g.NewObj(actorTestItemSpec)
+	taker := g.NewObj(atActorSpec)
+	item := g.NewObj(atItemSpec)
+	item2 := g.NewObj(atItemSpec)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(taker, math.Pt(0, 0))
@@ -389,8 +401,8 @@ func TestTryPickupFromStack(t *testing.T) {
 
 func TestPickupOutOfBounds(t *testing.T) {
 	g := NewGame()
-	taker := g.NewObj(actorTestSpec)
-	item := g.NewObj(actorTestItemSpec)
+	taker := g.NewObj(atActorSpec)
+	item := g.NewObj(atItemSpec)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(taker, math.Pt(0, 0))
@@ -407,7 +419,7 @@ func TestPickupOutOfBounds(t *testing.T) {
 
 func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
 	g := NewGame()
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 	if mode := g.mode; mode != ModeHud {
 		t.Errorf(`TryEquip w no equips switched to mode %v, want %v`, mode, ModeHud)
@@ -417,10 +429,10 @@ func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
 func TestTryEquipWithEquipsInInventory(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 
-	equip := g.NewObj(actorTestItemSpec)
+	equip := g.NewObj(atItemSpec)
 	equipper.Packer.Inventory().Add(equip)
 
 	equipper.Equipper.TryEquip()
@@ -433,10 +445,10 @@ func TestTryEquipWithEquipsInInventory(t *testing.T) {
 func TestEquipIntoEmptySlot(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 
-	equip := g.NewObj(actorTestItemSpec)
+	equip := g.NewObj(atItemSpec)
 	inv := equipper.Packer.Inventory()
 	inv.Add(equip)
 
@@ -460,11 +472,11 @@ func TestEquipIntoEmptySlot(t *testing.T) {
 func TestEquipIntoOccupiedSlot(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 
-	equip1 := g.NewObj(actorTestItemSpec)
-	equip2 := g.NewObj(actorTestItemSpec)
+	equip1 := g.NewObj(atItemSpec)
+	equip2 := g.NewObj(atItemSpec)
 
 	inv := equipper.Packer.Inventory()
 	inv.Add(equip1)
@@ -490,10 +502,10 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 func TestEquipOutOfBounds(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 
-	equip := g.NewObj(actorTestItemSpec)
+	equip := g.NewObj(atItemSpec)
 	inv := equipper.Packer.Inventory()
 	inv.Add(equip)
 
@@ -508,7 +520,7 @@ func TestEquipOutOfBounds(t *testing.T) {
 func TestTryRemoveNothingEquipped(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
+	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryRemove()
 
 	if mode := g.mode; mode != ModeHud {
@@ -519,8 +531,8 @@ func TestTryRemoveNothingEquipped(t *testing.T) {
 func TestTryRemoveSomethingEquipped(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
-	equip := g.NewObj(actorTestItemSpec)
+	equipper := g.NewObj(atActorSpec)
+	equip := g.NewObj(atItemSpec)
 
 	equipper.Equipper.Body().Wear(equip)
 	equipper.Equipper.TryRemove()
@@ -533,8 +545,8 @@ func TestTryRemoveSomethingEquipped(t *testing.T) {
 func TestRemove(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
-	equip := g.NewObj(actorTestItemSpec)
+	equipper := g.NewObj(atActorSpec)
+	equip := g.NewObj(atItemSpec)
 
 	equipper.Equipper.Body().Wear(equip)
 	equipper.Equipper.TryRemove()
@@ -552,8 +564,8 @@ func TestRemove(t *testing.T) {
 func TestRemoveOutOfBounds(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
-	equip := g.NewObj(actorTestItemSpec)
+	equipper := g.NewObj(atActorSpec)
+	equip := g.NewObj(atItemSpec)
 
 	equipper.Equipper.Body().Wear(equip)
 	equipper.Equipper.TryRemove()
@@ -567,8 +579,8 @@ func TestRemoveOutOfBounds(t *testing.T) {
 func TestRemoveOverflowsToGround(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
-	equip := g.NewObj(actorTestItemSpec)
+	equipper := g.NewObj(atActorSpec)
+	equip := g.NewObj(atItemSpec)
 	equipper.Equipper.Body().Wear(equip)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
@@ -591,8 +603,8 @@ func TestRemoveOverflowsToGround(t *testing.T) {
 func TestRemoveWhenInvAndGroundAreFull(t *testing.T) {
 	g := NewGame()
 
-	equipper := g.NewObj(actorTestSpec)
-	equip := g.NewObj(actorTestItemSpec)
+	equipper := g.NewObj(atActorSpec)
+	equip := g.NewObj(atItemSpec)
 	equipper.Equipper.Body().Wear(equip)
 
 	l := NewLevel(4, 4, nil, IdentLevel)
@@ -612,7 +624,7 @@ func TestRemoveWhenInvAndGroundAreFull(t *testing.T) {
 func TestTryDropWithNothingInInventory(t *testing.T) {
 	g := NewGame()
 
-	packer := g.NewObj(actorTestSpec)
+	packer := g.NewObj(atActorSpec)
 	packer.Packer.TryDrop()
 
 	if mode := g.mode; mode != ModeHud {
@@ -623,7 +635,7 @@ func TestTryDropWithNothingInInventory(t *testing.T) {
 func TestTryDropWithFullGround(t *testing.T) {
 	g := NewGame()
 
-	packer := g.NewObj(actorTestSpec)
+	packer := g.NewObj(atActorSpec)
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(packer, math.Pt(0, 0))
 
@@ -638,11 +650,11 @@ func TestTryDropWithFullGround(t *testing.T) {
 func TestTryDrop(t *testing.T) {
 	g := NewGame()
 
-	packer := g.NewObj(actorTestSpec)
+	packer := g.NewObj(atActorSpec)
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(packer, math.Pt(0, 0))
 
-	item := g.NewObj(actorTestItemSpec)
+	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)
 
 	packer.Packer.TryDrop()
@@ -655,11 +667,11 @@ func TestTryDrop(t *testing.T) {
 func TestDrop(t *testing.T) {
 	g := NewGame()
 
-	packer := g.NewObj(actorTestSpec)
+	packer := g.NewObj(atActorSpec)
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(packer, math.Pt(0, 0))
 
-	item := g.NewObj(actorTestItemSpec)
+	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)
 
 	packer.Packer.TryDrop()
@@ -677,11 +689,11 @@ func TestDrop(t *testing.T) {
 func TestDropOutOfBounds(t *testing.T) {
 	g := NewGame()
 
-	packer := g.NewObj(actorTestSpec)
+	packer := g.NewObj(atActorSpec)
 	l := NewLevel(4, 4, nil, IdentLevel)
 	l.Place(packer, math.Pt(0, 0))
 
-	item := g.NewObj(actorTestItemSpec)
+	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)
 
 	packer.Packer.TryDrop()

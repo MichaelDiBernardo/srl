@@ -40,7 +40,7 @@ func (p *ActorMover) Move(dir math.Point) bool {
 
 	endtile := obj.Level.At(endpos)
 	if other := endtile.Actor; other != nil {
-		if opposing := obj.isPlayer() != other.isPlayer(); opposing {
+		if opposing := obj.IsPlayer() != other.IsPlayer(); opposing {
 			p.obj.Fighter.Hit(other.Fighter)
 		}
 		return false
@@ -48,7 +48,7 @@ func (p *ActorMover) Move(dir math.Point) bool {
 
 	moved := obj.Level.Place(obj, endpos)
 	if moved {
-		if items := endtile.Items; !items.Empty() && obj.isPlayer() {
+		if items := endtile.Items; !items.Empty() && obj.IsPlayer() {
 			var msg string
 			topname, n := items.Top().Spec.Name, items.Len()
 			if n == 1 {

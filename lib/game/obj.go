@@ -129,7 +129,7 @@ func (o *Obj) Pos() math.Point {
 }
 
 // Does this object represent the player?
-func (o *Obj) isPlayer() bool {
+func (o *Obj) IsPlayer() bool {
 	return o.Spec.Family == FamActor && o.Spec.Genus == GenPlayer
 }
 

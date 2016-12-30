@@ -1,5 +1,4 @@
 NEXT:
- - test death mode change
  - test body accumulator methods
  - test mores
  - do crits

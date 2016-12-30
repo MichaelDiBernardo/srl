@@ -56,10 +56,10 @@ func (g *Game) SwitchMode(m Mode) {
 }
 
 func (g *Game) Kill(actor *Obj) {
-	if actor.isPlayer() {
+	if actor.IsPlayer() {
 		g.Events.Message("The quest for the TOWER ends...")
 		g.Events.More()
-		g.Events.SwitchMode(ModeGameOver)
+		g.SwitchMode(ModeGameOver)
 	} else {
 		g.Level.Remove(actor)
 	}
