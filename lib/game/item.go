@@ -1,10 +1,10 @@
 package game
 
-import (
-	"fmt"
-)
-
+// Something you can equip.
 const GenEquip = "equip"
+
+// Something you can eat / drink / use a single time.
+const GenConsume = "consume"
 
 type Equip struct {
 	Trait
@@ -26,6 +26,18 @@ func NewEquip(equipspec Equip) func(*Obj) *Equip {
 	}
 }
 
-func (e *Equip) Desc() string {
-	return fmt.Sprintf("(+%v)", e.Melee)
+type UseFunc func(user Consumer)
+
+type Consume struct {
+	Trait
+	Use UseFunc
+}
+
+func NewConsume(usefunc UseFunc) func(*Obj) *Consume {
+	return func(obj *Obj) *Consume {
+		return &Consume{
+			Trait: Trait{obj: obj},
+			Use:   usefunc,
+		}
+	}
 }
