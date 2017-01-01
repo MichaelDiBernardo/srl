@@ -13,7 +13,7 @@ var (
 		Species: SpecSword,
 		Name:    "SWORD",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{
+			Equipment: NewEquipment(Equipment{
 				Damroll: NewDice(2, 5),
 				Melee:   0,
 				Evasion: 1,
@@ -28,7 +28,7 @@ var (
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{
+			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 4),
 				Melee:    0,
 				Evasion:  -1,

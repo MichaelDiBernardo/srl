@@ -24,7 +24,7 @@ func NewBody() *Body {
 }
 
 func (b *Body) Wear(item *Obj) *Obj {
-	slot := item.Equip.Slot
+	slot := item.Equipment.Slot
 	equipped := b.Slots[slot]
 	b.Slots[slot] = item
 	return equipped
@@ -52,7 +52,7 @@ func (b *Body) Naked() bool {
 func (b *Body) Melee() int {
 	melee := 0
 	for _, equip := range b.all() {
-		melee += equip.Equip.Melee
+		melee += equip.Equipment.Melee
 	}
 	return melee
 }
@@ -61,7 +61,7 @@ func (b *Body) Melee() int {
 func (b *Body) Evasion() int {
 	evasion := 0
 	for _, equip := range b.all() {
-		evasion += equip.Equip.Evasion
+		evasion += equip.Equipment.Evasion
 	}
 	return evasion
 }
@@ -69,7 +69,7 @@ func (b *Body) Evasion() int {
 func (b *Body) ProtDice() []Dice {
 	dice := make([]Dice, 0, numSlots)
 	for _, equip := range b.all() {
-		dice = append(dice, equip.Equip.Protroll)
+		dice = append(dice, equip.Equipment.Protroll)
 	}
 	return dice
 }

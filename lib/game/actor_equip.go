@@ -31,7 +31,7 @@ func NewActorEquipper(obj *Obj) Equipper {
 }
 
 func (a *ActorEquipper) TryEquip() {
-	if !a.obj.Packer.Inventory().HasEquips() {
+	if !a.obj.Packer.Inventory().HasEquipment() {
 		a.obj.Game.Events.Message("Nothing to wield/wear.")
 	} else {
 		a.obj.Game.SwitchMode(ModeEquip)

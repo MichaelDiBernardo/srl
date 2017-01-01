@@ -10,7 +10,7 @@ var btWeapSpec = &Spec{
 	Species: "testspec",
 	Name:    "Hand",
 	Traits: &Traits{
-		Equip: NewEquip(Equip{Slot: SlotHand}),
+		Equipment: NewEquipment(Equipment{Slot: SlotHand}),
 	},
 }
 

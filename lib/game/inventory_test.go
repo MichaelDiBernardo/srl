@@ -69,12 +69,12 @@ func TestHasEquips(t *testing.T) {
 	g := NewGame()
 	inv := NewInventoryWithCap(2)
 
-	if inv.HasEquips() {
+	if inv.HasEquipment() {
 		t.Errorf(`inv.HasEquips() was true, want false`)
 	}
 	inv.Add(g.NewObj(invTestItem))
 
-	if !inv.HasEquips() {
+	if !inv.HasEquipment() {
 		t.Errorf(`inv.HasEquips() was false, want true`)
 	}
 }

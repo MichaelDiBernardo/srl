@@ -64,8 +64,8 @@ type Obj struct {
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
-	Equip   *Equip
-	Consume *Consume
+	Equipment  *Equipment
+	Consumable *Consumable
 }
 
 func (o *Obj) String() string {
@@ -87,8 +87,8 @@ type Traits struct {
 	Equipper func(*Obj) Equipper
 	Consumer func(*Obj) Consumer
 
-	Equip   func(*Obj) *Equip
-	Consume func(*Obj) *Consume
+	Equipment  func(*Obj) *Equipment
+	Consumable func(*Obj) *Consumable
 }
 
 // Create a new game object from the given spec. This shouldn't be used
@@ -124,11 +124,11 @@ func newObj(spec *Spec) *Obj {
 		newobj.Consumer = traits.Consumer(newobj)
 	}
 
-	if traits.Equip != nil {
-		newobj.Equip = traits.Equip(newobj)
+	if traits.Equipment != nil {
+		newobj.Equipment = traits.Equipment(newobj)
 	}
-	if traits.Consume != nil {
-		newobj.Consume = traits.Consume(newobj)
+	if traits.Consumable != nil {
+		newobj.Consumable = traits.Consumable(newobj)
 	}
 	return newobj
 }

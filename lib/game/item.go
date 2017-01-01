@@ -6,7 +6,8 @@ const GenEquip = "equip"
 // Something you can eat / drink / use a single time.
 const GenConsume = "consume"
 
-type Equip struct {
+// Equipment trait.
+type Equipment struct {
 	Trait
 	Damroll  Dice
 	Protroll Dice
@@ -17,8 +18,8 @@ type Equip struct {
 }
 
 // See NewSheet in actor.go to understand why this is written this way.
-func NewEquip(equipspec Equip) func(*Obj) *Equip {
-	return func(o *Obj) *Equip {
+func NewEquipment(equipspec Equipment) func(*Obj) *Equipment {
+	return func(o *Obj) *Equipment {
 		// Copy.
 		equip := equipspec
 		equip.obj = o
@@ -26,18 +27,19 @@ func NewEquip(equipspec Equip) func(*Obj) *Equip {
 	}
 }
 
-type UseFunc func(user Consumer)
+type ConsumeFunc func(consumer Consumer)
 
-type Consume struct {
+// Consumable trait.
+type Consumable struct {
 	Trait
-	Use UseFunc
+	Consume ConsumeFunc
 }
 
-func NewConsume(usefunc UseFunc) func(*Obj) *Consume {
-	return func(obj *Obj) *Consume {
-		return &Consume{
-			Trait: Trait{obj: obj},
-			Use:   usefunc,
+func NewConsumable(cf ConsumeFunc) func(*Obj) *Consumable {
+	return func(obj *Obj) *Consumable {
+		return &Consumable{
+			Trait:   Trait{obj: obj},
+			Consume: cf,
 		}
 	}
 }

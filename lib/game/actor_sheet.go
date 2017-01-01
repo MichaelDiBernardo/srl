@@ -113,11 +113,11 @@ func (p *PlayerSheet) Attack() Attack {
 	weap := p.weapon()
 	str := p.Str()
 
-	bonusSides := math.Min(math.Abs(str), weap.Equip.Weight) * math.Sgn(str)
+	bonusSides := math.Min(math.Abs(str), weap.Equipment.Weight) * math.Sgn(str)
 	return Attack{
 		Melee:   melee,
-		Damroll: weap.Equip.Damroll.Add(0, bonusSides),
-		CritDiv: weap.Equip.Weight + baseCritDiv,
+		Damroll: weap.Equipment.Damroll.Add(0, bonusSides),
+		CritDiv: weap.Equipment.Weight + baseCritDiv,
 	}
 }
 
@@ -136,7 +136,7 @@ func (p *PlayerSheet) fist() *Obj {
 		Species: SpecFist,
 		Name:    "FIST",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{
+			Equipment: NewEquipment(Equipment{
 				Damroll: NewDice(1, p.Str()+1),
 				Melee:   0,
 				Weight:  0,

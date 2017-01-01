@@ -51,7 +51,7 @@ func TestEquipIntoEmptySlot(t *testing.T) {
 		t.Errorf(`Item did not leave inventory after equipping.`)
 	}
 
-	slot := equip.Equip.Slot
+	slot := equip.Equipment.Slot
 	if equipped := equipper.Equipper.Body().Slots[slot]; equipped != equip {
 		t.Errorf(`Equipped item was %v, want %v`, equipped, equip)
 	}
@@ -81,7 +81,7 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 		t.Errorf(`First wield was not swapped out; got %v, want %v.`, swapped, equip1)
 	}
 
-	slot := equip2.Equip.Slot
+	slot := equip2.Equipment.Slot
 	if equipped := equipper.Equipper.Body().Slots[slot]; equipped != equip2 {
 		t.Errorf(`Equipped item was %v, want %v`, equipped, equip2)
 	}
@@ -138,9 +138,9 @@ func TestRemove(t *testing.T) {
 
 	equipper.Equipper.Body().Wear(equip)
 	equipper.Equipper.TryRemove()
-	equipper.Equipper.Remove(equip.Equip.Slot)
+	equipper.Equipper.Remove(equip.Equipment.Slot)
 
-	if removed := equipper.Equipper.Body().Slots[equip.Equip.Slot]; removed != nil {
+	if removed := equipper.Equipper.Body().Slots[equip.Equipment.Slot]; removed != nil {
 		t.Errorf(`Found %v in removed slot; want nil`, removed)
 	}
 
@@ -177,7 +177,7 @@ func TestRemoveOverflowsToGround(t *testing.T) {
 	equipper.Packer.Inventory().capacity = 0
 
 	equipper.Equipper.TryRemove()
-	equipper.Equipper.Remove(equip.Equip.Slot)
+	equipper.Equipper.Remove(equip.Equipment.Slot)
 
 	if removed := equipper.Packer.Inventory().Top(); removed != nil {
 		t.Errorf(`Found %v in pack; want nil`, removed)

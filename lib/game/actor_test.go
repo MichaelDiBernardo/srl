@@ -20,7 +20,7 @@ var (
 		Species: "testspec",
 		Name:    "Item",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{Slot: SlotHand}),
+			Equipment: NewEquipment(Equipment{Slot: SlotHand}),
 		},
 	}
 )

@@ -42,7 +42,7 @@ var astKnifeSpec = &Spec{
 	Species: SpecSword,
 	Name:    "KNIFE",
 	Traits: &Traits{
-		Equip: NewEquip(Equip{
+		Equipment: NewEquipment(Equipment{
 			Damroll: NewDice(1, 7),
 			Melee:   1,
 			Evasion: 1,
@@ -174,7 +174,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{
+			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 4),
 				Melee:    0,
 				Evasion:  -1,
@@ -189,7 +189,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 		Species: SpecLeatherArmor,
 		Name:    "MASK",
 		Traits: &Traits{
-			Equip: NewEquip(Equip{
+			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 3),
 				Melee:    0,
 				Evasion:  -2,
