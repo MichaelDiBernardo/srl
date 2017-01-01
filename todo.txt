@@ -1,12 +1,9 @@
 NEXT:
- - test mores
- - do crits
- - test hit()
- 
-Then:
 - Basic consumables.
     - Consumables stack in inventories.
     - You can use items.
+ 
+Then:
 - Level generation. 
     - Monster generation
     - Item generation
