@@ -60,7 +60,7 @@ type Obj struct {
 	Fighter  Fighter
 	Packer   Packer
 	Equipper Equipper
-	Consumer Consumer
+	User     User
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
@@ -85,7 +85,7 @@ type Traits struct {
 	Fighter  func(*Obj) Fighter
 	Packer   func(*Obj) Packer
 	Equipper func(*Obj) Equipper
-	Consumer func(*Obj) Consumer
+	User     func(*Obj) User
 
 	Equipment  func(*Obj) *Equipment
 	Consumable func(*Obj) *Consumable
@@ -120,8 +120,8 @@ func newObj(spec *Spec) *Obj {
 	if traits.Equipper != nil {
 		newobj.Equipper = traits.Equipper(newobj)
 	}
-	if traits.Consumer != nil {
-		newobj.Consumer = traits.Consumer(newobj)
+	if traits.User != nil {
+		newobj.User = traits.User(newobj)
 	}
 
 	if traits.Equipment != nil {

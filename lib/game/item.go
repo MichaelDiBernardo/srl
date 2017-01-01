@@ -1,5 +1,9 @@
 package game
 
+import (
+	"fmt"
+)
+
 // Something you can equip.
 const GenEquipment = "equipment"
 
@@ -28,7 +32,7 @@ func NewEquipment(equipspec Equipment) func(*Obj) *Equipment {
 }
 
 // Function that actually does something when this item gets used.
-type ConsumeFunc func(consumer Consumer)
+type ConsumeFunc func(user User)
 
 // Consumable trait.
 type Consumable struct {
@@ -45,4 +49,10 @@ func NewConsumable(cf ConsumeFunc) func(*Obj) *Consumable {
 			Consume: cf,
 		}
 	}
+}
+
+func curefunc(user User) {
+	u := user.Obj()
+	u.Sheet.Heal(40)
+	u.Game.Events.Message(fmt.Sprintf("%s recovers.", u.Spec.Name))
 }

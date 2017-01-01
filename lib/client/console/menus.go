@@ -315,6 +315,62 @@ func renderInventory(display display, title string, inv *game.Inventory) {
 	}
 }
 
+// The use screen.
+type useScreen struct {
+	display display
+	menu    panel
+}
+
+// Create a new use screen.
+func newUseScreen(display display) *useScreen {
+	return &useScreen{
+		display: display,
+		menu:    newUsePanel(display),
+	}
+}
+
+// Render the inventory screen.
+func (u *useScreen) Render(g *game.Game) {
+	u.menu.Render(g)
+}
+
+func (u *useScreen) Handle(ev game.Event) {
+}
+
+func (inv *useScreen) NextCommand() game.Command {
+	for {
+		tboxev := inv.display.PollEvent()
+		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+			return game.ModeCommand{Mode: game.ModeHud}
+		} else if ch := tboxev.Ch; ch != 0 {
+			opt := selectOption(ch)
+			if opt != -1 {
+				return game.MenuCommand{Option: opt}
+			}
+		}
+	}
+}
+
+// Panel that renders the use list.
+type usePanel struct {
+	display display
+}
+
+// Create a new usePanel.
+func newUsePanel(display display) *usePanel {
+	return &usePanel{display: display}
+}
+
+// Listens to nothing.
+func (m *usePanel) Handle(e game.Event) {
+}
+
+// Render the menu.
+func (m *usePanel) Render(g *game.Game) {
+	inv := g.Player.Packer.Inventory()
+	renderInventory(m.display, "Use what?", inv)
+}
+
 // Basic choosy things.
 var alphabet = []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
 

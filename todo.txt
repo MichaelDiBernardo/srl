@@ -1,7 +1,8 @@
 NEXT:
 - Basic consumables.
+    - Test consumable stuff done so far.
+    - Consumables can have duration effects.
     - Consumables stack in inventories.
-    - You can use items.
  
 Then:
 - Level generation. 

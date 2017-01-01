@@ -19,6 +19,7 @@ var (
 			Fighter:  NewActorFighter,
 			Packer:   NewActorPacker,
 			Equipper: NewActorEquipper,
+			User:     NewActorUser,
 			Sheet:    NewPlayerSheet,
 		},
 	}

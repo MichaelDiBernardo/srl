@@ -25,6 +25,7 @@ func New() *Console {
 		game.ModeEquip:     newEquipScreen(display),
 		game.ModeRemove:    newRemoveScreen(display),
 		game.ModeDrop:      newDropScreen(display),
+		game.ModeUse:       newUseScreen(display),
 		game.ModeSheet:     newSheetScreen(display),
 		game.ModeGameOver:  newGameOverScreen(display),
 	}

@@ -52,10 +52,14 @@ func TestLevel(l *Level) *Level {
 
 		stacksize := rand.Intn(3) + 1
 		for j := 0; j < stacksize; j++ {
-			if rand.Intn(2) == 1 {
+			hi := rand.Intn(3)
+			switch hi {
+			case 0:
 				l.Place(l.fac.NewObj(WeapSword), pt)
-			} else {
+			case 1:
 				l.Place(l.fac.NewObj(ArmorLeather), pt)
+			case 2:
+				l.Place(l.fac.NewObj(PotCure), pt)
 			}
 		}
 	}

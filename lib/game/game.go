@@ -87,6 +87,9 @@ type TryEquipCommand struct {
 type TryRemoveCommand struct {
 }
 
+type TryUseCommand struct {
+}
+
 type ModeCommand struct {
 	Mode Mode
 }
@@ -102,6 +105,7 @@ var controllers = map[Mode]func(*Game, Command){
 	ModeInventory: inventoryController,
 	ModePickup:    pickupController,
 	ModeEquip:     equipController,
+	ModeUse:       useController,
 	ModeRemove:    removeController,
 	ModeDrop:      dropController,
 	ModeSheet:     sheetController,
@@ -122,6 +126,8 @@ func hudController(g *Game, com Command) {
 		g.Player.Equipper.TryEquip()
 	case TryRemoveCommand:
 		g.Player.Equipper.TryRemove()
+	case TryUseCommand:
+		g.Player.User.TryUse()
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}
@@ -155,6 +161,16 @@ func equipController(g *Game, com Command) {
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
 		g.Player.Equipper.Equip(c.Option)
+	}
+}
+
+// Do stuff when player is using an item.
+func useController(g *Game, com Command) {
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
+	case MenuCommand:
+		g.Player.User.Use(c.Option)
 	}
 }
 
@@ -212,6 +228,7 @@ const (
 	ModeEquip
 	ModeRemove
 	ModeDrop
+	ModeUse
 	ModeSheet
 	ModeGameOver
 )

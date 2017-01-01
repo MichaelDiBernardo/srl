@@ -4,6 +4,8 @@ const (
 	SpecFist         = "fist"
 	SpecSword        = "sword"
 	SpecLeatherArmor = "leatherarmor"
+
+	SpecCure = "cure"
 )
 
 var (
@@ -35,6 +37,18 @@ var (
 				Weight:   4,
 				Slot:     SlotBody,
 			}),
+		},
+	}
+)
+
+var (
+	PotCure = &Spec{
+		Family:  FamItem,
+		Genus:   GenConsumable,
+		Species: SpecCure,
+		Name:    "CURE",
+		Traits: &Traits{
+			Consumable: NewConsumable(curefunc),
 		},
 	}
 )

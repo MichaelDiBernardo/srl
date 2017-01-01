@@ -91,6 +91,17 @@ func (inv *Inventory) HasEquipment() bool {
 	return false
 }
 
+// Does this inventory have anything to use in it?
+func (inv *Inventory) HasUsables() bool {
+	for e := inv.Items.Front(); e != nil; e = e.Next() {
+		item := e.Value.(*Obj)
+		if item.Spec.Genus == GenConsumable {
+			return true
+		}
+	}
+	return false
+}
+
 func (inv *Inventory) itemElemAt(index int) *list.Element {
 	itemElem := inv.Items.Back()
 	for i := 0; i != index; i++ {

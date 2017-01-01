@@ -72,6 +72,7 @@ var hudKeymap = map[rune]game.Command{
 	'd': game.TryDropCommand{},
 	'w': game.TryEquipCommand{},
 	'r': game.TryRemoveCommand{},
+	'a': game.TryUseCommand{},
 	'i': game.ModeCommand{Mode: game.ModeInventory},
 	'@': game.ModeCommand{Mode: game.ModeSheet},
 }
@@ -114,6 +115,7 @@ var actorGlyphs = map[game.Species]glyph{
 var itemGlyphs = map[game.Species]glyph{
 	game.SpecSword:        glyph{Ch: '|', Fg: termbox.ColorBlue, Bg: termbox.ColorBlack},
 	game.SpecLeatherArmor: glyph{Ch: '[', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
+	game.SpecCure:         glyph{Ch: '!', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 }
 
 // Glyphs used to render tiles.

@@ -35,6 +35,10 @@ type Sheet interface {
 
 	// Hurt me.
 	Hurt(dmg int)
+	// Heal me.
+	Heal(amt int)
+	// Touch me.
+	// Feel me.
 }
 
 // Sheet used for player, which has a lot of derived attributes.
@@ -105,6 +109,10 @@ func (p *PlayerSheet) MaxMP() int {
 func (p *PlayerSheet) Hurt(dmg int) {
 	p.hp -= dmg
 	checkDeath(p)
+}
+
+func (p *PlayerSheet) Heal(amt int) {
+	p.hp = math.Min(p.hp+amt, p.MaxHP())
 }
 
 func (p *PlayerSheet) Attack() Attack {
@@ -236,6 +244,10 @@ func (m *MonsterSheet) MaxMP() int {
 func (m *MonsterSheet) Hurt(dmg int) {
 	m.hp -= dmg
 	checkDeath(m)
+}
+
+func (m *MonsterSheet) Heal(amt int) {
+	m.hp = math.Min(m.hp+amt, m.MaxHP())
 }
 
 func (m *MonsterSheet) Attack() Attack {
