@@ -29,8 +29,11 @@ type Sheet interface {
 
 	// Vitals.
 	HP() int
+	setHP(hp int)
 	MaxHP() int
+
 	MP() int
+	setMP(mp int)
 	MaxMP() int
 
 	// Hurt me.
@@ -94,12 +97,20 @@ func (p *PlayerSheet) HP() int {
 	return p.hp
 }
 
-func (p *PlayerSheet) MP() int {
-	return p.mp
+func (p *PlayerSheet) setHP(hp int) {
+	p.hp = hp
 }
 
 func (p *PlayerSheet) MaxHP() int {
 	return 10 * (1 + p.Vit())
+}
+
+func (p *PlayerSheet) MP() int {
+	return p.mp
+}
+
+func (p *PlayerSheet) setMP(mp int) {
+	p.mp = mp
 }
 
 func (p *PlayerSheet) MaxMP() int {
@@ -107,12 +118,11 @@ func (p *PlayerSheet) MaxMP() int {
 }
 
 func (p *PlayerSheet) Hurt(dmg int) {
-	p.hp -= dmg
-	checkDeath(p)
+	hurt(p, dmg)
 }
 
 func (p *PlayerSheet) Heal(amt int) {
-	p.hp = math.Min(p.hp+amt, p.MaxHP())
+	heal(p, amt)
 }
 
 func (p *PlayerSheet) Attack() Attack {
@@ -229,12 +239,20 @@ func (m *MonsterSheet) HP() int {
 	return m.hp
 }
 
-func (m *MonsterSheet) MP() int {
-	return m.mp
+func (m *MonsterSheet) setHP(hp int) {
+	m.hp = hp
 }
 
 func (m *MonsterSheet) MaxHP() int {
 	return m.maxhp
+}
+
+func (m *MonsterSheet) MP() int {
+	return m.mp
+}
+
+func (m *MonsterSheet) setMP(mp int) {
+	m.mp = mp
 }
 
 func (m *MonsterSheet) MaxMP() int {
@@ -242,12 +260,11 @@ func (m *MonsterSheet) MaxMP() int {
 }
 
 func (m *MonsterSheet) Hurt(dmg int) {
-	m.hp -= dmg
-	checkDeath(m)
+	hurt(m, dmg)
 }
 
 func (m *MonsterSheet) Heal(amt int) {
-	m.hp = math.Min(m.hp+amt, m.MaxHP())
+	heal(m, amt)
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -263,18 +280,6 @@ func (m *MonsterSheet) Defense() Defense {
 		Evasion:  m.evasion,
 		ProtDice: []Dice{m.protroll},
 	}
-}
-
-func checkDeath(s Sheet) {
-	if s.HP() > 0 {
-		return
-	}
-
-	obj := s.Obj()
-	game := obj.Game
-
-	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
-	game.Kill(obj)
 }
 
 // Details about an actor's melee attack, before the melee roll is applied --
@@ -308,4 +313,26 @@ func (def Defense) RollProt() int {
 	}
 
 	return sum
+}
+
+// Shared functions across sheets.
+func heal(s Sheet, amt int) {
+	s.setHP(math.Min(s.HP()+amt, s.MaxHP()))
+}
+
+func hurt(s Sheet, dmg int) {
+	s.setHP(s.HP() - dmg)
+	checkDeath(s)
+}
+
+func checkDeath(s Sheet) {
+	if s.HP() > 0 {
+		return
+	}
+
+	obj := s.Obj()
+	game := obj.Game
+
+	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
+	game.Kill(obj)
 }

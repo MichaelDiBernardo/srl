@@ -11,6 +11,7 @@ var (
 			Mover:    NewActorMover,
 			Packer:   NewActorPacker,
 			Equipper: NewActorEquipper,
+			User:     NewActorUser,
 		},
 	}
 

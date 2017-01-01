@@ -4,9 +4,17 @@ import (
 	"testing"
 )
 
-var invTestItem = &Spec{
+var invTestEquip = &Spec{
 	Family:  FamItem,
 	Genus:   GenEquipment,
+	Species: "testspec",
+	Name:    "Item",
+	Traits:  &Traits{},
+}
+
+var invTestConsumable = &Spec{
+	Family:  FamItem,
+	Genus:   GenConsumable,
 	Species: "testspec",
 	Name:    "Item",
 	Traits:  &Traits{},
@@ -16,9 +24,9 @@ func TestTake(t *testing.T) {
 	g := NewGame()
 	inv := NewInventory()
 
-	item1 := g.NewObj(invTestItem)
-	item2 := g.NewObj(invTestItem)
-	item3 := g.NewObj(invTestItem)
+	item1 := g.NewObj(invTestEquip)
+	item2 := g.NewObj(invTestEquip)
+	item3 := g.NewObj(invTestEquip)
 
 	inv.Add(item1)
 	inv.Add(item2)
@@ -49,9 +57,9 @@ func TestAddOverCapacity(t *testing.T) {
 	g := NewGame()
 	inv := NewInventoryWithCap(2)
 
-	item1 := g.NewObj(invTestItem)
-	item2 := g.NewObj(invTestItem)
-	item3 := g.NewObj(invTestItem)
+	item1 := g.NewObj(invTestEquip)
+	item2 := g.NewObj(invTestEquip)
+	item3 := g.NewObj(invTestEquip)
 
 	inv.Add(item1)
 	inv.Add(item2)
@@ -72,9 +80,37 @@ func TestHasEquips(t *testing.T) {
 	if inv.HasEquipment() {
 		t.Errorf(`inv.HasEquips() was true, want false`)
 	}
-	inv.Add(g.NewObj(invTestItem))
+
+	inv.Add(g.NewObj(invTestConsumable))
+
+	if inv.HasEquipment() {
+		t.Errorf(`inv.HasEquips() was true, want false`)
+	}
+
+	inv.Add(g.NewObj(invTestEquip))
 
 	if !inv.HasEquipment() {
 		t.Errorf(`inv.HasEquips() was false, want true`)
+	}
+}
+
+func TestHasUsables(t *testing.T) {
+	g := NewGame()
+	inv := NewInventoryWithCap(2)
+
+	if inv.HasUsables() {
+		t.Errorf(`inv.HasUsables() was true, want false`)
+	}
+
+	inv.Add(g.NewObj(invTestEquip))
+
+	if inv.HasUsables() {
+		t.Errorf(`inv.HasUsables() was true, want false`)
+	}
+
+	inv.Add(g.NewObj(invTestConsumable))
+
+	if !inv.HasUsables() {
+		t.Errorf(`inv.HasUsables() was false, want true`)
 	}
 }

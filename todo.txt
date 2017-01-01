@@ -1,22 +1,21 @@
 NEXT:
-- Basic consumables.
-    - Test consumable stuff done so far.
-    - Consumables can have duration effects.
-    - Consumables stack in inventories.
- 
-Then:
 - Level generation. 
     - Monster generation
     - Item generation
     - Map generation
+- Stairs
+ 
+Then:
 - Monsters drop loot
 - Monsters have tracking / movement+attacking AI. 
 - Add stairs / progression.
 - Add a basic "you got to level 5 you win"
 - Egos (?), artefacts.
 - Turncounting, speed
+- Consumables can have duration effects.
 
 Stuff:
+- Consumables stack in inventories.
 - XP spending on skills
 - user-level configs for
     - keymaps

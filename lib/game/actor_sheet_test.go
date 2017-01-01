@@ -36,6 +36,18 @@ func TestHurtingPlayerToDeathEndsGame(t *testing.T) {
 	}
 }
 
+func TestHealPlayerDoesntExceedMaxHP(t *testing.T) {
+	g := NewGame()
+	obj := g.NewObj(PlayerSpec)
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, hp: 1}
+	g.Player = obj
+
+	obj.Sheet.Heal(9999999)
+	if hp, maxhp := obj.Sheet.HP(), obj.Sheet.MaxHP(); hp != maxhp {
+		t.Errorf(`Player healed to %d hp; want %d.`, hp, maxhp)
+	}
+}
+
 var astKnifeSpec = &Spec{
 	Family:  FamItem,
 	Genus:   GenEquipment,
