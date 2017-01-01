@@ -132,7 +132,7 @@ func (p *PlayerSheet) weapon() *Obj {
 func (p *PlayerSheet) fist() *Obj {
 	return p.obj.Game.NewObj(&Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: SpecFist,
 		Name:    "FIST",
 		Traits: &Traits{

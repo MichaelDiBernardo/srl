@@ -1,10 +1,10 @@
 package game
 
 // Something you can equip.
-const GenEquip = "equip"
+const GenEquipment = "equipment"
 
 // Something you can eat / drink / use a single time.
-const GenConsume = "consume"
+const GenConsumable = "consume"
 
 // Equipment trait.
 type Equipment struct {
@@ -27,6 +27,7 @@ func NewEquipment(equipspec Equipment) func(*Obj) *Equipment {
 	}
 }
 
+// Function that actually does something when this item gets used.
 type ConsumeFunc func(consumer Consumer)
 
 // Consumable trait.
@@ -35,6 +36,8 @@ type Consumable struct {
 	Consume ConsumeFunc
 }
 
+// Given a consumefunc, this creates a factory function for consumables with
+// this action.
 func NewConsumable(cf ConsumeFunc) func(*Obj) *Consumable {
 	return func(obj *Obj) *Consumable {
 		return &Consumable{

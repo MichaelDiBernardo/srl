@@ -38,7 +38,7 @@ func TestHurtingPlayerToDeathEndsGame(t *testing.T) {
 
 var astKnifeSpec = &Spec{
 	Family:  FamItem,
-	Genus:   GenEquip,
+	Genus:   GenEquipment,
 	Species: SpecSword,
 	Name:    "KNIFE",
 	Traits: &Traits{
@@ -170,7 +170,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 
 	armspec1 := &Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
 		Traits: &Traits{
@@ -185,7 +185,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 	}
 	armspec2 := &Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: SpecLeatherArmor,
 		Name:    "MASK",
 		Traits: &Traits{

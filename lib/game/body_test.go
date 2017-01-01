@@ -6,7 +6,7 @@ import (
 
 var btWeapSpec = &Spec{
 	Family:  FamItem,
-	Genus:   GenEquip,
+	Genus:   GenEquipment,
 	Species: "testspec",
 	Name:    "Hand",
 	Traits: &Traits{

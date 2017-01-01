@@ -9,7 +9,7 @@ const (
 var (
 	WeapSword = &Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: SpecSword,
 		Name:    "SWORD",
 		Traits: &Traits{
@@ -24,7 +24,7 @@ var (
 	}
 	ArmorLeather = &Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
 		Traits: &Traits{

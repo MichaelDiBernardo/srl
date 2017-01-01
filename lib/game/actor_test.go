@@ -16,7 +16,7 @@ var (
 
 	atItemSpec = &Spec{
 		Family:  FamItem,
-		Genus:   GenEquip,
+		Genus:   GenEquipment,
 		Species: "testspec",
 		Name:    "Item",
 		Traits: &Traits{

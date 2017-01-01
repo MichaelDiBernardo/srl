@@ -15,7 +15,7 @@ var lTestActor = &Spec{
 
 var lTestItem = &Spec{
 	Family:  FamItem,
-	Genus:   GenEquip,
+	Genus:   GenEquipment,
 	Species: "TestSpecies",
 	Name:    "Hiiii",
 	Traits:  &Traits{},

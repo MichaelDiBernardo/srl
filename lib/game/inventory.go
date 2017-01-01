@@ -84,7 +84,7 @@ func (inv *Inventory) Take(index int) *Obj {
 func (inv *Inventory) HasEquipment() bool {
 	for e := inv.Items.Front(); e != nil; e = e.Next() {
 		item := e.Value.(*Obj)
-		if item.Spec.Genus == GenEquip {
+		if item.Spec.Genus == GenEquipment {
 			return true
 		}
 	}

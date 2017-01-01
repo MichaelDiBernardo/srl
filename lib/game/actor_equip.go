@@ -58,7 +58,7 @@ func (a *ActorEquipper) Equip(index int) {
 		return
 	}
 
-	if equip.Spec.Genus != GenEquip {
+	if equip.Spec.Genus != GenEquipment {
 		a.obj.Game.Events.Message(fmt.Sprintf("Cannot equip %v.", equip.Spec.Name))
 		return
 	}
