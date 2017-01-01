@@ -13,24 +13,9 @@ Then:
 - Add stairs / progression.
 - Add a basic "you got to level 5 you win"
 - Egos (?), artefacts.
+- Turncounting, speed
 
 Stuff:
-- Equipment
-    x inventory on ground and for actors
-    x Picking up off ground (just the top)
-    x showing what's in inventory
-    s pickup up off ground (select what you want)
-        x pick from menu
-        x we really need commands to also be structs. keymaps be damned.
-    x Inv has capacity
-    x Write tests for this stuff ^
-    x wielding or wearing what's in inventory
-        x Weapons need a way to:
-            x Describe their weight, damage dice, tohit.
-            x Identify what equipment slot they should go in
-            x Items need a trait "Equip"
-    x hit with weapons
-    x protect with armor
 - XP spending on skills
 - user-level configs for
     - keymaps
