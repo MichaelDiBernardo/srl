@@ -68,6 +68,30 @@ func (r Rectangle) String() string {
 	return fmt.Sprintf("Rect(%v, %v)", r.Min, r.Max)
 }
 
-func (r Rectangle) Intersects(o Rectangle) bool {
-	return false
+// Intersect returns the largest rectangle contained by both r and s. If the
+// two rectangles do not overlap then the zero rectangle will be returned.
+// Stolen from https://golang.org/src/image/geom.go?m=text.
+func (r Rectangle) Intersect(s Rectangle) Rectangle {
+	if r.Min.X < s.Min.X {
+		r.Min.X = s.Min.X
+	}
+	if r.Min.Y < s.Min.Y {
+		r.Min.Y = s.Min.Y
+	}
+	if r.Max.X > s.Max.X {
+		r.Max.X = s.Max.X
+	}
+	if r.Max.Y > s.Max.Y {
+		r.Max.Y = s.Max.Y
+	}
+	if r.Min.X > r.Max.X || r.Min.Y > r.Max.Y {
+		return ZeroRect
+	}
+	return r
 }
+
+func (r Rectangle) Center() Point {
+	return Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
+}
+
+var ZeroRect Rectangle
