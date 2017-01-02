@@ -67,3 +67,7 @@ func (r Rectangle) HasPoint(p Point) bool {
 func (r Rectangle) String() string {
 	return fmt.Sprintf("Rect(%v, %v)", r.Min, r.Max)
 }
+
+func (r Rectangle) Intersects(o Rectangle) bool {
+	return false
+}

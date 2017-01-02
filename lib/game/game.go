@@ -6,12 +6,6 @@ import (
 	"log"
 )
 
-// Among other things, a Game serves as a factory for all types of game
-// objects.
-type ObjFactory interface {
-	NewObj(spec *Spec) *Obj
-}
-
 // Backend for a single game.
 type Game struct {
 	Player *Obj
@@ -29,11 +23,8 @@ func NewGame() *Game {
 func (g *Game) Start() {
 	g.mode = ModeHud
 	g.Player = g.NewObj(PlayerSpec)
-
-	level := NewLevel(40, 40, g, TestLevel)
+	level := NewDungeon(g)
 	g.Level = level
-
-	level.Place(g.Player, math.Pt(1, 1))
 }
 
 // Create a new object for use in this game.
