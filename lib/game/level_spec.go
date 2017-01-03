@@ -92,15 +92,23 @@ func RoomsLevel(l *Level) *Level {
 	// Find room placement.
 	for i := 0; i < nrooms; i++ {
 		for tries := 0; tries < (200 / nrooms); tries++ {
-			rw, rh := RandInt(5, 13)|1, RandInt(5, 13)|1
-			min := math.Pt(RandInt(0, width-rw), RandInt(0, height-rh))
+			rw, rh := RandInt(4, 13)|1, RandInt(4, 13)|1
+			min := math.Pt(RandInt(1, width-rw-3), RandInt(1, height-rh-3))
 			max := min.Add(math.Pt(rw, rh))
 			newroom := math.Rect(min, max)
 
 			log.Printf("Trying to make room %v.", newroom)
 			good := true
 			for _, room := range rooms {
-				if newroom.Intersect(room) != math.ZeroRect {
+				// When checking for intersection, we'll use a room boundary
+				// that just contains the actual room so that we don't get
+				// rooms that are directly adjacent to one another (no
+				// "frankenrooms".)
+				nrbounds := math.Rect(
+					newroom.Min.Add(math.Pt(-1, -1)),
+					newroom.Max.Add(math.Pt(1, 1)),
+				)
+				if nrbounds.Intersect(room) != math.ZeroRect {
 					log.Printf("%v intersects %v -- no good.", newroom, room)
 					good = false
 					break
@@ -116,8 +124,8 @@ func RoomsLevel(l *Level) *Level {
 			// Find a random "connection point" at some odd location in the room.
 			// This is where we'll dig to from another room to make a corridor.
 			connpt := math.Pt(
-				RandInt(newroom.Min.X+1, newroom.Max.X-1)|1,
-				RandInt(newroom.Min.Y+1, newroom.Max.Y-1)|1,
+				RandInt(newroom.Min.X, newroom.Max.X)|1,
+				RandInt(newroom.Min.Y, newroom.Max.Y)|1,
 			)
 			connpts = append(connpts, connpt)
 		}
@@ -125,28 +133,38 @@ func RoomsLevel(l *Level) *Level {
 
 	// Render rooms and corridors into level.
 	for i, room := range rooms {
-		for y := room.Min.Y + 1; y < room.Max.Y; y++ {
-			for x := room.Min.X + 1; x < room.Max.X; x++ {
+		for y := room.Min.Y; y < room.Max.Y; y++ {
+			for x := room.Min.X; x < room.Max.X; x++ {
 				m[y][x].Feature = FeatFloor
 			}
 		}
 
 		if i >= 1 {
 			startpt, endpt := connpts[i-1], connpts[i]
+			log.Printf("Connecting %d:%v:%v to %d:%v:%v", i-1, rooms[i-1], startpt, i, rooms[i], endpt)
 
+			var start, end int
 			if Coinflip() {
-				for z := startpt.X; z < endpt.X; z++ {
+				start, end = diter(startpt.X, endpt.X)
+				for z := start; z < end; z++ {
 					m[startpt.Y][z].Feature = FeatFloor
+					log.Printf("\t%v", math.Pt(z, startpt.Y))
 				}
-				for z := startpt.Y; z < endpt.Y; z++ {
+				start, end = diter(startpt.Y, endpt.Y)
+				for z := start; z < end; z++ {
 					m[z][endpt.X].Feature = FeatFloor
+					log.Printf("\t%v", math.Pt(endpt.X, z))
 				}
 			} else {
-				for z := startpt.Y; z < endpt.Y; z++ {
+				start, end = diter(startpt.Y, endpt.Y)
+				for z := start; z < end; z++ {
 					m[z][startpt.X].Feature = FeatFloor
+					log.Printf("\t%v", math.Pt(startpt.X, z))
 				}
-				for z := startpt.X; z < endpt.X; z++ {
+				start, end = diter(startpt.X, endpt.X)
+				for z := start; z < end; z++ {
 					m[endpt.Y][z].Feature = FeatFloor
+					log.Printf("\t%v", math.Pt(z, endpt.Y))
 				}
 			}
 		}
@@ -156,6 +174,16 @@ func RoomsLevel(l *Level) *Level {
 	l.Place(l.game.Player, startroom.Center())
 
 	return l
+}
+
+// Given x and y, this will reorder them if necessary so that you can iterate
+// from one to the other by using a positive increment in a for loop.
+func diter(x, y int) (start, end int) {
+	if x < y {
+		return x, y
+	} else {
+		return y, x
+	}
 }
 
 func NewDungeon(g *Game) *Level {
