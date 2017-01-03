@@ -86,3 +86,11 @@ func (d Dice) String() string {
 func RandInt(low int, high int) int {
 	return low + intsource(high-low)
 }
+
+func OneIn(n int) bool {
+	return intsource(n) == 0
+}
+
+func Coinflip() bool {
+	return OneIn(2)
+}

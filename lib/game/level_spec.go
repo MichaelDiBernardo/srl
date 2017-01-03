@@ -72,8 +72,9 @@ func TestLevel(l *Level) *Level {
 
 // 80 x 80
 // 15-20 rooms
-// Room sizes 4-10. This includes the bounding wall, so a room with width 4
-// will be 2 floor tiles across.
+// Room sizes 5-13. This includes the bounding wall, so a room with width 5
+// will be 3 floor tiles across.
+// Note: Thanks, fcrawl. You're a pal.
 func RoomsLevel(l *Level) *Level {
 	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
 	// When we begin, all is walls.
@@ -83,43 +84,70 @@ func RoomsLevel(l *Level) *Level {
 		}
 	}
 
-	// Find room placement.
 	nrooms := RandInt(15, 20)
 	rooms := make([]math.Rectangle, 0, nrooms)
+	connpts := make([]math.Point, 0, nrooms)
 	log.Printf("Making %d rooms.", nrooms)
 
-	for {
-		rw, rh := RandInt(4, 12), RandInt(4, 12)
-		min := math.Pt(RandInt(0, width-rw), RandInt(0, height-rh))
-		max := min.Add(math.Pt(rw, rh))
-		newroom := math.Rect(min, max)
+	// Find room placement.
+	for i := 0; i < nrooms; i++ {
+		for tries := 0; tries < (200 / nrooms); tries++ {
+			rw, rh := RandInt(5, 13)|1, RandInt(5, 13)|1
+			min := math.Pt(RandInt(0, width-rw), RandInt(0, height-rh))
+			max := min.Add(math.Pt(rw, rh))
+			newroom := math.Rect(min, max)
 
-		log.Printf("Trying to make room %v.", newroom)
-		good := true
-		for _, room := range rooms {
-			if newroom.Intersect(room) != math.ZeroRect {
-				log.Printf("%v intersects %v -- no good.", newroom, room)
-				good = false
-				break
+			log.Printf("Trying to make room %v.", newroom)
+			good := true
+			for _, room := range rooms {
+				if newroom.Intersect(room) != math.ZeroRect {
+					log.Printf("%v intersects %v -- no good.", newroom, room)
+					good = false
+					break
+				}
 			}
-		}
 
-		if !good {
-			continue
-		}
-		log.Printf("Room %v was good.", newroom)
+			if !good {
+				continue
+			}
+			log.Printf("Room %v was good.", newroom)
+			rooms = append(rooms, newroom)
 
-		rooms = append(rooms, newroom)
-		if len(rooms) >= nrooms {
-			break
+			// Find a random "connection point" at some odd location in the room.
+			// This is where we'll dig to from another room to make a corridor.
+			connpt := math.Pt(
+				RandInt(newroom.Min.X+1, newroom.Max.X-1)|1,
+				RandInt(newroom.Min.Y+1, newroom.Max.Y-1)|1,
+			)
+			connpts = append(connpts, connpt)
 		}
 	}
 
-	// Render rooms into level.
-	for _, room := range rooms {
+	// Render rooms and corridors into level.
+	for i, room := range rooms {
 		for y := room.Min.Y + 1; y < room.Max.Y; y++ {
 			for x := room.Min.X + 1; x < room.Max.X; x++ {
 				m[y][x].Feature = FeatFloor
+			}
+		}
+
+		if i >= 1 {
+			startpt, endpt := connpts[i-1], connpts[i]
+
+			if Coinflip() {
+				for z := startpt.X; z < endpt.X; z++ {
+					m[startpt.Y][z].Feature = FeatFloor
+				}
+				for z := startpt.Y; z < endpt.Y; z++ {
+					m[z][endpt.X].Feature = FeatFloor
+				}
+			} else {
+				for z := startpt.Y; z < endpt.Y; z++ {
+					m[z][startpt.X].Feature = FeatFloor
+				}
+				for z := startpt.X; z < endpt.X; z++ {
+					m[endpt.Y][z].Feature = FeatFloor
+				}
 			}
 		}
 	}
