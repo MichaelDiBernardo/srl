@@ -91,25 +91,25 @@ func LynnRoomsLevel(l *Level) *Level {
 	m := l.Map
 	fillmap(m, l.Bounds, FeatWall)
 
-	// We'll attempt to create as many as 'nrooms' rooms, but may fall short if
-	// we run into intractable placement problems.
-	nrooms := RandInt(10, 15)
+	// We'll attempt to create this many rooms, but may fall short if we run
+	// into intractable placement problems.
+	maxrooms := RandInt(10, 20)
 
 	// The rooms we've placed so far, represented as Rects.
-	rooms := make([]math.Rectangle, 0, nrooms)
+	rooms := make([]math.Rectangle, 0, maxrooms)
 	// The ith joint in 'joints' is the joint in the ith room of 'rooms'.
-	joints := make([]math.Point, 0, nrooms)
+	joints := make([]math.Point, 0, maxrooms)
 	// All of the points that currently belong to a corridor.
 	paths := make([]math.Point, 0)
 
-	log.Printf("Making %d rooms.", nrooms)
+	log.Printf("Making %d rooms.", maxrooms)
 
-	for ri := 0; ri < nrooms; ri++ {
+	// The actual room index and # of rooms.
+	ri, nrooms := 0, 0
+	for r := 0; r < maxrooms; r++ {
 		placed := placeroom(l, rooms, paths)
 		if placed == math.ZeroRect {
 			// We tried hard but couldn't do it. Try again from beginning.
-			// TODO: Indices are totally messed if we do this. Need to count
-			//       separately.
 			continue
 		}
 
@@ -121,26 +121,24 @@ func LynnRoomsLevel(l *Level) *Level {
 		// Find a joint for this room, and if we're far along enough, try to
 		// join it to the previous.
 		joints = append(joints, makejoint(placed))
-		if ri == 0 {
-			continue
+		if ri > 0 {
+			path := dig(joints[ri], joints[ri-1])
+			drawpath(l, path)
+			for _, pt := range path {
+				paths = append(paths, pt)
+			}
 		}
-
-		// TODO: Looks like we're sometimes digging one deep or one shallow.
-		path := dig(joints[ri], joints[ri-1])
-		for _, pt := range path {
-			l.At(pt).Feature = FeatFloor
-			paths = append(paths, pt)
-		}
+		ri++
+		nrooms++
 	}
-	// TODO: renderpath? also can't use nrooms
-	// TODO: Needs to place doors.
 	path := dig(joints[0], joints[nrooms-1])
-	for _, pt := range path {
-		l.At(pt).Feature = FeatFloor
-	}
+	drawpath(l, path)
+	// Don't need to add to paths anymore since we're done placing rooms.
 
 	startroom := rooms[RandInt(0, nrooms)]
 	l.Place(l.game.Player, startroom.Center())
+
+	log.Printf("Made %d/%d rooms.", nrooms, maxrooms)
 	return l
 }
 
@@ -175,6 +173,7 @@ func placeroom(l *Level, rooms []math.Rectangle, paths []math.Point) math.Rectan
 			return newroom
 		}
 	}
+	log.Print("\tCouldn't place any candidates; giving up.")
 	return math.ZeroRect
 }
 
@@ -210,26 +209,34 @@ func fits(newroom math.Rectangle, rooms []math.Rectangle, paths []math.Point) bo
 func dig(startpt, endpt math.Point) []math.Point {
 	log.Printf("Connecting joint %v to %v", startpt, endpt)
 
-	var start, end int
+	var start, end, incr int
 	path := make([]math.Point, 0)
 
 	if Coinflip() {
-		start, end = diter(startpt.X, endpt.X)
-		for z := start; z < end; z++ {
-			path = append(path, math.Pt(z, startpt.Y))
+		start, end, incr = drange(startpt.X, endpt.X, true)
+		for z := start; z != end; z += incr {
+			pt := math.Pt(z, startpt.Y)
+			path = append(path, pt)
+			log.Printf("\t%v", pt)
 		}
-		start, end = diter(startpt.Y, endpt.Y)
-		for z := start; z < end; z++ {
-			path = append(path, math.Pt(endpt.X, z))
+		start, end, incr = drange(startpt.Y, endpt.Y, true)
+		for z := start; z != end; z += incr {
+			pt := math.Pt(endpt.X, z)
+			path = append(path, pt)
+			log.Printf("\t%v", pt)
 		}
 	} else {
-		start, end = diter(startpt.Y, endpt.Y)
-		for z := start; z < end; z++ {
-			path = append(path, math.Pt(startpt.X, z))
+		start, end, incr = drange(startpt.Y, endpt.Y, true)
+		for z := start; z != end; z += incr {
+			pt := math.Pt(startpt.X, z)
+			path = append(path, pt)
+			log.Printf("\t%v", pt)
 		}
-		start, end = diter(startpt.X, endpt.X)
-		for z := start; z < end; z++ {
-			path = append(path, math.Pt(z, endpt.Y))
+		start, end, incr = drange(startpt.X, endpt.X, true)
+		for z := start; z != end; z += incr {
+			pt := math.Pt(z, endpt.Y)
+			path = append(path, pt)
+			log.Printf("\t%v", pt)
 		}
 	}
 
@@ -245,14 +252,40 @@ func makejoint(room math.Rectangle) math.Point {
 	)
 }
 
-// Given x and y, this will reorder them if necessary so that you can iterate
-// from one to the other by using a positive increment in a for loop.
-func diter(x, y int) (start, end int) {
-	if x < y {
-		return x, y
-	} else {
-		return y, x
+func drawpath(l *Level, path []math.Point) {
+	doored := false
+	for _, pt := range path {
+		if tile := l.At(pt); !doored && tile.Feature.Solid {
+			log.Printf("Placed door at %v", pt)
+			doored = true
+			tile.Feature = FeatClosedDoor
+		} else {
+			tile.Feature = FeatFloor
+		}
 	}
+}
+
+// Given x and y, this will return 'start', 'end', and 'iter' that you can use
+// in a for loop to iterate in an ordered sequence from x to y. Set 'incl' to
+// true if you want both x and y to be included in the iteration; otherwise it
+// will end just before y.
+//
+// Use it like:
+// start, end, incr, i := drange(10, 4, true)
+// for i := start; i != end; i += incr {
+//    dostuff()
+// }
+func drange(x, y int, incl bool) (start, end, incr int) {
+	if x < y {
+		start, end, incr = x, y, 1
+	} else {
+		start, end, incr = x, y, -1
+	}
+
+	if incl {
+		end += incr
+	}
+	return start, end, incr
 }
 
 func NewDungeon(g *Game) *Level {

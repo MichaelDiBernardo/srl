@@ -120,8 +120,9 @@ var itemGlyphs = map[game.Species]glyph{
 
 // Glyphs used to render tiles.
 var featureGlyphs = map[game.FeatureType]glyph{
-	"FeatWall":  glyph{Ch: '#', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
-	"FeatFloor": glyph{Ch: '.', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+	"FeatWall":       glyph{Ch: '#', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
+	"FeatFloor":      glyph{Ch: '.', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+	"FeatClosedDoor": glyph{Ch: '+', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
 }
 
 // Create a new mapPanel.
