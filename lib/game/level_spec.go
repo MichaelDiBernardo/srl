@@ -70,110 +70,179 @@ func TestLevel(l *Level) *Level {
 	return l
 }
 
-// 80 x 80
-// 15-20 rooms
-// Room sizes 5-13. This includes the bounding wall, so a room with width 5
-// will be 3 floor tiles across.
-// Note: Thanks, fcrawl. You're a pal.
-func RoomsLevel(l *Level) *Level {
-	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
+// This implements lynn's algorithm for simply laying out angband-ish rooms
+// without a lot of fuss.
+//
+// The idea is to randomly place rooms, and then draw L-shaped corridors to
+// connect them. The connection points are randomly-selected "joints" placed
+// one-per-room.
+//
+// We do this by:
+// a) Creating and randomly placing an odd-sized room where it fits. We don't
+//    allow new rooms to overlap existing rooms or corridors.
+// b) Selecting a random, odd-aligned joint in this new room.
+// c) If there is at least one predecessor room, dig an L-shaped path between
+//    the joints. At this stage, corridors are allowed to blast through
+//    intervening rooms.
+//
+// See http://i.imgur.com/WhmnByV.png for a terse graph-ical explanation.
+func LynnRoomsLevel(l *Level) *Level {
 	// When we begin, all is walls.
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			m[y][x].Feature = FeatWall
-		}
-	}
+	m := l.Map
+	fillmap(m, l.Bounds, FeatWall)
 
-	nrooms := RandInt(15, 20)
+	// We'll attempt to create as many as 'nrooms' rooms, but may fall short if
+	// we run into intractable placement problems.
+	nrooms := RandInt(10, 15)
+
+	// The rooms we've placed so far, represented as Rects.
 	rooms := make([]math.Rectangle, 0, nrooms)
-	connpts := make([]math.Point, 0, nrooms)
+	// The ith joint in 'joints' is the joint in the ith room of 'rooms'.
+	joints := make([]math.Point, 0, nrooms)
+	// All of the points that currently belong to a corridor.
+	paths := make([]math.Point, 0)
+
 	log.Printf("Making %d rooms.", nrooms)
 
-	// Find room placement.
-	for i := 0; i < nrooms; i++ {
-		for tries := 0; tries < (200 / nrooms); tries++ {
-			rw, rh := RandInt(4, 13)|1, RandInt(4, 13)|1
-			min := math.Pt(RandInt(1, width-rw-3), RandInt(1, height-rh-3))
-			max := min.Add(math.Pt(rw, rh))
-			newroom := math.Rect(min, max)
+	for ri := 0; ri < nrooms; ri++ {
+		placed := placeroom(l, rooms, paths)
+		if placed == math.ZeroRect {
+			// We tried hard but couldn't do it. Try again from beginning.
+			// TODO: Indices are totally messed if we do this. Need to count
+			//       separately.
+			continue
+		}
 
-			log.Printf("Trying to make room %v.", newroom)
-			good := true
-			for _, room := range rooms {
-				// When checking for intersection, we'll use a room boundary
-				// that just contains the actual room so that we don't get
-				// rooms that are directly adjacent to one another (no
-				// "frankenrooms".)
-				nrbounds := math.Rect(
-					newroom.Min.Add(math.Pt(-1, -1)),
-					newroom.Max.Add(math.Pt(1, 1)),
-				)
-				if nrbounds.Intersect(room) != math.ZeroRect {
-					log.Printf("%v intersects %v -- no good.", newroom, room)
-					good = false
-					break
-				}
-			}
+		// Record and draw the room on the map. We want it drawn before we try
+		// to dig out of it to make door placement easier.
+		rooms = append(rooms, placed)
+		fillmap(m, placed, FeatFloor)
 
-			if !good {
-				continue
-			}
-			log.Printf("Room %v was good.", newroom)
-			rooms = append(rooms, newroom)
+		// Find a joint for this room, and if we're far along enough, try to
+		// join it to the previous.
+		joints = append(joints, makejoint(placed))
+		if ri == 0 {
+			continue
+		}
 
-			// Find a random "connection point" at some odd location in the room.
-			// This is where we'll dig to from another room to make a corridor.
-			connpt := math.Pt(
-				RandInt(newroom.Min.X, newroom.Max.X)|1,
-				RandInt(newroom.Min.Y, newroom.Max.Y)|1,
-			)
-			connpts = append(connpts, connpt)
+		// TODO: Looks like we're sometimes digging one deep or one shallow.
+		path := dig(joints[ri], joints[ri-1])
+		for _, pt := range path {
+			l.At(pt).Feature = FeatFloor
+			paths = append(paths, pt)
 		}
 	}
-
-	// Render rooms and corridors into level.
-	for i, room := range rooms {
-		for y := room.Min.Y; y < room.Max.Y; y++ {
-			for x := room.Min.X; x < room.Max.X; x++ {
-				m[y][x].Feature = FeatFloor
-			}
-		}
-
-		if i >= 1 {
-			startpt, endpt := connpts[i-1], connpts[i]
-			log.Printf("Connecting %d:%v:%v to %d:%v:%v", i-1, rooms[i-1], startpt, i, rooms[i], endpt)
-
-			var start, end int
-			if Coinflip() {
-				start, end = diter(startpt.X, endpt.X)
-				for z := start; z < end; z++ {
-					m[startpt.Y][z].Feature = FeatFloor
-					log.Printf("\t%v", math.Pt(z, startpt.Y))
-				}
-				start, end = diter(startpt.Y, endpt.Y)
-				for z := start; z < end; z++ {
-					m[z][endpt.X].Feature = FeatFloor
-					log.Printf("\t%v", math.Pt(endpt.X, z))
-				}
-			} else {
-				start, end = diter(startpt.Y, endpt.Y)
-				for z := start; z < end; z++ {
-					m[z][startpt.X].Feature = FeatFloor
-					log.Printf("\t%v", math.Pt(startpt.X, z))
-				}
-				start, end = diter(startpt.X, endpt.X)
-				for z := start; z < end; z++ {
-					m[endpt.Y][z].Feature = FeatFloor
-					log.Printf("\t%v", math.Pt(z, endpt.Y))
-				}
-			}
-		}
+	// TODO: renderpath? also can't use nrooms
+	// TODO: Needs to place doors.
+	path := dig(joints[0], joints[nrooms-1])
+	for _, pt := range path {
+		l.At(pt).Feature = FeatFloor
 	}
 
 	startroom := rooms[RandInt(0, nrooms)]
 	l.Place(l.game.Player, startroom.Center())
-
 	return l
+}
+
+func fillmap(m Map, area math.Rectangle, f *Feature) {
+	min, max := area.Min, area.Max
+	for y := min.Y; y < max.Y; y++ {
+		for x := min.X; x < max.X; x++ {
+			m[y][x].Feature = f
+		}
+	}
+}
+
+// Makes a random room within the confines of the given level.
+func randroom(l *Level) math.Rectangle {
+	width, height := l.Bounds.Width(), l.Bounds.Height()
+
+	// Clamp room to odd widths and heights -- this is an aesthetic preference.
+	// The left side of the range is an even number to make all of the possible
+	// odd values equally probably ([4..5]=5, [6..7]=7 etc.)
+	rw, rh := RandInt(4, 13)|1, RandInt(4, 13)|1
+	min := math.Pt(RandInt(1, width-rw-3), RandInt(1, height-rh-3))
+	max := min.Add(math.Pt(rw, rh))
+	return math.Rect(min, max)
+}
+
+func placeroom(l *Level, rooms []math.Rectangle, paths []math.Point) math.Rectangle {
+	log.Printf("Placeroom:")
+	for tries := 0; tries < 15; tries++ {
+		newroom := randroom(l)
+		log.Printf("\tTrying to place room candidate: %v.", newroom)
+		if fits(newroom, rooms, paths) {
+			return newroom
+		}
+	}
+	return math.ZeroRect
+}
+
+// Can 'room' be placed in a level with 'rooms' and 'paths' without
+// intersecting any of them?
+func fits(newroom math.Rectangle, rooms []math.Rectangle, paths []math.Point) bool {
+	nrbounds := math.Rect(
+		newroom.Min.Add(math.Pt(-1, -1)),
+		newroom.Max.Add(math.Pt(1, 1)),
+	)
+
+	for _, room := range rooms {
+		// When checking for intersection, we'll use a room boundary 1
+		// larger than the floorspace of the actual room.
+		// This is so we don't get rooms that are directly adjacent to one
+		// another (no "frankenrooms".)
+		if nrbounds.Intersect(room) != math.ZeroRect {
+			log.Printf("%v intersects %v -- no good.", newroom, room)
+			return false
+		}
+	}
+
+	for _, pt := range paths {
+		if nrbounds.HasPoint(pt) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Given two joints, this will return a path that joins them.
+func dig(startpt, endpt math.Point) []math.Point {
+	log.Printf("Connecting joint %v to %v", startpt, endpt)
+
+	var start, end int
+	path := make([]math.Point, 0)
+
+	if Coinflip() {
+		start, end = diter(startpt.X, endpt.X)
+		for z := start; z < end; z++ {
+			path = append(path, math.Pt(z, startpt.Y))
+		}
+		start, end = diter(startpt.Y, endpt.Y)
+		for z := start; z < end; z++ {
+			path = append(path, math.Pt(endpt.X, z))
+		}
+	} else {
+		start, end = diter(startpt.Y, endpt.Y)
+		for z := start; z < end; z++ {
+			path = append(path, math.Pt(startpt.X, z))
+		}
+		start, end = diter(startpt.X, endpt.X)
+		for z := start; z < end; z++ {
+			path = append(path, math.Pt(z, endpt.Y))
+		}
+	}
+
+	return path
+}
+
+// Finds an odd-aligned location to serve as a joint in an l-shaped path
+// connecting this to another room.
+func makejoint(room math.Rectangle) math.Point {
+	return math.Pt(
+		RandInt(room.Min.X, room.Max.X)|1,
+		RandInt(room.Min.Y, room.Max.Y)|1,
+	)
 }
 
 // Given x and y, this will reorder them if necessary so that you can iterate
@@ -187,5 +256,5 @@ func diter(x, y int) (start, end int) {
 }
 
 func NewDungeon(g *Game) *Level {
-	return NewLevel(80, 80, g, RoomsLevel)
+	return NewLevel(80, 80, g, LynnRoomsLevel)
 }
