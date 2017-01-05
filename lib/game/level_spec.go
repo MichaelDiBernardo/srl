@@ -123,7 +123,7 @@ func LynnRoomsLevel(l *Level) *Level {
 		joints = append(joints, makejoint(placed))
 		if ri > 0 {
 			path := dig(joints[ri], joints[ri-1])
-			drawpath(l, path, placed, rooms[ri-1])
+			drawpath(l, path, rooms)
 			for _, pt := range path {
 				paths = append(paths, pt)
 			}
@@ -132,7 +132,7 @@ func LynnRoomsLevel(l *Level) *Level {
 		nrooms++
 	}
 	path := dig(joints[0], joints[nrooms-1])
-	drawpath(l, path, rooms[0], rooms[nrooms-1])
+	drawpath(l, path, rooms)
 	// Don't need to add to paths anymore since we're done placing rooms.
 
 	startroom := rooms[RandInt(0, nrooms)]
@@ -256,33 +256,26 @@ func makejoint(room math.Rectangle) math.Point {
 }
 
 // Draws the path from startroom to endroom. Also places closed doors at egress
-// of each room.
-func drawpath(l *Level, path []math.Point, startroom, endroom math.Rectangle) {
-	startdoored, enddoored := false, false
-	egress := func(i int, pt math.Point) bool {
-		if startdoored || i == 0 {
+// of each room that is intersected along the way.
+func drawpath(l *Level, path []math.Point, rooms []math.Rectangle) {
+	// Predicate that tells us if we should place a door.
+	placedoor := func(i int, pt math.Point) bool {
+		if i == 0 || i >= len(path)-1 {
 			return false
 		}
-		prevpt := path[i-1]
-		return (l.At(pt).Feature.Solid &&
-			!startroom.HasPoint(pt) &&
-			startroom.HasPoint(prevpt))
-	}
-	ingress := func(i int, pt math.Point) bool {
-		if enddoored || i >= len(path)-1 {
-			return false
+		prevpt, nextpt := path[i-1], path[i+1]
+		for _, room := range rooms {
+			egress := !room.HasPoint(pt) && room.HasPoint(prevpt)
+			ingress := !room.HasPoint(pt) && room.HasPoint(nextpt)
+			if egress || ingress {
+				return true
+			}
 		}
-		nextpt := path[i+1]
-		return (l.At(pt).Feature.Solid &&
-			!endroom.HasPoint(pt) &&
-			endroom.HasPoint(nextpt))
+		return false
 	}
 	for i, pt := range path {
-		if tile := l.At(pt); egress(i, pt) {
-			log.Printf("Placed egress at %v", pt)
-			tile.Feature = FeatClosedDoor
-		} else if ingress(i, pt) {
-			log.Printf("Placed ingress at %v", pt)
+		if tile := l.At(pt); placedoor(i, pt) {
+			log.Printf("Placed door at %v", pt)
 			tile.Feature = FeatClosedDoor
 		} else {
 			tile.Feature = FeatFloor
