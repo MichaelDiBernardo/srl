@@ -6,11 +6,9 @@ import (
 )
 
 func TestTryPickupNoItemsOnGround(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	taker := g.NewObj(atActorSpec)
-
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(taker, math.Pt(0, 0))
+	g.Level.Place(taker, math.Pt(1, 1))
 
 	taker.Packer.TryPickup()
 	if size := taker.Packer.Inventory().Len(); size > 0 {
@@ -19,39 +17,37 @@ func TestTryPickupNoItemsOnGround(t *testing.T) {
 }
 
 func TestTryPickupOneItemOnGround(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	taker := g.NewObj(atActorSpec)
 	item := g.NewObj(atItemSpec)
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(taker, math.Pt(0, 0))
-	l.Place(item, math.Pt(0, 0))
+	g.Level.Place(taker, math.Pt(1, 1))
+	g.Level.Place(item, math.Pt(1, 1))
 
 	taker.Packer.TryPickup()
 	if size := taker.Packer.Inventory().Len(); size != 1 {
 		t.Errorf(`TryPickup() on 1-item square gave inven size %d; want 1`, size)
 	}
-	if size := l.At(math.Pt(0, 0)).Items.Len(); size != 0 {
+	if size := g.Level.At(math.Pt(1, 1)).Items.Len(); size != 0 {
 		t.Errorf(`TryPickup() on 1-item square left %d items on ground; want 0`, size)
 	}
 }
 
 func TestTryPickupFromStack(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	taker := g.NewObj(atActorSpec)
 	item := g.NewObj(atItemSpec)
 	item2 := g.NewObj(atItemSpec)
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(taker, math.Pt(0, 0))
-	l.Place(item, math.Pt(0, 0))
-	l.Place(item2, math.Pt(0, 0))
+	g.Level.Place(taker, math.Pt(1, 1))
+	g.Level.Place(item, math.Pt(1, 1))
+	g.Level.Place(item2, math.Pt(1, 1))
 
 	taker.Packer.TryPickup()
 	if size := taker.Packer.Inventory().Len(); size != 0 {
 		t.Errorf(`TryPickup() on stack took something instead of opening menu; took %d things`, size)
 	}
-	if size := l.At(math.Pt(0, 0)).Items.Len(); size != 2 {
+	if size := g.Level.At(math.Pt(1, 1)).Items.Len(); size != 2 {
 		t.Errorf(`TryPickup() took from ground instead of opening menu; left %d things`, size)
 	}
 	if size := g.Events.Len(); size != 1 {
@@ -69,13 +65,12 @@ func TestTryPickupFromStack(t *testing.T) {
 }
 
 func TestPickupOutOfBounds(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	taker := g.NewObj(atActorSpec)
 	item := g.NewObj(atItemSpec)
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(taker, math.Pt(0, 0))
-	l.Place(item, math.Pt(0, 0))
+	g.Level.Place(taker, math.Pt(1, 1))
+	g.Level.Place(item, math.Pt(1, 1))
 
 	taker.Packer.TryPickup()
 	taker.Packer.Pickup(5)
@@ -87,7 +82,7 @@ func TestPickupOutOfBounds(t *testing.T) {
 }
 
 func TestTryDropWithNothingInInventory(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	packer := g.NewObj(atActorSpec)
 	packer.Packer.TryDrop()
@@ -98,11 +93,10 @@ func TestTryDropWithNothingInInventory(t *testing.T) {
 }
 
 func TestTryDropWithFullGround(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	packer := g.NewObj(atActorSpec)
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(packer, math.Pt(0, 0))
+	g.Level.Place(packer, math.Pt(1, 1))
 
 	packer.Tile.Items.capacity = 0
 	packer.Packer.TryDrop()
@@ -113,11 +107,10 @@ func TestTryDropWithFullGround(t *testing.T) {
 }
 
 func TestTryDrop(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	packer := g.NewObj(atActorSpec)
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(packer, math.Pt(0, 0))
+	g.Level.Place(packer, math.Pt(1, 1))
 
 	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)
@@ -130,11 +123,10 @@ func TestTryDrop(t *testing.T) {
 }
 
 func TestDrop(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	packer := g.NewObj(atActorSpec)
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(packer, math.Pt(0, 0))
+	g.Level.Place(packer, math.Pt(1, 1))
 
 	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)
@@ -152,11 +144,10 @@ func TestDrop(t *testing.T) {
 }
 
 func TestDropOutOfBounds(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	packer := g.NewObj(atActorSpec)
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(packer, math.Pt(0, 0))
+	g.Level.Place(packer, math.Pt(1, 1))
 
 	item := g.NewObj(atItemSpec)
 	packer.Packer.Inventory().Add(item)

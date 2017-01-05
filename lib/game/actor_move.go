@@ -38,6 +38,10 @@ func (p *ActorMover) Move(dir math.Point) bool {
 		}
 		return false
 	}
+	if endtile.Feature == FeatClosedDoor {
+		endtile.Feature = FeatOpenDoor
+		return false
+	}
 
 	moved := obj.Level.Place(obj, endpos)
 	if moved {

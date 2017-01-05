@@ -15,7 +15,7 @@ var atConsumeSpec = &Spec{
 }
 
 func TestTryUseWithNoUsablesInInventory(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	user := g.NewObj(atActorSpec)
 	user.User.TryUse()
 	if mode := g.mode; mode != ModeHud {
@@ -24,7 +24,7 @@ func TestTryUseWithNoUsablesInInventory(t *testing.T) {
 }
 
 func TestTryUseWithConsumablesInInventory(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	user := g.NewObj(atActorSpec)
 
 	item := g.NewObj(atConsumeSpec)
@@ -37,7 +37,7 @@ func TestTryUseWithConsumablesInInventory(t *testing.T) {
 }
 
 func TestUse(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	user := g.NewObj(atActorSpec)
 	used := false
 
@@ -70,7 +70,7 @@ func TestUse(t *testing.T) {
 }
 
 func TestUseOutOfBounds(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	user := g.NewObj(atActorSpec)
 	item := g.NewObj(atConsumeSpec)
 

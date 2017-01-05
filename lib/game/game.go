@@ -23,8 +23,7 @@ func NewGame() *Game {
 func (g *Game) Start() {
 	g.mode = ModeHud
 	g.Player = g.NewObj(PlayerSpec)
-	level := NewDungeon(g)
-	g.Level = level
+	g.Level = NewDungeon(g)
 }
 
 // Create a new object for use in this game.

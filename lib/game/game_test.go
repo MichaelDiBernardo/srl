@@ -5,10 +5,24 @@ import (
 	"testing"
 )
 
+// Creates a new game that especially useful for testing; makes a 4x4 map with
+// a wall border, and places the player at 2,2.
+func newTestGame() *Game {
+	return newTestGameWith(IdentLevel)
+}
+
+func newTestGameWith(func(*Level) *Level) *Game {
+	g := NewGame()
+	g.mode = ModeHud
+	// Manully do the Start() stuff so we can pick the level.
+	g.Player = g.NewObj(PlayerSpec)
+	g.Level = NewLevel(4, 4, g, SquareLevel)
+	return g
+}
+
 // Game tests
 func TestKillingPlayerEndsGame(t *testing.T) {
-	g := NewGame()
-	g.Start()
+	g := newTestGame()
 	g.Kill(g.Player)
 
 	if m := g.mode; m != ModeGameOver {
@@ -25,21 +39,21 @@ func TestKillingMonsterRemovesIt(t *testing.T) {
 		Traits:  &Traits{},
 	}
 
-	g := NewGame()
+	g := newTestGame()
 
 	obj := g.NewObj(gtActorSpec)
-	l := NewLevel(4, 4, g, IdentLevel)
-	g.Level = l
 
 	pos := math.Pt(1, 1)
-	l.Place(obj, pos)
+	g.Level.Place(obj, pos)
 
 	g.Kill(obj)
 
-	if l.At(pos).Actor != nil {
+	if g.Level.At(pos).Actor != nil {
 		t.Error(`Actor's previous tile had tile.Actor != nil`)
 	}
-	if len(l.actors) > 0 {
+
+	// Only actor left should be the player.
+	if len(g.Level.actors) > 1 {
 		t.Error(`l.actors was not empty after removal.`)
 	}
 

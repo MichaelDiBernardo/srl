@@ -6,12 +6,11 @@ import (
 )
 
 func TestOkMove(t *testing.T) {
-	g := NewGame()
-	l := NewLevel(4, 4, g, IdentLevel)
+	g := newTestGame()
 	obj := g.NewObj(atActorSpec)
-	startpos := math.Pt(1, 1)
 
-	l.Place(obj, startpos)
+	startpos := math.Pt(1, 1)
+	g.Level.Place(obj, startpos)
 
 	ok := obj.Mover.Move(math.Pt(1, 0))
 
@@ -25,20 +24,19 @@ func TestOkMove(t *testing.T) {
 		t.Errorf(`Move((1, 0)) = %v, want %v`, newpos, want)
 	}
 
-	if l.At(startpos).Actor != nil {
+	if g.Level.At(startpos).Actor != nil {
 		t.Error(`Move((1, 0)) did not set start tile actor to nil`)
 	}
-	if l.At(newpos).Actor != obj {
+	if g.Level.At(newpos).Actor != obj {
 		t.Error(`Move((1, 0)) did not set dest tile actor to obj`)
 	}
 }
 
 func TestActorCollision(t *testing.T) {
-	g := NewGame()
-	l := NewLevel(4, 4, g, IdentLevel)
+	g := newTestGame()
 	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
-	l.Place(a1, math.Pt(1, 1))
-	l.Place(a2, math.Pt(2, 1))
+	g.Level.Place(a1, math.Pt(1, 1))
+	g.Level.Place(a2, math.Pt(2, 1))
 
 	ok := a1.Mover.Move(math.Pt(1, 0))
 

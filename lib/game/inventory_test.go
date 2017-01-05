@@ -21,7 +21,7 @@ var invTestConsumable = &Spec{
 }
 
 func TestTake(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	inv := NewInventory()
 
 	item1 := g.NewObj(invTestEquip)
@@ -54,7 +54,7 @@ func TestTake(t *testing.T) {
 }
 
 func TestAddOverCapacity(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	inv := NewInventoryWithCap(2)
 
 	item1 := g.NewObj(invTestEquip)
@@ -74,7 +74,7 @@ func TestAddOverCapacity(t *testing.T) {
 }
 
 func TestHasEquips(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	inv := NewInventoryWithCap(2)
 
 	if inv.HasEquipment() {
@@ -95,7 +95,7 @@ func TestHasEquips(t *testing.T) {
 }
 
 func TestHasUsables(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	inv := NewInventoryWithCap(2)
 
 	if inv.HasUsables() {

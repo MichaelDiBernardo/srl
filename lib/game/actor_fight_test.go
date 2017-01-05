@@ -15,26 +15,24 @@ func (f *fakefighter) Hit(other Fighter) {
 }
 
 func TestPlayerMonsterCollisionsHit(t *testing.T) {
-	g := NewGame()
-	player := g.NewObj(PlayerSpec)
-	pf := &fakefighter{Trait: Trait{obj: player}}
-	player.Fighter = pf
+	g := newTestGame()
+	pf := &fakefighter{Trait: Trait{obj: g.Player}}
+	g.Player.Fighter = pf
 
 	monster := g.NewObj(atActorSpec)
-	mf := &fakefighter{Trait: Trait{obj: player}}
+	mf := &fakefighter{Trait: Trait{obj: monster}}
 	monster.Fighter = mf
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(player, math.Pt(0, 0))
-	l.Place(monster, math.Pt(1, 1))
+	g.Level.Place(g.Player, math.Pt(1, 1))
+	g.Level.Place(monster, math.Pt(1, 2))
 
-	player.Mover.Move(math.Pt(1, 1))
+	g.Player.Mover.Move(math.Pt(0, 1))
 
 	if !pf.Called {
 		t.Error("Moving player into other did not try to hit.")
 	}
 
-	monster.Mover.Move(math.Pt(-1, -1))
+	monster.Mover.Move(math.Pt(0, -1))
 
 	if !mf.Called {
 		t.Error("Moving other into player did not try to hit.")
@@ -42,7 +40,7 @@ func TestPlayerMonsterCollisionsHit(t *testing.T) {
 }
 
 func TestMonsterMonsterCollisionsHit(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	mon1 := g.NewObj(atActorSpec)
 	mf1 := &fakefighter{Trait: Trait{obj: mon1}}
 	mon1.Fighter = mf1
@@ -51,11 +49,10 @@ func TestMonsterMonsterCollisionsHit(t *testing.T) {
 	mf2 := &fakefighter{Trait: Trait{obj: mon2}}
 	mon2.Fighter = mf2
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(mon1, math.Pt(0, 0))
-	l.Place(mon2, math.Pt(1, 1))
+	g.Level.Place(mon1, math.Pt(1, 1))
+	g.Level.Place(mon2, math.Pt(1, 2))
 
-	mon1.Mover.Move(math.Pt(1, 1))
+	mon1.Mover.Move(math.Pt(0, 1))
 
 	if mf1.Called {
 		t.Error("Moving monster into monster tried to hit.")
@@ -99,7 +96,7 @@ func TestHit(t *testing.T) {
 			},
 		}
 
-		g := NewGame()
+		g := newTestGame()
 		attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
 		FixRandomDie(test.rolls)
 

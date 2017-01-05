@@ -6,7 +6,7 @@ import (
 )
 
 func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
 	if mode := g.mode; mode != ModeHud {
@@ -15,7 +15,7 @@ func TestTryEquipWithNoEquipsInInventory(t *testing.T) {
 }
 
 func TestTryEquipWithEquipsInInventory(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
@@ -31,7 +31,7 @@ func TestTryEquipWithEquipsInInventory(t *testing.T) {
 }
 
 func TestEquipIntoEmptySlot(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
@@ -58,7 +58,7 @@ func TestEquipIntoEmptySlot(t *testing.T) {
 }
 
 func TestEquipIntoOccupiedSlot(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
@@ -88,7 +88,7 @@ func TestEquipIntoOccupiedSlot(t *testing.T) {
 }
 
 func TestEquipOutOfBounds(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryEquip()
@@ -106,7 +106,7 @@ func TestEquipOutOfBounds(t *testing.T) {
 }
 
 func TestTryRemoveNothingEquipped(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equipper.Equipper.TryRemove()
@@ -117,7 +117,7 @@ func TestTryRemoveNothingEquipped(t *testing.T) {
 }
 
 func TestTryRemoveSomethingEquipped(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equip := g.NewObj(atItemSpec)
@@ -131,7 +131,7 @@ func TestTryRemoveSomethingEquipped(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equip := g.NewObj(atItemSpec)
@@ -150,7 +150,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestRemoveOutOfBounds(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equip := g.NewObj(atItemSpec)
@@ -165,17 +165,14 @@ func TestRemoveOutOfBounds(t *testing.T) {
 }
 
 func TestRemoveOverflowsToGround(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
-	equip := g.NewObj(atItemSpec)
-	equipper.Equipper.Body().Wear(equip)
-
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(equipper, math.Pt(0, 0))
-
 	equipper.Packer.Inventory().capacity = 0
+	g.Level.Place(equipper, math.Pt(1, 1))
+	equip := g.NewObj(atItemSpec)
 
+	equipper.Equipper.Body().Wear(equip)
 	equipper.Equipper.TryRemove()
 	equipper.Equipper.Remove(equip.Equipment.Slot)
 
@@ -189,14 +186,13 @@ func TestRemoveOverflowsToGround(t *testing.T) {
 }
 
 func TestRemoveWhenInvAndGroundAreFull(t *testing.T) {
-	g := NewGame()
+	g := newTestGame()
 
 	equipper := g.NewObj(atActorSpec)
 	equip := g.NewObj(atItemSpec)
 	equipper.Equipper.Body().Wear(equip)
 
-	l := NewLevel(4, 4, nil, IdentLevel)
-	l.Place(equipper, math.Pt(0, 0))
+	g.Level.Place(equipper, math.Pt(1, 1))
 
 	equipper.Packer.Inventory().capacity = 0
 	equipper.Tile.Items.capacity = 0

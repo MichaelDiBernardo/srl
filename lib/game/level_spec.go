@@ -18,7 +18,7 @@ func SquareLevel(l *Level) *Level {
 			m[y][x].Feature = feature
 		}
 	}
-	l.Place(l.game.Player, math.Pt(1, 1))
+	l.Place(l.game.Player, math.Pt(2, 2))
 	return l
 }
 
