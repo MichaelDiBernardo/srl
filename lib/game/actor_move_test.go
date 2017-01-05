@@ -44,3 +44,23 @@ func TestActorCollision(t *testing.T) {
 		t.Error(`a1.Move( (1, 0)) = true, want false`)
 	}
 }
+
+func TestMoveOpensClosedDoor(t *testing.T) {
+	g := newTestGame()
+	obj := g.NewObj(atActorSpec)
+
+	startpos := math.Pt(1, 1)
+	doorpos := math.Pt(1, 2)
+	g.Level.Place(obj, startpos)
+	g.Level.At(doorpos).Feature = FeatClosedDoor
+
+	ok := obj.Mover.Move(math.Pt(0, 1))
+
+	if ok {
+		t.Error(`Move into closed door was ok = true, want false`)
+	}
+
+	if feat := g.Level.At(doorpos).Feature; feat != FeatOpenDoor {
+		t.Errorf(`Door didn't open; got feature %#v, want %#v`, feat, FeatOpenDoor)
+	}
+}
