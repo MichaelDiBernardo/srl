@@ -138,6 +138,9 @@ func LynnRoomsLevel(l *Level) *Level {
 	startroom := rooms[RandInt(0, nrooms)]
 	l.Place(l.game.Player, startroom.Center())
 
+	placemonsters(l, startroom, rooms)
+	placeitems(l, startroom, rooms)
+
 	log.Printf("Made %d/%d rooms.", nrooms, maxrooms)
 	return l
 }
@@ -261,6 +264,64 @@ func drawpath(l *Level, path []math.Point) {
 			tile.Feature = FeatClosedDoor
 		} else {
 			tile.Feature = FeatFloor
+		}
+	}
+}
+
+func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
+	nmonsters := 30
+	g := l.game
+
+	for i := 0; i < nmonsters; i++ {
+		mon := g.NewObj(MonOrc)
+		for tries := 0; tries < 50; tries++ {
+			room := rooms[RandInt(0, len(rooms))]
+			if room == startroom {
+				continue
+			}
+
+			loc := math.Pt(
+				RandInt(room.Min.X, room.Max.X),
+				RandInt(room.Min.Y, room.Max.Y),
+			)
+
+			if l.Place(mon, loc) {
+				break
+			}
+		}
+	}
+}
+
+func placeitems(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
+	nitems := 40
+	g := l.game
+
+	for i := 0; i < nitems; i++ {
+		var spec *Spec
+		switch RandInt(0, 3) {
+		case 0:
+			spec = WeapSword
+		case 1:
+			spec = ArmorLeather
+		case 2:
+			spec = PotCure
+		}
+
+		item := g.NewObj(spec)
+		for tries := 0; tries < 50; tries++ {
+			room := rooms[RandInt(0, len(rooms))]
+			if room == startroom {
+				continue
+			}
+
+			loc := math.Pt(
+				RandInt(room.Min.X, room.Max.X),
+				RandInt(room.Min.Y, room.Max.Y),
+			)
+
+			if l.Place(item, loc) {
+				break
+			}
 		}
 	}
 }
