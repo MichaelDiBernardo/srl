@@ -2,7 +2,6 @@ package game
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 )
 
 // e.g. "Actor", "Item"
@@ -44,14 +43,11 @@ type Gen struct {
 
 // Should this entry be "findable" in the given range of depths?
 func (g Gen) Findable(low, high int) bool {
-	log.Printf("Gen.Findable: checking [%d,%d]", low, high)
 	for _, d := range g.Depths {
 		if low <= d && d <= high {
-			log.Printf("%d: good!", d)
 			return true
 		}
 	}
-	log.Printf("Gen.Findable: no good depths for [%d,%d]", low, high)
 	return false
 }
 

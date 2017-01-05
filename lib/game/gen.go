@@ -5,23 +5,17 @@ import (
 )
 
 // Given the depth of the level and the "wiggle" (i.e. permissible range
-// outside the depth), this will generate n "groups" of monsters that contain
+// outside the depth), this will generate n "groups" of objects made from specs
 // that are guaranteed not to be outside [depth - wiggle, depth + wiggle] based
 // on its given depth. Group sizes are taken from the GroupSize entry for each
-// monster.
-func GenMonsters(n, depth, wiggle int, g *Game) [][]*Obj {
-	return genmonsters(n, depth, wiggle, Monsters, g)
-}
-
-// This one allows you to specify the list of specs to use as input to make it
-// possible to test it on different speclists.
-func genmonsters(n, depth, wiggle int, specs []*Spec, g *Game) [][]*Obj {
+// spec -- if this is a monster, it's intended to be the pack size, and if it's
+// an item it is intended to be the stack size.
+func Generate(n, depth, wiggle int, specs []*Spec, g *Game) [][]*Obj {
 	low, high := depth-wiggle, depth+wiggle
-	log.Printf("genmonsters: %d groups, %d specs, depths %d-%d", n, len(specs), low, high)
-
+	log.Printf("Generate: %d groups, %d specs, depths %d-%d", n, len(specs), low, high)
 	candidates := make([]*Spec, 0)
 
-	log.Print("genmonsters: filtering candidates")
+	log.Print("Generate: filtering candidates")
 	for _, spec := range specs {
 		if spec.Gen.Findable(low, high) {
 			log.Printf("\tSelected %v", spec.Name)
@@ -32,15 +26,15 @@ func genmonsters(n, depth, wiggle int, specs []*Spec, g *Game) [][]*Obj {
 	ncandidates := len(candidates)
 	generated := make([][]*Obj, 0)
 
-	log.Printf("genmonsters: %d candidates at depth %d", ncandidates, depth)
+	log.Printf("Generate: %d candidates at depth %d", ncandidates, depth)
 
 	// RIP :(
 	if ncandidates == 0 {
-		log.Print("genmonsters: No candidates! Returning no groups.")
+		log.Print("Generate: No candidates! Returning no groups.")
 		return generated
 	}
 
-	log.Print("genmonsters: Creating groups.")
+	log.Print("Generate: Creating groups.")
 	for i := 0; i < n; i++ {
 		selected := candidates[RandInt(0, ncandidates)]
 		gsize := selected.Gen.GroupSize
@@ -52,7 +46,7 @@ func genmonsters(n, depth, wiggle int, specs []*Spec, g *Game) [][]*Obj {
 		}
 		generated = append(generated, group)
 	}
-	log.Print("genmonsters: done.")
+	log.Print("Generate: done.")
 
 	return generated
 }

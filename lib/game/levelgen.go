@@ -241,7 +241,7 @@ func drawpath(l *Level, path []math.Point, rooms []math.Rectangle) {
 func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 	g := l.game
 
-	mongroups := GenMonsters(20, g.Depth, 2, g)
+	mongroups := Generate(10, g.Depth, 2, Monsters, g)
 
 	for _, group := range mongroups {
 		for tries := 0; tries < 50; tries++ {
@@ -269,23 +269,13 @@ func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 
 // Generates and places a bunch of items in any room.
 func placeitems(l *Level, rooms []math.Rectangle) {
-	nitems := 40
 	g := l.game
+	itemgroups := Generate(40, g.Depth, 2, Items, g)
 
-	for i := 0; i < nitems; i++ {
-		var spec *Spec
-		switch RandInt(0, 3) {
-		case 0:
-			spec = WeapSword
-		case 1:
-			spec = ArmorLeather
-		case 2:
-			spec = PotCure
-		}
+	for _, group := range itemgroups {
+		room := rooms[RandInt(0, len(rooms))]
 
-		item := g.NewObj(spec)
-		for tries := 0; tries < 10; tries++ {
-			room := rooms[RandInt(0, len(rooms))]
+		for _, item := range group {
 			loc := math.Pt(
 				RandInt(room.Min.X, room.Max.X),
 				RandInt(room.Min.Y, room.Max.Y),

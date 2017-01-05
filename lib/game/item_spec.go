@@ -8,12 +8,16 @@ const (
 	SpecCure = "cure"
 )
 
-var (
-	WeapSword = &Spec{
+var Items = []*Spec{
+	&Spec{
 		Family:  FamItem,
 		Genus:   GenEquipment,
 		Species: SpecSword,
 		Name:    "SWORD",
+		Gen: Gen{
+			Depths:    []int{1},
+			GroupSize: 1,
+		},
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Damroll: NewDice(2, 5),
@@ -23,12 +27,16 @@ var (
 				Slot:    SlotHand,
 			}),
 		},
-	}
-	ArmorLeather = &Spec{
+	},
+	&Spec{
 		Family:  FamItem,
 		Genus:   GenEquipment,
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
+		Gen: Gen{
+			Depths:    []int{1},
+			GroupSize: 1,
+		},
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 4),
@@ -38,17 +46,18 @@ var (
 				Slot:     SlotBody,
 			}),
 		},
-	}
-)
-
-var (
-	PotCure = &Spec{
+	},
+	&Spec{
 		Family:  FamItem,
 		Genus:   GenConsumable,
 		Species: SpecCure,
 		Name:    "CURE",
+		Gen: Gen{
+			Depths:    []int{1},
+			GroupSize: 1,
+		},
 		Traits: &Traits{
 			Consumable: NewConsumable(curefunc),
 		},
-	}
-)
+	},
+}
