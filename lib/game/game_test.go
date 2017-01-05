@@ -8,7 +8,7 @@ import (
 // Creates a new game that especially useful for testing; makes a 4x4 map with
 // a wall border, and places the player at 2,2.
 func newTestGame() *Game {
-	return newTestGameWith(IdentLevel)
+	return newTestGameWith(SquareLevel)
 }
 
 func newTestGameWith(func(*Level) *Level) *Game {

@@ -3,10 +3,9 @@ package game
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 	"log"
-	"math/rand"
 )
 
-// Generators.
+// Generates a simple square test level suitable for unit tests.
 func SquareLevel(l *Level) *Level {
 	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
 	for y := 0; y < height; y++ {
@@ -19,54 +18,6 @@ func SquareLevel(l *Level) *Level {
 		}
 	}
 	l.Place(l.game.Player, math.Pt(2, 2))
-	return l
-}
-
-func IdentLevel(l *Level) *Level {
-	height, width, m := l.Bounds.Height(), l.Bounds.Width(), l.Map
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			m[y][x].Feature = FeatFloor
-		}
-	}
-	l.Place(l.game.Player, math.Pt(1, 1))
-	return l
-}
-
-func TestLevel(l *Level) *Level {
-	l = SquareLevel(l)
-	for i := 0; i < 10; i++ {
-		mon := l.game.NewObj(MonOrc)
-		for {
-			pt := math.Pt(rand.Intn(l.Bounds.Width()), rand.Intn(l.Bounds.Height()))
-			if l.Place(mon, pt) {
-				break
-			}
-		}
-	}
-	for i := 0; i < 20; i++ {
-		var pt math.Point
-		for {
-			pt = math.Pt(rand.Intn(l.Bounds.Width()), rand.Intn(l.Bounds.Height()))
-			if !l.At(pt).Feature.Solid {
-				break
-			}
-		}
-
-		stacksize := rand.Intn(3) + 1
-		for j := 0; j < stacksize; j++ {
-			hi := rand.Intn(3)
-			switch hi {
-			case 0:
-				l.Place(l.game.NewObj(WeapSword), pt)
-			case 1:
-				l.Place(l.game.NewObj(ArmorLeather), pt)
-			case 2:
-				l.Place(l.game.NewObj(PotCure), pt)
-			}
-		}
-	}
-	l.Place(l.game.Player, math.Pt(1, 1))
 	return l
 }
 
@@ -139,12 +90,13 @@ func LynnRoomsLevel(l *Level) *Level {
 	l.Place(l.game.Player, startroom.Center())
 
 	placemonsters(l, startroom, rooms)
-	placeitems(l, startroom, rooms)
+	placeitems(l, rooms)
 
 	log.Printf("Made %d/%d rooms.", nrooms, maxrooms)
 	return l
 }
 
+// Fills the tiles in the given area with the given feature.
 func fillmap(m Map, area math.Rectangle, f *Feature) {
 	min, max := area.Min, area.Max
 	for y := min.Y; y < max.Y; y++ {
@@ -167,6 +119,8 @@ func randroom(l *Level) math.Rectangle {
 	return math.Rect(min, max)
 }
 
+// Tries to generate a room that won't intersect with any other rooms or an
+// existing corridor.
 func placeroom(l *Level, rooms []math.Rectangle, paths []math.Point) math.Rectangle {
 	log.Printf("Placeroom:")
 	for tries := 0; tries < 15; tries++ {
@@ -283,31 +237,38 @@ func drawpath(l *Level, path []math.Point, rooms []math.Rectangle) {
 	}
 }
 
+// Generates and places monsters in any room except the starting room.
 func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
-	nmonsters := 30
 	g := l.game
 
-	for i := 0; i < nmonsters; i++ {
-		mon := g.NewObj(MonOrc)
+	mongroups := GenMonsters(20, g.Depth, 2, g)
+
+	for _, group := range mongroups {
 		for tries := 0; tries < 50; tries++ {
 			room := rooms[RandInt(0, len(rooms))]
 			if room == startroom {
 				continue
 			}
 
-			loc := math.Pt(
-				RandInt(room.Min.X, room.Max.X),
-				RandInt(room.Min.Y, room.Max.Y),
-			)
+			// TODO: Don't use another loop, instead try to place as a group.
+			for _, mon := range group {
+				for moretries := 0; moretries < 50; moretries++ {
+					loc := math.Pt(
+						RandInt(room.Min.X, room.Max.X),
+						RandInt(room.Min.Y, room.Max.Y),
+					)
 
-			if l.Place(mon, loc) {
-				break
+					if l.Place(mon, loc) {
+						break
+					}
+				}
 			}
 		}
 	}
 }
 
-func placeitems(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
+// Generates and places a bunch of items in any room.
+func placeitems(l *Level, rooms []math.Rectangle) {
 	nitems := 40
 	g := l.game
 
@@ -323,17 +284,12 @@ func placeitems(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 		}
 
 		item := g.NewObj(spec)
-		for tries := 0; tries < 50; tries++ {
+		for tries := 0; tries < 10; tries++ {
 			room := rooms[RandInt(0, len(rooms))]
-			if room == startroom {
-				continue
-			}
-
 			loc := math.Pt(
 				RandInt(room.Min.X, room.Max.X),
 				RandInt(room.Min.Y, room.Max.Y),
 			)
-
 			if l.Place(item, loc) {
 				break
 			}
@@ -364,6 +320,7 @@ func drange(x, y int, incl bool) (start, end, incr int) {
 	return start, end, incr
 }
 
+// Generates a new dungeon level.
 func NewDungeon(g *Game) *Level {
 	return NewLevel(80, 80, g, LynnRoomsLevel)
 }

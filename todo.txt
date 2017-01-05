@@ -1,6 +1,4 @@
 NEXT:
-- Level generation. 
-    - Map generation
     - Monster generation
     - Item generation
  
@@ -26,6 +24,8 @@ Stuff:
     - morgues
     - etc
 - Monster AI
+- Room variations ("vaults")
+- Room decorations
 
 HAX:
 - items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???

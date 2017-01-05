@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // e.g. "Actor", "Item"
@@ -32,6 +33,28 @@ func (t *Trait) Obj() *Obj {
 	return t.obj
 }
 
+// Stores everything you need to know about randomly generating this object
+// ingame.
+// 'Depths' is a list of the native depths of this object.
+// 'GroupSize' means "pack size" for monsters and "stack size" for consumables.
+type Gen struct {
+	Depths    []int
+	GroupSize int
+}
+
+// Should this entry be "findable" in the given range of depths?
+func (g Gen) Findable(low, high int) bool {
+	log.Printf("Gen.Findable: checking [%d,%d]", low, high)
+	for _, d := range g.Depths {
+		if low <= d && d <= high {
+			log.Printf("%d: good!", d)
+			return true
+		}
+	}
+	log.Printf("Gen.Findable: no good depths for [%d,%d]", low, high)
+	return false
+}
+
 // A specification for a type of game object.
 type Spec struct {
 	Family  Family
@@ -39,6 +62,7 @@ type Spec struct {
 	Species Species
 	Name    string
 	Traits  *Traits
+	Gen     Gen
 }
 
 var nextobjid = 1

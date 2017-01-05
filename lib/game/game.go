@@ -11,12 +11,13 @@ type Game struct {
 	Player *Obj
 	Level  *Level
 	Events *EventQueue
+	Depth  int
 	mode   Mode
 }
 
 // Create a new game.
 func NewGame() *Game {
-	return &Game{Events: newEventQueue()}
+	return &Game{Events: newEventQueue(), Depth: 1}
 }
 
 // Temp convenience method to init the game before playing.

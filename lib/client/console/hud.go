@@ -109,6 +109,7 @@ type glyph struct {
 var actorGlyphs = map[game.Species]glyph{
 	game.SpecHuman: glyph{Ch: '@', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
 	game.SpecOrc:   glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
+	game.SpecAnt:   glyph{Ch: 'a', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
 }
 
 // Glyphs used to render items.
