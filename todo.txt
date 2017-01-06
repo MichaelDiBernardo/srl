@@ -1,10 +1,9 @@
 NEXT:
-    - Monster generation
-    - Item generation
- 
-Then:
+- tests for generate
 - LOS
 - Player can only see in LOS
+ 
+Then:
 - Monsters have AI that:
     - Randomly wanders when player isn't in LOS
     - Chases and attacks when player in LOS
@@ -18,12 +17,13 @@ Then:
 
 Stuff:
 - Consumables stack in inventories.
+- Monster pack starting formation and proper pack placement.
 - XP spending on skills
 - user-level configs for
     - keymaps
     - morgues
     - etc
-- Monster AI
+- Monster & Pack AI
 - Room variations ("vaults")
 - Room decorations
 

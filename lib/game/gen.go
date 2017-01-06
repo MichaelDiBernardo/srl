@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/MichaelDiBernardo/srl/lib/math"
 	"log"
 )
 
@@ -37,7 +38,7 @@ func Generate(n, depth, wiggle int, specs []*Spec, g *Game) [][]*Obj {
 	log.Print("Generate: Creating groups.")
 	for i := 0; i < n; i++ {
 		selected := candidates[RandInt(0, ncandidates)]
-		gsize := selected.Gen.GroupSize
+		gsize := math.Max(1, selected.Gen.GroupSize)
 		group := make([]*Obj, 0, gsize)
 
 		log.Printf("\t%d %v", gsize, selected.Name)
