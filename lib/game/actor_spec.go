@@ -47,6 +47,8 @@ var Monsters = []*Spec{
 				vit: 1,
 				mnd: 0,
 
+				speed: 2,
+
 				melee:      1,
 				evasion:    1,
 				critdivmod: 4,
@@ -78,6 +80,8 @@ var Monsters = []*Spec{
 				agi: 3,
 				vit: 1,
 				mnd: 0,
+
+				speed: 2,
 
 				melee:      5,
 				evasion:    5,

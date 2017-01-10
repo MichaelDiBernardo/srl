@@ -52,7 +52,7 @@ func TestSpecsAtExactDepth(t *testing.T) {
 			t.Errorf(`Generate() made group %d of size %d, want 1`, i, l)
 		}
 		if s, e := group[0].Spec.Name, expected[i]; s != e {
-			t.Errorf(`Wrong spec on obj in group %d; got %s, want %s`, s, e)
+			t.Errorf(`Wrong spec on obj in group %d; got %s, want %s`, i, s, e)
 		}
 	}
 }
@@ -98,7 +98,7 @@ func TestSpecsWithWiggleDepth(t *testing.T) {
 			t.Errorf(`Generate() made group %d of size %d, want 1`, i, l)
 		}
 		if s, e := group[0].Spec.Name, expected[i]; s != e {
-			t.Errorf(`Wrong spec on obj in group %d; got %s, want %s`, s, e)
+			t.Errorf(`Wrong spec on obj in group %d; got %s, want %s`, i, s, e)
 		}
 	}
 }

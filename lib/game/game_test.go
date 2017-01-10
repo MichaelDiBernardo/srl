@@ -36,7 +36,7 @@ func TestKillingMonsterRemovesIt(t *testing.T) {
 		Genus:   GenMonster,
 		Species: "TestSpecies",
 		Name:    "Hi",
-		Traits:  &Traits{},
+		Traits:  &Traits{Sheet: NewPlayerSheet},
 	}
 
 	g := newTestGame()
@@ -53,7 +53,7 @@ func TestKillingMonsterRemovesIt(t *testing.T) {
 	}
 
 	// Only actor left should be the player.
-	if len(g.Level.actors) > 1 {
+	if g.Level.scheduler.Len() > 1 {
 		t.Error(`l.actors was not empty after removal.`)
 	}
 

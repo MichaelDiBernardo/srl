@@ -17,10 +17,10 @@ type Tile struct {
 type Map [][]*Tile
 
 type Level struct {
-	Map    Map
-	Bounds math.Rectangle
-	game   *Game
-	actors []*Obj
+	Map       Map
+	Bounds    math.Rectangle
+	game      *Game
+	scheduler *Scheduler
 }
 
 // Create a level that uses the given gametory to create game objects, and which
@@ -41,10 +41,10 @@ func NewLevel(width, height int, game *Game, gen func(*Level) *Level) *Level {
 		newmap = append(newmap, row)
 	}
 	level := &Level{
-		Map:    newmap,
-		Bounds: math.Rect(math.Origin, math.Pt(width, height)),
-		game:   game,
-		actors: make([]*Obj, 0),
+		Map:       newmap,
+		Bounds:    math.Rect(math.Origin, math.Pt(width, height)),
+		game:      game,
+		scheduler: NewScheduler(),
 	}
 	return gen(level)
 }
@@ -87,14 +87,11 @@ func (l *Level) Remove(o *Obj) {
 
 }
 
+// Advances the game until the player's next turn.
 func (l *Level) Evolve() {
-	for _, row := range l.Map {
-		for _, tile := range row {
-			tile.Visible = false
-		}
-	}
-
-	for _, actor := range l.actors {
+	// Advance schedule until we find the player.
+	for {
+		actor := l.scheduler.Next()
 		if seer := actor.Seer; seer != nil {
 			seer.CalcLOS()
 		}
@@ -102,13 +99,17 @@ func (l *Level) Evolve() {
 			ai.Act(l)
 		}
 		if actor.IsPlayer() {
+			for _, row := range l.Map {
+				for _, tile := range row {
+					tile.Visible = false
+				}
+			}
 			for _, pt := range actor.Seer.LOS() {
 				l.At(pt).Visible = true
 			}
+			break
 		}
 	}
-
-	// Player LOS
 }
 
 func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
@@ -122,7 +123,7 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 	if obj.Tile != nil {
 		obj.Tile.Actor = nil
 	} else {
-		l.actors = append(l.actors, obj)
+		l.scheduler.Add(obj)
 	}
 
 	obj.Level = l
@@ -141,20 +142,7 @@ func (l *Level) removeActor(obj *Obj) {
 	obj.Tile.Actor = nil
 	obj.Tile = nil
 	obj.Level = nil
-
-	index := -1
-	for i, o := range l.actors {
-		if o == obj {
-			index = i
-			break
-		}
-	}
-
-	if index == -1 {
-		panic("Tried to remove actor but wasn't in list.")
-	}
-
-	l.actors = append(l.actors[:index], l.actors[index+1:]...)
+	l.scheduler.Remove(obj)
 }
 
 // Used to track which actor should be acting when.
@@ -201,9 +189,20 @@ func NewScheduler() *Scheduler {
 	return &Scheduler{pq: &pq}
 }
 
+func (s *Scheduler) Len() int {
+	return len(*(s.pq))
+}
+
 // Add an actor to the schedule.
 func (s *Scheduler) Add(actor *Obj) {
-	entry := &scheduled{actor: actor, delay: getdelay(actor.Sheet.Speed())}
+	delay := getdelay(actor.Sheet.Speed())
+
+	// Player should always get the first turn.
+	if actor.IsPlayer() {
+		delay = 0
+	}
+
+	entry := &scheduled{actor: actor, delay: delay}
 	heap.Push(s.pq, entry)
 }
 
@@ -240,6 +239,8 @@ func (s *Scheduler) Remove(actor *Obj) {
 	heap.Init(s.pq)
 }
 
+// Given the speed of an actor, this will tell you how much delay to add after
+// each of its turns.
 func getdelay(spd int) int {
 	switch spd {
 	case 1:

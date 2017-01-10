@@ -10,7 +10,7 @@ var lTestActor = &Spec{
 	Genus:   GenMonster,
 	Species: "TestSpecies",
 	Name:    "Hi",
-	Traits:  &Traits{},
+	Traits:  &Traits{Sheet: NewPlayerSheet},
 }
 
 var lTestItem = &Spec{
@@ -90,11 +90,8 @@ func TestPlaceAddsActorToList(t *testing.T) {
 
 	g.Level.Place(obj, startpos)
 
-	if actual := len(g.Level.actors); actual != 2 {
+	if actual := g.Level.scheduler.Len(); actual != 2 {
 		t.Errorf(`Place(obj) put %d actors in list; want 2`, actual)
-	}
-	if actual := g.Level.actors[1]; actual != obj {
-		t.Errorf(`Place(obj) put %v in list; want %v`, actual, obj)
 	}
 }
 
@@ -106,7 +103,7 @@ func TestBadPlaceDoesNotAddActorToList(t *testing.T) {
 	g.Level.Place(obj, startpos)
 
 	// Player is always in the list.
-	if actual := len(g.Level.actors); actual != 1 {
+	if actual := g.Level.scheduler.Len(); actual != 1 {
 		t.Errorf(`Place(obj) put %d actors in list; want 1`, actual)
 	}
 }
@@ -146,7 +143,7 @@ func TestOkRemoveActor(t *testing.T) {
 	if g.Level.At(pos).Actor != nil {
 		t.Error(`Actor's previous tile had tile.Actor != nil`)
 	}
-	if len(g.Level.actors) > 1 {
+	if g.Level.scheduler.Len() > 1 {
 		t.Error(`l.actors had monster-actors after removal.`)
 	}
 }
@@ -156,7 +153,7 @@ type schedulerTest struct {
 	want   []string
 }
 
-func TestScheduler(t *testing.T) {
+func TestScheduling(t *testing.T) {
 	tests := []schedulerTest{
 		{map[string]int{"A": 1}, []string{"A", "A", "A", "A", "A"}},
 		{map[string]int{"A": 2}, []string{"A", "A", "A", "A", "A"}},
@@ -187,6 +184,10 @@ func TestScheduler(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRemoveFromSchedule(t *testing.T) {
+	// TODO
 }
 
 func lTestSpd(g *Game, name string, spd int) *Obj {
