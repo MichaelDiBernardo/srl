@@ -25,18 +25,22 @@ func NewActorSeer(obj *Obj) Seer {
 }
 
 func (a *ActorSeer) CalcFOV() {
-	fov := make([]math.Point, 0, FOVRadius*FOVRadius)
-	cheb := math.Chebyshev(FOVRadius)
+	// Max area of FOV is (2r+1) * (2r+1)
+	maxarea := 4*FOVRadius*FOVRadius + 4*FOVRadius + 1
+	fov := make([]math.Point, maxarea)
+
 	pos, level := a.Obj().Pos(), a.Obj().Level
 
-	for y := cheb.Min.Y; y < cheb.Max.Y; y++ {
-		for x := cheb.Min.X; x < cheb.Max.X; x++ {
-			pt := math.Pt(x, y).Add(pos)
+	for r := 0; r <= FOVRadius; r++ {
+		edge := math.ChebyEdge(r)
+		for _, cpt := range edge {
+			pt := pos.Add(cpt)
 			if pt.In(level) {
 				fov = append(fov, pt)
 			}
 		}
 	}
+
 	a.fov = fov
 
 	if actor := a.Obj(); actor.IsPlayer() {

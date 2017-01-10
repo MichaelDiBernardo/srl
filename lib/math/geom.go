@@ -96,7 +96,7 @@ func (r Rectangle) Center() Point {
 	return Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
 }
 
-// Yields rectangle that contains all coordinates of Chebyshev distance 'r'
+// Yields rectangle that contains all coordinates of Chebyshev distance <= r
 // from (0, 0). You can iterate over all points like:
 //
 // points := Chebyshev(3)
@@ -107,4 +107,30 @@ func (r Rectangle) Center() Point {
 // }
 func Chebyshev(r int) Rectangle {
 	return Rect(Pt(-r, -r), Pt(r+1, r+1))
+}
+
+// Creates a list of points that have Chebyshev distance == r from (0, 0).  The
+// points are ordered, following them will take you from topleft -> bottomleft
+// -> bottomright -> topright.
+func ChebyEdge(r int) []Point {
+	if r <= 0 {
+		return []Point{Pt(0, 0)}
+	}
+
+	edge := make([]Point, 0)
+
+	for i := -r; i < r; i++ {
+		edge = append(edge, Pt(i, -r))
+	}
+	for i := -r; i < r; i++ {
+		edge = append(edge, Pt(r, i))
+	}
+	for i := -r; i < r; i++ {
+		edge = append(edge, Pt(-i, r))
+	}
+	for i := -r; i < r; i++ {
+		edge = append(edge, Pt(-r, -i))
+	}
+
+	return edge
 }
