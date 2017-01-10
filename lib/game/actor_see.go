@@ -38,6 +38,10 @@ func (a *ActorSeer) CalcFOV() {
 		}
 	}
 	a.fov = fov
+
+	if actor := a.Obj(); actor.IsPlayer() {
+		actor.Level.UpdateVis()
+	}
 }
 
 func (a *ActorSeer) FOV() FOV {

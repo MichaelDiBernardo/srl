@@ -99,16 +99,23 @@ func (l *Level) Evolve() {
 			ai.Act(l)
 		}
 		if actor.IsPlayer() {
-			for _, row := range l.Map {
-				for _, tile := range row {
-					tile.Visible = false
-				}
-			}
-			for _, pt := range actor.Seer.FOV() {
-				l.At(pt).Visible = true
-			}
 			break
 		}
+	}
+}
+
+// Updates what the player can see on the level.
+func (l *Level) UpdateVis() {
+	for _, row := range l.Map {
+		for _, tile := range row {
+			tile.Visible = false
+		}
+	}
+
+	fov := l.game.Player.Seer.FOV()
+
+	for _, pt := range fov {
+		l.At(pt).Visible = true
 	}
 }
 
@@ -130,6 +137,12 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 	obj.Tile = tile
 
 	tile.Actor = obj
+
+	// Mostly done for the player's sake; when we start the game,
+	// Level.Evolve() hasn't been called yet, which is what refreshes FOV.
+	if seer := obj.Seer; seer != nil {
+		seer.CalcFOV()
+	}
 
 	return true
 }
