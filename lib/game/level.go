@@ -156,16 +156,16 @@ type scheduled struct {
 type SQ []*scheduled
 
 // See https://golang.org/pkg/container/heap/#example__intHeap.
-func (s *SQ) Len() int {
-	return len(*s)
+func (s SQ) Len() int {
+	return len(s)
 }
 
-func (s *SQ) Less(i, j int) bool {
-	return (*s)[i].delay < (*s)[j].delay
+func (s SQ) Less(i, j int) bool {
+	return s[i].delay < s[j].delay
 }
 
-func (s *SQ) Swap(i, j int) {
-	(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+func (s SQ) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 func (s *SQ) Push(x interface{}) {
@@ -190,7 +190,7 @@ func NewScheduler() *Scheduler {
 }
 
 func (s *Scheduler) Len() int {
-	return len(*(s.pq))
+	return s.pq.Len()
 }
 
 // Add an actor to the schedule.
