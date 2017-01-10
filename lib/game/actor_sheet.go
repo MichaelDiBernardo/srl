@@ -42,6 +42,8 @@ type Sheet interface {
 	Heal(amt int)
 	// Touch me.
 	// Feel me.
+
+	Speed() int
 }
 
 // Sheet used for player, which has a lot of derived attributes.
@@ -51,6 +53,8 @@ type PlayerSheet struct {
 	agi int
 	vit int
 	mnd int
+
+	speed int
 
 	hp int
 	mp int
@@ -63,6 +67,7 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		agi:   4,
 		vit:   4,
 		mnd:   3,
+		speed: 2,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
@@ -91,6 +96,10 @@ func (p *PlayerSheet) Melee() int {
 
 func (p *PlayerSheet) Evasion() int {
 	return p.Agi()
+}
+
+func (p *PlayerSheet) Speed() int {
+	return p.speed
 }
 
 func (p *PlayerSheet) HP() int {
@@ -183,6 +192,8 @@ type MonsterSheet struct {
 	vit int
 	mnd int
 
+	speed int
+
 	hp    int
 	mp    int
 	maxhp int
@@ -233,6 +244,10 @@ func (m *MonsterSheet) Melee() int {
 
 func (m *MonsterSheet) Evasion() int {
 	return m.evasion
+}
+
+func (m *MonsterSheet) Speed() int {
+	return m.speed
 }
 
 func (m *MonsterSheet) HP() int {

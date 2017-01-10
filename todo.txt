@@ -1,5 +1,4 @@
 NEXT:
-- tests for generate
 - LOS
 - Player can only see in LOS
  

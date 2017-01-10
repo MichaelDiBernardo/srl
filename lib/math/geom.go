@@ -48,6 +48,8 @@ type Rectangle struct {
 	Min, Max Point
 }
 
+var ZeroRect Rectangle
+
 func Rect(min, max Point) Rectangle {
 	return Rectangle{Min: min, Max: max}
 }
@@ -93,5 +95,3 @@ func (r Rectangle) Intersect(s Rectangle) Rectangle {
 func (r Rectangle) Center() Point {
 	return Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
 }
-
-var ZeroRect Rectangle

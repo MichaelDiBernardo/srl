@@ -81,6 +81,7 @@ type Obj struct {
 	Packer   Packer
 	Equipper Equipper
 	User     User
+	Seer     Seer
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
@@ -106,6 +107,7 @@ type Traits struct {
 	Packer   func(*Obj) Packer
 	Equipper func(*Obj) Equipper
 	User     func(*Obj) User
+	Seer     func(*Obj) Seer
 
 	Equipment  func(*Obj) *Equipment
 	Consumable func(*Obj) *Consumable
@@ -143,6 +145,9 @@ func newObj(spec *Spec) *Obj {
 	if traits.User != nil {
 		newobj.User = traits.User(newobj)
 	}
+	if traits.Seer != nil {
+		newobj.Seer = traits.Seer(newobj)
+	}
 
 	if traits.Equipment != nil {
 		newobj.Equipment = traits.Equipment(newobj)
@@ -161,8 +166,4 @@ func (o *Obj) Pos() math.Point {
 // Does this object represent the player?
 func (o *Obj) IsPlayer() bool {
 	return o.Spec.Family == FamActor && o.Spec.Genus == GenPlayer
-}
-
-func (o *Obj) HasAI() bool {
-	return o.AI != nil
 }

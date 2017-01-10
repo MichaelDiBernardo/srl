@@ -150,3 +150,53 @@ func TestOkRemoveActor(t *testing.T) {
 		t.Error(`l.actors had monster-actors after removal.`)
 	}
 }
+
+type schedulerTest struct {
+	actors map[string]int
+	want   []string
+}
+
+func TestScheduler(t *testing.T) {
+	tests := []schedulerTest{
+		{map[string]int{"A": 1}, []string{"A", "A", "A", "A", "A"}},
+		{map[string]int{"A": 2}, []string{"A", "A", "A", "A", "A"}},
+		{map[string]int{"A": 3}, []string{"A", "A", "A", "A", "A"}},
+		{map[string]int{"A": 4}, []string{"A", "A", "A", "A", "A"}},
+		{map[string]int{"A": 1, "B": 2}, []string{"B", "A", "B", "A", "B", "B"}},
+		{map[string]int{"A": 1, "B": 2}, []string{"B", "A", "B", "A", "B", "B", "A", "B"}},
+		{map[string]int{"A": 2, "B": 4}, []string{"B", "A", "B", "B", "A", "B", "B", "A", "B", "B", "A"}},
+	}
+
+	g := newTestGame()
+
+	for ti, test := range tests {
+		s := NewScheduler()
+		for aname, speed := range test.actors {
+			s.Add(lTestSpd(g, aname, speed))
+		}
+
+		actual := make([]string, 0)
+		for i := 0; i < len(test.want); i++ {
+			actual = append(actual, s.Next().Spec.Name)
+		}
+
+		for si, want := range test.want {
+			if actual[si] != want {
+				t.Errorf("TestScheduler: Test %d -- got %v, want %v", ti, actual, test.want)
+				break
+			}
+		}
+	}
+}
+
+func lTestSpd(g *Game, name string, spd int) *Obj {
+	return g.NewObj(&Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: "TestSpecies",
+		Name:    name,
+		Traits: &Traits{
+			Sheet: NewMonsterSheet(MonsterSheet{speed: spd}),
+		},
+	})
+}

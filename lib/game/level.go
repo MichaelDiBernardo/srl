@@ -1,6 +1,7 @@
 package game
 
 import (
+	"container/heap"
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -10,6 +11,7 @@ type Tile struct {
 	Actor   *Obj
 	Items   *Inventory
 	Pos     math.Point
+	Visible bool
 }
 
 type Map [][]*Tile
@@ -86,11 +88,27 @@ func (l *Level) Remove(o *Obj) {
 }
 
 func (l *Level) Evolve() {
-	for _, actor := range l.actors {
-		if actor.HasAI() {
-			actor.AI.Act(l)
+	for _, row := range l.Map {
+		for _, tile := range row {
+			tile.Visible = false
 		}
 	}
+
+	for _, actor := range l.actors {
+		if seer := actor.Seer; seer != nil {
+			seer.CalcLOS()
+		}
+		if ai := actor.AI; ai != nil {
+			ai.Act(l)
+		}
+		if actor.IsPlayer() {
+			for _, pt := range actor.Seer.LOS() {
+				l.At(pt).Visible = true
+			}
+		}
+	}
+
+	// Player LOS
 }
 
 func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
@@ -137,4 +155,102 @@ func (l *Level) removeActor(obj *Obj) {
 	}
 
 	l.actors = append(l.actors[:index], l.actors[index+1:]...)
+}
+
+// Used to track which actor should be acting when.
+type scheduled struct {
+	actor *Obj
+	delay int
+}
+
+// Shoehorning into container/heap's interface. SQ acts as the actual priority
+// queue.
+type SQ []*scheduled
+
+// See https://golang.org/pkg/container/heap/#example__intHeap.
+func (s *SQ) Len() int {
+	return len(*s)
+}
+
+func (s *SQ) Less(i, j int) bool {
+	return (*s)[i].delay < (*s)[j].delay
+}
+
+func (s *SQ) Swap(i, j int) {
+	(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+}
+
+func (s *SQ) Push(x interface{}) {
+	*s = append(*s, x.(*scheduled))
+}
+
+func (s *SQ) Pop() interface{} {
+	old := *s
+	n := len(old)
+	x := old[n-1]
+	*s = old[0 : n-1]
+	return x
+}
+
+type Scheduler struct {
+	pq *SQ
+}
+
+func NewScheduler() *Scheduler {
+	pq := make(SQ, 0)
+	return &Scheduler{pq: &pq}
+}
+
+// Add an actor to the schedule.
+func (s *Scheduler) Add(actor *Obj) {
+	entry := &scheduled{actor: actor, delay: getdelay(actor.Sheet.Speed())}
+	heap.Push(s.pq, entry)
+}
+
+// Picks the next actor to act, and moves time forward for everyone else.
+func (s *Scheduler) Next() *Obj {
+	entry := heap.Pop(s.pq).(*scheduled)
+	for _, e := range *(s.pq) {
+		e.delay -= entry.delay
+	}
+	heap.Init(s.pq)
+
+	actor := entry.actor
+	entry.delay = getdelay(actor.Sheet.Speed())
+	heap.Push(s.pq, entry)
+
+	return actor
+}
+
+// Removes an actor from the scheduler.
+func (s *Scheduler) Remove(actor *Obj) {
+	index := -1
+	for i, e := range *(s.pq) {
+		if e.actor == actor {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		panic("Tried to remove actor but wasn't in list.")
+	}
+
+	*(s.pq) = append((*(s.pq))[:index], (*(s.pq))[index+1:]...)
+	heap.Init(s.pq)
+}
+
+func getdelay(spd int) int {
+	switch spd {
+	case 1:
+		return 150
+	case 2:
+		return 100
+	case 3:
+		return 75
+	case 4:
+		return 50
+	default:
+		panic(fmt.Sprintf("Spd %d does not have a delay", spd))
+	}
 }
