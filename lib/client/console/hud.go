@@ -153,8 +153,9 @@ func (m *mapPanel) Render(g *game.Game) {
 
 			tile := level.At(cur)
 			drawpos := cur.Add(maptrans)
-
-			if tile.Actor != nil {
+			if !tile.Visible {
+				m.display.SetCell(drawpos.X, drawpos.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
+			} else if tile.Actor != nil {
 				gl := actorGlyphs[tile.Actor.Spec.Species]
 				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
 			} else if !tile.Items.Empty() {

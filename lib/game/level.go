@@ -93,7 +93,7 @@ func (l *Level) Evolve() {
 	for {
 		actor := l.scheduler.Next()
 		if seer := actor.Seer; seer != nil {
-			seer.CalcLOS()
+			seer.CalcFOV()
 		}
 		if ai := actor.AI; ai != nil {
 			ai.Act(l)
@@ -104,7 +104,7 @@ func (l *Level) Evolve() {
 					tile.Visible = false
 				}
 			}
-			for _, pt := range actor.Seer.LOS() {
+			for _, pt := range actor.Seer.FOV() {
 				l.At(pt).Visible = true
 			}
 			break

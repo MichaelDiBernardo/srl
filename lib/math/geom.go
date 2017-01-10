@@ -95,3 +95,16 @@ func (r Rectangle) Intersect(s Rectangle) Rectangle {
 func (r Rectangle) Center() Point {
 	return Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
 }
+
+// Yields rectangle that contains all coordinates of Chebyshev distance 'r'
+// from (0, 0). You can iterate over all points like:
+//
+// points := Chebyshev(3)
+// for y := points.Min.Y; y < points.Max.Y; y++ {
+//   for x := points.Min.X; x < points.Max.X; x++ {
+//       -- do something with Pt(x, y)
+//   }
+// }
+func Chebyshev(r int) Rectangle {
+	return Rect(Pt(-r, -r), Pt(r+1, r+1))
+}
