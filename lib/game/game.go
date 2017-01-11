@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+const MaxDepth = 5
+
 // Backend for a single game.
 type Game struct {
 	Player *Obj

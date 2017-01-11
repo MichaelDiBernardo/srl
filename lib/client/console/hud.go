@@ -125,6 +125,8 @@ var featureGlyphs = map[game.FeatureType]glyph{
 	"FeatFloor":      glyph{Ch: '.', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
 	"FeatClosedDoor": glyph{Ch: '+', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
 	"FeatOpenDoor":   glyph{Ch: '\'', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
+	"FeatStairsUp":   glyph{Ch: '>', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
+	"FeatStairsDown": glyph{Ch: '<', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
 }
 
 // Create a new mapPanel.

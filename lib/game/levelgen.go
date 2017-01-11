@@ -91,6 +91,7 @@ func LynnRoomsLevel(l *Level) *Level {
 
 	placemonsters(l, startroom, rooms)
 	placeitems(l, rooms)
+	placestairs(l, rooms)
 
 	log.Printf("Made %d/%d rooms.", nrooms, maxrooms)
 	return l
@@ -253,10 +254,7 @@ func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 			// TODO: Don't use another loop, instead try to place as a group.
 			for _, mon := range group {
 				for moretries := 0; moretries < 50; moretries++ {
-					loc := math.Pt(
-						RandInt(room.Min.X, room.Max.X),
-						RandInt(room.Min.Y, room.Max.Y),
-					)
+					loc := randpoint(room)
 
 					if l.Place(mon, loc) {
 						break
@@ -276,15 +274,56 @@ func placeitems(l *Level, rooms []math.Rectangle) {
 		room := rooms[RandInt(0, len(rooms))]
 
 		for _, item := range group {
-			loc := math.Pt(
-				RandInt(room.Min.X, room.Max.X),
-				RandInt(room.Min.Y, room.Max.Y),
-			)
+			loc := randpoint(room)
 			if l.Place(item, loc) {
 				break
 			}
 		}
 	}
+}
+
+func placestairs(l *Level, rooms []math.Rectangle) {
+	up, down := RandInt(1, 4), RandInt(1, 4)
+	if depth := l.game.Depth; depth == 1 {
+		down = -1
+	} else if depth == MaxDepth {
+		up = -1
+	}
+
+	nup, ndown := 0, 0
+
+	place := func(feat *Feature) bool {
+		for tries := 0; tries < 100; tries++ {
+			room := rooms[RandInt(0, len(rooms))]
+			loc := randpoint(room)
+			tile := l.At(loc)
+			if tile.Feature == FeatFloor && tile.Items.Empty() && tile.Actor == nil {
+				tile.Feature = feat
+				return true
+			}
+		}
+		return false
+	}
+
+	for i := 0; i <= up; i++ {
+		if place(FeatStairsUp) {
+			nup++
+		}
+	}
+	for i := 0; i <= down; i++ {
+		if place(FeatStairsDown) {
+			ndown++
+		}
+	}
+	log.Printf("Placed stairs -- %d up, %d down", nup, ndown)
+}
+
+// Selects a random point within this rectangle.
+func randpoint(r math.Rectangle) math.Point {
+	return math.Pt(
+		RandInt(r.Min.X, r.Max.X),
+		RandInt(r.Min.Y, r.Max.Y),
+	)
 }
 
 // Given x and y, this will return 'start', 'end', and 'iter' that you can use
