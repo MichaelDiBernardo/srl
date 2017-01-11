@@ -25,11 +25,11 @@ func NewActorSeer(obj *Obj) Seer {
 }
 
 func (a *ActorSeer) CalcFOV() {
-    // TODO: This is basically a direct translation of fcrawl's raycasting FOV
-    // algorithm. I didn't try at all to make it less pythony and more go-ey.
-    // Should replace with something less churny or just a totally different
-    // algorithm, there's enough of these written in C that should be a lot
-    // less impedence-mismatchy to directly translate.
+	// TODO: This is basically a direct translation of fcrawl's raycasting FOV
+	// algorithm. I didn't try at all to make it less pythony and more go-ey.
+	// Should replace with something less churny or just a totally different
+	// algorithm, there's enough of these written in C that should be a lot
+	// less impedence-mismatchy to directly translate.
 	fov := newPointSet()
 	fov.Add(math.Origin)
 

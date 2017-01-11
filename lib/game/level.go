@@ -12,6 +12,7 @@ type Tile struct {
 	Items   *Inventory
 	Pos     math.Point
 	Visible bool
+	Seen    bool
 }
 
 type Map [][]*Tile
@@ -115,7 +116,9 @@ func (l *Level) UpdateVis() {
 	fov := l.game.Player.Seer.FOV()
 
 	for _, pt := range fov {
-		l.At(pt).Visible = true
+		tile := l.At(pt)
+		tile.Visible = true
+		tile.Seen = true
 	}
 }
 

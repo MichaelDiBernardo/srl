@@ -153,23 +153,29 @@ func (m *mapPanel) Render(g *game.Game) {
 
 			tile := level.At(cur)
 			drawpos := cur.Add(maptrans)
-			if !tile.Visible {
+
+			if !tile.Seen {
 				m.display.SetCell(drawpos.X, drawpos.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
-			} else if tile.Actor != nil {
-				gl := actorGlyphs[tile.Actor.Spec.Species]
-				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
+				continue
+			}
+
+			var gl glyph
+
+			if tile.Visible && tile.Actor != nil {
+				gl = actorGlyphs[tile.Actor.Spec.Species]
 			} else if !tile.Items.Empty() {
 				item, stack := tile.Items.Top(), tile.Items.Len() > 1
-				gl := itemGlyphs[item.Spec.Species]
-				bg := gl.Bg
+				gl = itemGlyphs[item.Spec.Species]
 				if stack {
-					bg = termbox.ColorCyan
+					gl.Bg = termbox.ColorCyan
 				}
-				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, bg)
 			} else {
-				gl := featureGlyphs[tile.Feature.Type]
-				m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
+				gl = featureGlyphs[tile.Feature.Type]
+				if !tile.Visible {
+					gl.Fg = termbox.ColorBlack | termbox.AttrBold
+				}
 			}
+			m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
 		}
 	}
 }
