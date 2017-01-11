@@ -23,6 +23,7 @@ _testmain.go
 *.test
 *.prof
 *.swp
+*.swo
 *.log
 
 srl
