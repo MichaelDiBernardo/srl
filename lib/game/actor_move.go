@@ -9,6 +9,8 @@ import (
 type Mover interface {
 	Objgetter
 	Move(dir math.Point) bool
+	Ascend() bool
+	Descend() bool
 }
 
 // A universally-applicable mover for actors.
@@ -57,4 +59,22 @@ func (p *ActorMover) Move(dir math.Point) bool {
 		}
 	}
 	return moved
+}
+
+// Try to go up stairs. If the current tile is not an upstair, return false.
+func (p *ActorMover) Ascend() bool {
+	if tile := p.obj.Tile; tile.Feature != FeatStairsUp {
+		return false
+	}
+	p.obj.Game.ChangeFloor(1)
+	return true
+}
+
+// Try to go down stairs. If the current tile is not an downstair, return false.
+func (p *ActorMover) Descend() bool {
+	if tile := p.obj.Tile; tile.Feature != FeatStairsDown {
+		return false
+	}
+	p.obj.Game.ChangeFloor(-1)
+	return true
 }

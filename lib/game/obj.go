@@ -34,16 +34,16 @@ func (t *Trait) Obj() *Obj {
 
 // Stores everything you need to know about randomly generating this object
 // ingame.
-// 'Depths' is a list of the native depths of this object.
+// 'Floors' is a list of the native floors of this object.
 // 'GroupSize' means "pack size" for monsters and "stack size" for consumables.
 type Gen struct {
-	Depths    []int
+	Floors    []int
 	GroupSize int
 }
 
-// Should this entry be "findable" in the given range of depths?
+// Should this entry be "findable" in the given range of floors?
 func (g Gen) Findable(low, high int) bool {
-	for _, d := range g.Depths {
+	for _, d := range g.Floors {
 		if low <= d && d <= high {
 			return true
 		}

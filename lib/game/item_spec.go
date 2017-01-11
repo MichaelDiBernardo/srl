@@ -15,7 +15,7 @@ var Items = []*Spec{
 		Species: SpecSword,
 		Name:    "SWORD",
 		Gen: Gen{
-			Depths:    []int{1},
+			Floors:    []int{1},
 			GroupSize: 1,
 		},
 		Traits: &Traits{
@@ -34,7 +34,7 @@ var Items = []*Spec{
 		Species: SpecLeatherArmor,
 		Name:    "LEATHER",
 		Gen: Gen{
-			Depths:    []int{1},
+			Floors:    []int{1},
 			GroupSize: 1,
 		},
 		Traits: &Traits{
@@ -53,7 +53,7 @@ var Items = []*Spec{
 		Species: SpecCure,
 		Name:    "CURE",
 		Gen: Gen{
-			Depths:    []int{1},
+			Floors:    []int{1},
 			GroupSize: 1,
 		},
 		Traits: &Traits{

@@ -242,7 +242,7 @@ func drawpath(l *Level, path []math.Point, rooms []math.Rectangle) {
 func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 	g := l.game
 
-	mongroups := Generate(10, g.Depth, 2, Monsters, g)
+	mongroups := Generate(10, g.Floor, 2, Monsters, g)
 
 	for _, group := range mongroups {
 		for tries := 0; tries < 50; tries++ {
@@ -268,7 +268,7 @@ func placemonsters(l *Level, startroom math.Rectangle, rooms []math.Rectangle) {
 // Generates and places a bunch of items in any room.
 func placeitems(l *Level, rooms []math.Rectangle) {
 	g := l.game
-	itemgroups := Generate(40, g.Depth, 2, Items, g)
+	itemgroups := Generate(40, g.Floor, 2, Items, g)
 
 	for _, group := range itemgroups {
 		room := rooms[RandInt(0, len(rooms))]
@@ -284,9 +284,9 @@ func placeitems(l *Level, rooms []math.Rectangle) {
 
 func placestairs(l *Level, rooms []math.Rectangle) {
 	up, down := RandInt(1, 4), RandInt(1, 4)
-	if depth := l.game.Depth; depth == 1 {
+	if floor := l.game.Floor; floor == 1 {
 		down = -1
-	} else if depth == MaxDepth {
+	} else if floor == MaxFloor {
 		up = -1
 	}
 

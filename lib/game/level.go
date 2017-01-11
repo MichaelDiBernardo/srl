@@ -130,7 +130,7 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 	// If this actor has been placed before, we need to clear the tile they
 	// were on previously. If they haven't, we need to add them to the actor
 	// list so we know who they are.
-	if obj.Tile != nil {
+	if obj.Tile != nil && obj.Level == l {
 		obj.Tile.Actor = nil
 	} else {
 		l.scheduler.Add(obj)

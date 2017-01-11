@@ -74,6 +74,8 @@ var hudKeymap = map[rune]game.Command{
 	'r': game.TryRemoveCommand{},
 	'a': game.TryUseCommand{},
 	'i': game.ModeCommand{Mode: game.ModeInventory},
+	'>': game.AscendCommand{},
+	'<': game.DescendCommand{},
 	'@': game.ModeCommand{Mode: game.ModeSheet},
 }
 
@@ -295,4 +297,6 @@ func (s *statusPanel) Render(g *game.Game) {
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+12, fmt.Sprintf("%-7s%8s", "DEF", sheet.Defense().Describe()), fg, bg)
+
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+14, fmt.Sprintf("%dF", g.Floor), fg, bg)
 }

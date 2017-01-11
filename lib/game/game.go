@@ -6,20 +6,20 @@ import (
 	"log"
 )
 
-const MaxDepth = 5
+const MaxFloor = 5
 
 // Backend for a single game.
 type Game struct {
 	Player *Obj
 	Level  *Level
 	Events *EventQueue
-	Depth  int
+	Floor  int
 	mode   Mode
 }
 
 // Create a new game.
 func NewGame() *Game {
-	return &Game{Events: newEventQueue(), Depth: 1}
+	return &Game{Events: newEventQueue(), Floor: 1}
 }
 
 // Temp convenience method to init the game before playing.
@@ -58,38 +58,36 @@ func (g *Game) Kill(actor *Obj) {
 	}
 }
 
+// Switch floors on the player.
+func (g *Game) ChangeFloor(dir int) {
+	g.Floor += dir
+	g.Level = NewDungeon(g)
+}
+
 // A command given _to_ the game.
 type Command interface{}
 
-type QuitCommand struct {
-}
+type QuitCommand struct{}
 
-type MoveCommand struct {
-	Dir math.Point
-}
+type MoveCommand struct{ Dir math.Point }
 
-type TryPickupCommand struct {
-}
+type TryPickupCommand struct{}
 
-type TryDropCommand struct {
-}
+type TryDropCommand struct{}
 
-type TryEquipCommand struct {
-}
+type TryEquipCommand struct{}
 
-type TryRemoveCommand struct {
-}
+type TryRemoveCommand struct{}
 
-type TryUseCommand struct {
-}
+type TryUseCommand struct{}
 
-type ModeCommand struct {
-	Mode Mode
-}
+type ModeCommand struct{ Mode Mode }
 
-type MenuCommand struct {
-	Option int
-}
+type MenuCommand struct{ Option int }
+
+type AscendCommand struct{}
+
+type DescendCommand struct{}
 
 // Controller functions that take commands for each given mode and run them on
 // the game.
@@ -121,6 +119,10 @@ func hudController(g *Game, com Command) {
 		g.Player.Equipper.TryRemove()
 	case TryUseCommand:
 		g.Player.User.TryUse()
+	case AscendCommand:
+		g.Player.Mover.Ascend()
+	case DescendCommand:
+		g.Player.Mover.Descend()
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}

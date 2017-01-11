@@ -11,28 +11,28 @@ func TestNoSpecsGeneratesNoGroups(t *testing.T) {
 	}
 }
 
-func TestSpecsAtExactDepth(t *testing.T) {
+func TestSpecsAtExactFloor(t *testing.T) {
 	g := newTestGame()
 	specs := []*Spec{
 		{
 			Name:   "1",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{1},
+				Floors: []int{1},
 			},
 		},
 		{
 			Name:   "2",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{2},
+				Floors: []int{2},
 			},
 		},
 		{
 			Name:   "3",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{1},
+				Floors: []int{1},
 			},
 		},
 	}
@@ -57,28 +57,28 @@ func TestSpecsAtExactDepth(t *testing.T) {
 	}
 }
 
-func TestSpecsWithWiggleDepth(t *testing.T) {
+func TestSpecsWithWiggleFloor(t *testing.T) {
 	g := newTestGame()
 	specs := []*Spec{
 		{
 			Name:   "1",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{1},
+				Floors: []int{1},
 			},
 		},
 		{
 			Name:   "2",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{2},
+				Floors: []int{2},
 			},
 		},
 		{
 			Name:   "3",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths: []int{1},
+				Floors: []int{1},
 			},
 		},
 	}
@@ -110,7 +110,7 @@ func TestGroupSize(t *testing.T) {
 			Name:   "1",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths:    []int{1},
+				Floors:    []int{1},
 				GroupSize: 2,
 			},
 		},
@@ -118,7 +118,7 @@ func TestGroupSize(t *testing.T) {
 			Name:   "2",
 			Traits: &Traits{},
 			Gen: Gen{
-				Depths:    []int{1},
+				Floors:    []int{1},
 				GroupSize: 3,
 			},
 		},

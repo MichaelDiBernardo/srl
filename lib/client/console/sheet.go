@@ -60,8 +60,8 @@ func (s *sheetPanel) Render(g *game.Game) {
 	s.display.Write(1, 7, fmt.Sprintf("TURN %13d", 923), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 8, fmt.Sprintf("XP LEFT %10d", 152), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 9, fmt.Sprintf("XP TOTAL %9d", 4095), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(1, 10, fmt.Sprintf("FLOOR %12d", 2), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(1, 11, fmt.Sprintf("MIN FLOOR %8d", 1), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(1, 10, fmt.Sprintf("FLOOR %11dF", g.Floor), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(1, 11, fmt.Sprintf("MIN FLOOR %7dF", 1), termbox.ColorWhite, termbox.ColorBlack)
 
 	s.display.Write(22, 7, fmt.Sprintf("FIGHT %9s", sheet.Attack().Describe()), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(22, 8, fmt.Sprintf("DEF %11s", sheet.Defense().Describe()), termbox.ColorWhite, termbox.ColorBlack)
