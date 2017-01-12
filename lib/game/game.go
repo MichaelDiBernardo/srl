@@ -10,16 +10,17 @@ const MaxFloor = 5
 
 // Backend for a single game.
 type Game struct {
-	Player *Obj
-	Level  *Level
-	Events *EventQueue
-	Floor  int
-	mode   Mode
+	Player    *Obj
+	Level     *Level
+	Events    *EventQueue
+	Floor     int
+	PrevFloor int
+	mode      Mode
 }
 
 // Create a new game.
 func NewGame() *Game {
-	return &Game{Events: newEventQueue(), Floor: 1}
+	return &Game{Events: newEventQueue(), Floor: 1, PrevFloor: 1}
 }
 
 // Temp convenience method to init the game before playing.
@@ -60,6 +61,7 @@ func (g *Game) Kill(actor *Obj) {
 
 // Switch floors on the player.
 func (g *Game) ChangeFloor(dir int) {
+	g.PrevFloor = g.Floor
 	g.Floor += dir
 	g.Level = NewDungeon(g)
 }

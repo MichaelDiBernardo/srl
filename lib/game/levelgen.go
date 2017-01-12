@@ -316,6 +316,13 @@ func placestairs(l *Level, rooms []math.Rectangle) {
 		}
 	}
 	log.Printf("Placed stairs -- %d up, %d down", nup, ndown)
+
+	// Place the connecting stair.
+	if entry := l.game.Player.Tile; l.game.PrevFloor < l.game.Floor {
+		entry.Feature = FeatStairsDown
+	} else if l.game.PrevFloor > l.game.Floor {
+		entry.Feature = FeatStairsUp
+	} // Otherwise PrevFloor = Floor, which means we're starting the game.
 }
 
 // Selects a random point within this rectangle.
