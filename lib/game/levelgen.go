@@ -21,6 +21,40 @@ func SquareLevel(l *Level) *Level {
 	return l
 }
 
+// Creates a level based on an ascii 'picture'. Used for testing.
+func StringLevel(pic string) func(l *Level) *Level {
+	return func(l *Level) *Level {
+		y, x := -1, 0
+		m := l.Map
+		placepoint := math.Origin
+		for _, s := range pic {
+			switch s {
+			case '\n':
+				y++
+				x = 0
+				continue
+			case '#':
+				m[y][x].Feature = FeatWall
+			case ' ':
+				m[y][x].Feature = FeatFloor
+			case '+':
+				m[y][x].Feature = FeatClosedDoor
+			case '\'':
+				m[y][x].Feature = FeatOpenDoor
+			case '@':
+				placepoint = math.Pt(x, y)
+			default:
+				m[y][x].Feature = FeatFloor
+			}
+			x++
+		}
+		// Place at the end so that the player doesn't get LOS of a partially
+		// built map before the test/game starts.
+		l.Place(l.game.Player, placepoint)
+		return l
+	}
+}
+
 // This implements lynn's algorithm for laying out angband-ish rooms
 // without a lot of fuss.
 //

@@ -148,6 +148,108 @@ func TestOkRemoveActor(t *testing.T) {
 	}
 }
 
+type pftest struct {
+	pic   string
+	start math.Point
+	end   math.Point
+	ok    bool
+	want  Path
+}
+
+func TestPathfinding(t *testing.T) {
+	tests := []pftest{
+		{
+			start: math.Pt(0, 0),
+			end:   math.Pt(1, 0),
+			ok:    true,
+			want:  Path{math.Pt(1, 0)},
+			pic: `
+@x`,
+		},
+		{
+			start: math.Pt(0, 0),
+			end:   math.Pt(0, 0),
+			ok:    true,
+			want:  Path{},
+		},
+		{
+			start: math.Pt(-1, -1),
+			end:   math.Pt(0, 0),
+			ok:    false,
+			want:  Path{math.Pt(1, 0)},
+		},
+		{
+			start: math.Pt(0, 0),
+			end:   math.Pt(6, 0),
+			ok:    true,
+			want:  Path{math.Pt(1, 0), math.Pt(2, 0), math.Pt(3, 0), math.Pt(4, 0), math.Pt(5, 0), math.Pt(6, 0)},
+			pic: `
+@     x
+#######`,
+		},
+		{
+			start: math.Pt(0, 0),
+			end:   math.Pt(3, 3),
+			ok:    true,
+			want:  Path{math.Pt(1, 0), math.Pt(2, 0), math.Pt(3, 1), math.Pt(3, 2), math.Pt(3, 3)},
+			pic: `
+@   # 
+### #
+### #
+###x#
+`,
+		},
+		{
+			start: math.Pt(0, 1),
+			end:   math.Pt(2, 1),
+			ok:    true,
+			want:  Path{math.Pt(1, 0), math.Pt(2, 1)},
+			pic: `
+#'# 
+@#x
+#+#
+`,
+		},
+		{
+			start: math.Pt(0, 1),
+			end:   math.Pt(2, 1),
+			ok:    false,
+			want:  Path{},
+			pic: `
+###
+@#x
+###`,
+		},
+	}
+
+	for ti, test := range tests {
+		g := newTestGame()
+		l := NewLevel(40, 40, g, StringLevel(test.pic))
+		g.Level = l
+
+		path, ok := l.FindPath(test.start, test.end, pathcost)
+
+		if ok != test.ok {
+			t.Errorf(`Pathfinding test %d: ok=%v, want=%v`, ti, ok, test.ok)
+		}
+		if !test.ok {
+			continue
+		}
+
+		if alen, wlen := len(path), len(test.want); alen != wlen {
+			t.Errorf(`Pathfinding test %d: len(actual)=%d, len(want)=%d`, ti, alen, wlen)
+			continue
+		}
+
+		for i, wpt := range test.want {
+			if apt := path[i]; apt != wpt {
+				t.Errorf(`Pathfinding test %d: mismatch at %d, got %v, want %v`, ti, i, path, test.want)
+				break
+			}
+		}
+	}
+}
+
 type schedulerTest struct {
 	actors map[string]int
 	want   []string

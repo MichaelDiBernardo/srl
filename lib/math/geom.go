@@ -96,6 +96,18 @@ func (r Rectangle) Center() Point {
 	return Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
 }
 
+// "Filters" the given list of points into a new list that only contains those
+// points which are contained in r.
+func (r Rectangle) Clip(pts []Point) []Point {
+	clipped := make([]Point, 0, len(pts))
+	for _, pt := range pts {
+		if pt.In(r) {
+			clipped = append(clipped, pt)
+		}
+	}
+	return clipped
+}
+
 // Yields rectangle that contains all coordinates of Chebyshev distance <= r
 // from (0, 0). You can iterate over all points like:
 //
@@ -133,4 +145,13 @@ func ChebyEdge(r int) []Point {
 	}
 
 	return edge
+}
+
+func Adj(pt Point) []Point {
+	around := ChebyEdge(1)
+	adj := make([]Point, 0, 8)
+	for _, p := range around {
+		adj = append(adj, pt.Add(p))
+	}
+	return adj
 }

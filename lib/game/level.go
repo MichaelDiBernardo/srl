@@ -4,7 +4,20 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
+
+type FeatureType string
+
+type Feature struct {
+	Type   FeatureType
+	Solid  bool
+	Opaque bool
+}
+
+func (f *Feature) String() string {
+	return string(f.Type)
+}
 
 type Tile struct {
 	Feature *Feature
@@ -13,6 +26,10 @@ type Tile struct {
 	Pos     math.Point
 	Visible bool
 	Seen    bool
+}
+
+func (t *Tile) String() string {
+	return fmt.Sprintf("<%s:%v>", t.Feature, t.Pos)
 }
 
 type Map [][]*Tile
@@ -120,6 +137,111 @@ func (l *Level) UpdateVis() {
 		tile.Visible = true
 		tile.Seen = true
 	}
+}
+
+type Path []math.Point
+
+// Finds a reasonably direct path between start and dest in this level. If no
+// path could be found, 'path' will be zero and 'ok' will be false. This uses
+// Dijkstra's algorithm.
+func (l *Level) FindPath(start, end math.Point, cost func(*Level, math.Point) int) (path Path, ok bool) {
+	path = make(Path, 0, 100)
+	if !start.In(l) || !end.In(l) || l.At(start).Feature.Solid || l.At(end).Feature.Solid {
+		return path, false
+	}
+
+	if start == end {
+		return path, true
+	}
+
+	// PQ
+	todo := map[math.Point]bool{start: true}
+	dist := map[math.Point]int{start: 0}
+	prev := map[math.Point]math.Point{}
+
+	log.Printf("Begin pathfinding: %v to %v", start, end)
+	for len(todo) != 0 {
+		// TODO: Replace with heap.
+		cur, curdist := math.Origin, 100000
+		for cand, _ := range todo {
+			candist, ok := dist[cand]
+			if ok && candist < curdist {
+				cur = cand
+				curdist = candist
+			}
+		}
+		log.Printf("Visiting %v (dist %v)", cur, curdist)
+		if cur == end {
+			log.Printf("Found dest -- generating path.")
+			break
+		}
+		delete(todo, cur)
+
+		// Get neighbouring points.
+		adj := l.Bounds.Clip(math.Adj(cur))
+
+		neighbors := make([]*Tile, 0, len(adj))
+
+		// Figure out which neighbours we should even bother checking (e.g.
+		// walls are a bad idea at the moment. We don't have Kemenrauko.
+		for _, p := range adj {
+			if tile := l.At(p); patheligible(tile) {
+				neighbors = append(neighbors, tile)
+			}
+		}
+
+		log.Printf("Neighbors are %v", neighbors)
+
+		for _, n := range neighbors {
+			npos := n.Pos
+			d, ok := dist[npos]
+			if !ok {
+				d = 100000
+			}
+
+			altdist := curdist + cost(l, npos)
+			if altdist < d {
+				dist[npos] = altdist
+				prev[npos] = cur
+				todo[npos] = true
+			}
+		}
+	}
+
+	pathcur := end
+	for {
+		next, ok := prev[pathcur]
+		if !ok {
+			break
+		}
+		path = append(path, pathcur)
+		pathcur = next
+	}
+
+	for i, l := 0, len(path); i < l/2; i++ {
+		path[i], path[l-i-1] = path[l-i-1], path[i]
+	}
+
+	// We didn't find any path. Let the caller know via 'ok', since this
+	// distinguishes the situation where you tried to pathfind to yourself.
+	if len(path) == 0 {
+		return path, false
+	}
+	return path, true
+}
+
+// Returns the "cost" of moving onto 'loc' in level l.
+func pathcost(l *Level, loc math.Point) int {
+	switch l.At(loc).Feature {
+	case FeatClosedDoor:
+		return 2
+	default:
+		return 1
+	}
+}
+
+func patheligible(t *Tile) bool {
+	return t.Feature != FeatWall
 }
 
 func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
