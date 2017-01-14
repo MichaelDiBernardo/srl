@@ -19,6 +19,11 @@ func (f *Feature) String() string {
 	return string(f.Type)
 }
 
+const (
+	FlowScent = iota
+	NumFlows
+)
+
 type Tile struct {
 	Feature *Feature
 	Actor   *Obj
@@ -26,6 +31,7 @@ type Tile struct {
 	Pos     math.Point
 	Visible bool
 	Seen    bool
+	Flows   [NumFlows]int
 }
 
 func (t *Tile) String() string {
@@ -69,6 +75,20 @@ func NewLevel(width, height int, game *Game, gen func(*Level) *Level) *Level {
 
 func (l *Level) At(p math.Point) *Tile {
 	return l.Map[p.Y][p.X]
+}
+
+// Returns a list of the tiles "around" p (but not including p.)
+func (l *Level) Around(loc math.Point) []*Tile {
+	adj := l.Bounds.Clip(math.Adj(loc))
+
+	neighbors := make([]*Tile, 0, len(adj))
+
+	// Figure out which neighbours we should even bother checking (e.g.
+	// walls are a bad idea at the moment. We don't have Kemenrauko.
+	for _, p := range adj {
+		neighbors = append(neighbors, l.At(p))
+	}
+	return neighbors
 }
 
 func (l *Level) HasPoint(p math.Point) bool {
@@ -122,6 +142,8 @@ func (l *Level) Evolve() {
 	}
 }
 
+const ScentFactor = FOVRadius
+
 // Updates what the player can see on the level.
 func (l *Level) UpdateVis() {
 	for _, row := range l.Map {
@@ -131,11 +153,17 @@ func (l *Level) UpdateVis() {
 	}
 
 	fov := l.game.Player.Seer.FOV()
+	pos := l.game.Player.Pos()
+	turns := l.game.Turns
 
 	for _, pt := range fov {
 		tile := l.At(pt)
 		tile.Visible = true
 		tile.Seen = true
+		// HAX for now: Update scent flows. If we have to update more than one
+		// flow related to LOS (or at all really), we should move into its own
+		// workflow.
+		tile.Flows[FlowScent] = turns*ScentFactor - math.ChebyDist(pos, pt)
 	}
 }
 
@@ -224,21 +252,16 @@ func (l *Level) FindPath(start, end math.Point, cost func(*Level, math.Point) in
 		}
 
 		// Get neighbouring points.
-		adj := l.Bounds.Clip(math.Adj(cur))
-
-		neighbors := make([]*Tile, 0, len(adj))
+		neighbors := l.Around(cur)
 
 		// Figure out which neighbours we should even bother checking (e.g.
 		// walls are a bad idea at the moment. We don't have Kemenrauko.
-		for _, p := range adj {
-			if tile := l.At(p); patheligible(tile) {
-				neighbors = append(neighbors, tile)
-			}
-		}
-
 		log.Printf("Neighbors are %v", neighbors)
 
 		for _, n := range neighbors {
+			if !patheligible(n) {
+				continue
+			}
 			npos := n.Pos
 			d := dist.get(npos)
 

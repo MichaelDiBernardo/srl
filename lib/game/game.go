@@ -15,6 +15,7 @@ type Game struct {
 	Events    *EventQueue
 	Floor     int
 	PrevFloor int
+	Turns     int
 	mode      Mode
 }
 
@@ -130,6 +131,7 @@ func hudController(g *Game, com Command) {
 	}
 	if evolve {
 		g.Level.Evolve()
+		g.Turns++
 	}
 }
 

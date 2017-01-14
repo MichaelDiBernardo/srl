@@ -57,7 +57,7 @@ func (s *sheetPanel) Render(g *game.Game) {
 	s.display.Write(22, 4, fmt.Sprintf("VIT   %d", sheet.Vit()), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(22, 5, fmt.Sprintf("MND   %d", sheet.Mnd()), termbox.ColorWhite, termbox.ColorBlack)
 
-	s.display.Write(1, 7, fmt.Sprintf("TURN %13d", 923), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(1, 7, fmt.Sprintf("TURN %13d", g.Turns), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 8, fmt.Sprintf("XP LEFT %10d", 152), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 9, fmt.Sprintf("XP TOTAL %9d", 4095), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 10, fmt.Sprintf("FLOOR %11dF", g.Floor), termbox.ColorWhite, termbox.ColorBlack)

@@ -1,10 +1,21 @@
 NEXT:
-- Stairs & progression
+- Monster AI:
+    Types:
+        - Wandering
+            - Wander (select point, walk towards it, wait a bit, select new one.)
+              into
+            - Detect & Chase
+        - Territorial 
+            - Sit still
+            - Chase when detected; return home when lose detection 
+        - Lazy
+            - Sit still
+            - Chase when attacked
+            - Stay at last position when lose detection
+    - Should have 'sensors' (can detect by scent) or 'seers' (can only detect in LOS but chases by scent)
+    - Implement skillcheck based on perception vs. sneak
  
 Then:
-- Monsters have AI that:
-    - Randomly wanders when player isn't in LOS
-    - Chases and attacks when player in LOS
 - Turncounting
 - Monsters drop loot
 - Add a basic "you got to level 5 you win"

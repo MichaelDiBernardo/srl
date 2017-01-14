@@ -147,6 +147,11 @@ func ChebyEdge(r int) []Point {
 	return edge
 }
 
+// Calculates the Chebyshev distance between two points.
+func ChebyDist(p1, p2 Point) int {
+	return Max(Abs(p1.X-p2.X), Abs(p1.Y-p2.Y))
+}
+
 func Adj(pt Point) []Point {
 	around := ChebyEdge(1)
 	adj := make([]Point, 0, 8)

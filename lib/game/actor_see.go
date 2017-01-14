@@ -4,13 +4,17 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
-var FOVRadius = 4
+const (
+	FOVRadiusMax = 8
+	FOVRadius    = 4
+)
 
 // A thing that has a FOV
 type Seer interface {
 	Objgetter
 	CalcFOV()
 	FOV() FOV
+	CanSee(other *Obj) bool
 }
 
 type FOV []math.Point
@@ -75,6 +79,16 @@ func (a *ActorSeer) CalcFOV() {
 
 func (a *ActorSeer) FOV() FOV {
 	return a.fov
+}
+
+func (a *ActorSeer) CanSee(other *Obj) bool {
+	pos := other.Pos()
+	for _, pt := range a.fov {
+		if pos == pt {
+			return true
+		}
+	}
+	return false
 }
 
 func adj45dirs(d math.Point) pointset {
