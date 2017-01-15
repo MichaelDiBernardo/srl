@@ -4,7 +4,6 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 )
 
 type FeatureType string
@@ -134,12 +133,27 @@ func (l *Level) Evolve() {
 			seer.CalcFOV()
 		}
 		if ai := actor.AI; ai != nil {
-			ai.Act(l)
+			ai.Act()
 		}
 		if actor.IsPlayer() {
 			break
 		}
 	}
+}
+
+func (l *Level) RandomClearTile() *Tile {
+	r := l.Bounds
+	for tries := 0; tries < 100; tries++ {
+		loc := math.Pt(
+			RandInt(r.Min.X, r.Max.X),
+			RandInt(r.Min.Y, r.Max.Y),
+		)
+		tile := l.At(loc)
+		if !tile.Feature.Solid {
+			return tile
+		}
+	}
+	return nil
 }
 
 const ScentFactor = FOVRadius
@@ -241,13 +255,10 @@ func (l *Level) FindPath(start, end math.Point, cost func(*Level, math.Point) in
 	todo := &dijkstraQ{&unvisited{p: start, dist: dist}}
 	heap.Init(todo)
 
-	log.Printf("Begin pathfinding: %v to %v", start, end)
 	for todo.Len() != 0 {
 		cur := heap.Pop(todo).(*unvisited).p
 		curdist := dist[cur]
-		log.Printf("Visiting %v (dist %v)", cur, curdist)
 		if cur == end {
-			log.Printf("Found dest -- generating path.")
 			break
 		}
 
@@ -256,8 +267,6 @@ func (l *Level) FindPath(start, end math.Point, cost func(*Level, math.Point) in
 
 		// Figure out which neighbours we should even bother checking (e.g.
 		// walls are a bad idea at the moment. We don't have Kemenrauko.
-		log.Printf("Neighbors are %v", neighbors)
-
 		for _, n := range neighbors {
 			if !patheligible(n) {
 				continue
@@ -299,7 +308,7 @@ func (l *Level) FindPath(start, end math.Point, cost func(*Level, math.Point) in
 }
 
 // Returns the "cost" of moving onto 'loc' in level l.
-func pathcost(l *Level, loc math.Point) int {
+func PathCost(l *Level, loc math.Point) int {
 	switch l.At(loc).Feature {
 	case FeatClosedDoor:
 		return 2

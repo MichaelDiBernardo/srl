@@ -227,7 +227,7 @@ func TestPathfinding(t *testing.T) {
 		l := NewLevel(40, 40, g, StringLevel(test.pic))
 		g.Level = l
 
-		path, ok := l.FindPath(test.start, test.end, pathcost)
+		path, ok := l.FindPath(test.start, test.end, PathCost)
 
 		if ok != test.ok {
 			t.Errorf(`Pathfinding test %d: ok=%v, want=%v`, ti, ok, test.ok)

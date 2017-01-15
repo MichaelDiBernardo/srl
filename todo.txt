@@ -1,4 +1,5 @@
 NEXT:
+- Monsters need to be able to swap with each other and then resume their paths.
 - Monster AI:
     Types:
         - Wandering

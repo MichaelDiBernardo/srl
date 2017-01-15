@@ -25,6 +25,9 @@ func NewActorMover(obj *Obj) Mover {
 
 // Try to move the actor. Return false if the player couldn't move.
 func (p *ActorMover) Move(dir math.Point) bool {
+	if math.ChebyDist(math.Origin, dir) > 1 {
+		panic(fmt.Sprintf("Tried to Move(%s)", dir))
+	}
 	obj := p.obj
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)

@@ -36,8 +36,11 @@ var Monsters = []*Spec{
 			GroupSize: 2,
 		},
 		Traits: &Traits{
-			Mover:   NewActorMover,
-			AI:      NewRandomAI,
+			Mover: NewActorMover,
+			AI: NewSMAI(SMAI{
+				Attribs: &Personality{},
+				Brain:   SMAIWanderer,
+			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
 			Seer:    NewActorSeer,
@@ -70,8 +73,11 @@ var Monsters = []*Spec{
 			GroupSize: 2,
 		},
 		Traits: &Traits{
-			Mover:   NewActorMover,
-			AI:      NewRandomAI,
+			Mover: NewActorMover,
+			AI: NewSMAI(SMAI{
+				Attribs: &Personality{},
+				Brain:   SMAIWanderer,
+			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
 			Seer:    NewActorSeer,
