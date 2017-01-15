@@ -218,7 +218,6 @@ func (s *smaiStateWandering) Init(me *SMAI) {
 	// Pick a random tile to wander to.
 	level := me.obj.Level
 	tile := level.RandomClearTile()
-	mypos := me.obj.Pos()
 
 	if tile == nil {
 		// We couldn't find a destination.
@@ -226,18 +225,7 @@ func (s *smaiStateWandering) Init(me *SMAI) {
 		s.path = Path{}
 		return
 	}
-
-	path, ok := level.FindPath(mypos, tile.Pos, PathCost)
-	if !ok {
-		// We can't find our way to our destination. Let's pretend our
-		// destination is right here.
-		log.Printf("I couldn't find a path from %v to %v.", mypos, tile.Pos)
-		s.path = Path{}
-		return
-	}
-	s.path = path
-	s.dest = path[len(path)-1]
-	log.Printf("OK! I'm going to walk from %v to %v in %d steps.", mypos, tile.Pos, len(path))
+	s.pathfind(me, tile.Pos)
 }
 
 func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
@@ -248,7 +236,14 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	}
 
 	// Try to move to our next point.
-	dir := s.path[0].Sub(me.obj.Pos())
+	mypos, nextpos := me.obj.Pos(), s.path[0]
+	if math.ChebyDist(mypos, nextpos) > 1 {
+		log.Printf("I was pushed off course! Repathing to %v.", s.dest)
+		s.pathfind(me, s.dest)
+		return s.Act(me)
+	}
+
+	dir := nextpos.Sub(mypos)
 	ok := me.obj.Mover.Move(dir)
 
 	if !ok {
@@ -264,6 +259,21 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	}
 
 	return smaiNoTransition
+}
+
+func (s *smaiStateWandering) pathfind(me *SMAI, dest math.Point) {
+	mypos := me.obj.Pos()
+	path, ok := me.obj.Level.FindPath(mypos, dest, PathCost)
+	if !ok {
+		// We can't find our way to our destination. Let's pretend our
+		// destination is right here.
+		log.Printf("I couldn't find a path from %v to %v.", mypos, dest)
+		s.path = Path{}
+		return
+	}
+	s.path = path
+	s.dest = dest
+	log.Printf("OK! I'm going to walk from %v to %v in %d steps.", mypos, dest, len(path))
 }
 
 // TRANSITION ACTIONS

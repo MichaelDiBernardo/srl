@@ -105,7 +105,7 @@ func (l *Level) Place(o *Obj, p math.Point) bool {
 
 	switch o.Spec.Family {
 	case FamActor:
-		return l.placeActor(o, t)
+		return l.placeActor(o, t, false)
 	case FamItem:
 		return l.placeItem(o, t)
 	default:
@@ -154,6 +154,12 @@ func (l *Level) RandomClearTile() *Tile {
 		}
 	}
 	return nil
+}
+
+func (l *Level) SwapActors(x *Obj, y *Obj) {
+	tx, ty := x.Tile, y.Tile
+	l.placeActor(x, ty, true)
+	l.placeActor(y, tx, true)
 }
 
 const ScentFactor = FOVRadius
@@ -321,8 +327,8 @@ func patheligible(t *Tile) bool {
 	return t.Feature != FeatWall
 }
 
-func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
-	if tile.Actor != nil {
+func (l *Level) placeActor(obj *Obj, tile *Tile, force bool) bool {
+	if !force && tile.Actor != nil {
 		return false
 	}
 

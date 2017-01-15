@@ -40,8 +40,12 @@ func (p *ActorMover) Move(dir math.Point) bool {
 	if other := endtile.Actor; other != nil {
 		if opposing := obj.IsPlayer() != other.IsPlayer(); opposing {
 			p.obj.Fighter.Hit(other.Fighter)
+			return false
+		} else {
+			// Traveling monsters should swap with one another.
+			obj.Level.SwapActors(obj, other)
+			return true
 		}
-		return false
 	}
 	if endtile.Feature == FeatClosedDoor {
 		endtile.Feature = FeatOpenDoor
