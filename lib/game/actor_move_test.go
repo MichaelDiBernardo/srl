@@ -32,7 +32,7 @@ func TestOkMove(t *testing.T) {
 	}
 }
 
-func TestActorCollision(t *testing.T) {
+func TestMonsterSwapping(t *testing.T) {
 	g := newTestGame()
 	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
 	g.Level.Place(a1, math.Pt(1, 1))
@@ -40,8 +40,12 @@ func TestActorCollision(t *testing.T) {
 
 	ok := a1.Mover.Move(math.Pt(1, 0))
 
-	if ok {
-		t.Error(`a1.Move( (1, 0)) = true, want false`)
+	if !ok {
+		t.Error(`a1.Move( (1, 0)) = false, want true`)
+	}
+
+	if a1.Pos() != math.Pt(2, 1) && a2.Pos() != math.Pt(1, 1) {
+		t.Error(`Monsters did not swap`)
 	}
 }
 

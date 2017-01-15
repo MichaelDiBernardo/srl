@@ -1,9 +1,8 @@
 NEXT:
-- Monsters need to be able to swap with each other and then resume their paths.
 - Monster AI:
     Types:
         - Wandering
-            - Wander (select point, walk towards it, wait a bit, select new one.)
+            x Wander (select point, walk towards it, wait a bit, select new one.)
               into
             - Detect & Chase
         - Territorial 
@@ -31,7 +30,7 @@ Stuff:
     - keymaps
     - morgues
     - etc
-- Monster & Pack AI
+- Pack AI
 - Room variations ("vaults")
 - Room decorations
 
