@@ -31,8 +31,9 @@ func (a *ActorUser) TryUse() {
 
 func (a *ActorUser) Use(index int) {
 	a.obj.Game.SwitchMode(ModeHud)
+	inv := a.obj.Packer.Inventory()
 
-	item := a.obj.Packer.Inventory().Take(index)
+	item := inv.At(index)
 
 	// Bounds-check the index the player requested.
 	if item == nil {
@@ -44,5 +45,6 @@ func (a *ActorUser) Use(index int) {
 		return
 	}
 
+	item = inv.Take(index)
 	item.Consumable.Consume(a)
 }

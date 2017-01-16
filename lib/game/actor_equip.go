@@ -50,8 +50,9 @@ func (a *ActorEquipper) TryRemove() {
 
 func (a *ActorEquipper) Equip(index int) {
 	a.obj.Game.SwitchMode(ModeHud)
+	inv := a.obj.Packer.Inventory()
 
-	equip := a.obj.Packer.Inventory().Take(index)
+	equip := inv.At(index)
 
 	// Bounds-check the index the player requested.
 	if equip == nil {
@@ -62,6 +63,7 @@ func (a *ActorEquipper) Equip(index int) {
 		a.obj.Game.Events.Message(fmt.Sprintf("Cannot equip %v.", equip.Spec.Name))
 		return
 	}
+	equip = inv.Take(index)
 
 	if swapped := a.body.Wear(equip); swapped != nil {
 		a.obj.Packer.Inventory().Add(swapped)

@@ -65,9 +65,9 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		Trait: Trait{obj: obj},
 		str:   3,
 		agi:   4,
-		vit:   4,
+		vit:   20,
 		mnd:   3,
-		speed: 4,
+		speed: 2,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()

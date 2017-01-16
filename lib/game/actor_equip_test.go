@@ -105,6 +105,38 @@ func TestEquipOutOfBounds(t *testing.T) {
 	}
 }
 
+func TestEquipNonEquipment(t *testing.T) {
+	g := newTestGame()
+
+	cspec := &Spec{
+		Family:  FamItem,
+		Genus:   GenConsumable,
+		Species: SpecCure,
+		Name:    "CURE",
+		Traits:  &Traits{},
+	}
+
+	equipper := g.NewObj(atActorSpec)
+	equipper.Equipper.TryEquip()
+
+	equip := g.NewObj(atItemSpec)
+	item := g.NewObj(cspec)
+	inv := equipper.Packer.Inventory()
+	inv.Add(equip)
+	inv.Add(item)
+
+	equipper.Equipper.TryEquip()
+	equipper.Equipper.Equip(1)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Was mode %v after equip; want %v`, mode, ModeHud)
+	}
+
+	if nitems := inv.Len(); nitems != 2 {
+		t.Errorf(`Equipping nonitem did something weird to it.`)
+	}
+}
+
 func TestTryRemoveNothingEquipped(t *testing.T) {
 	g := newTestGame()
 

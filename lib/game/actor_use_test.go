@@ -41,7 +41,7 @@ func TestUse(t *testing.T) {
 	user := g.NewObj(atActorSpec)
 	used := false
 
-	var cspec = &Spec{
+	cspec := &Spec{
 		Family:  FamItem,
 		Genus:   GenConsumable,
 		Species: SpecCure,
@@ -83,5 +83,34 @@ func TestUseOutOfBounds(t *testing.T) {
 	}
 	if user.Packer.Inventory().Empty() {
 		t.Error(`Use() out-of-bounds consumed first item.`)
+	}
+}
+
+func TestUseBadItem(t *testing.T) {
+	g := newTestGame()
+	user := g.NewObj(atActorSpec)
+
+	cspec := &Spec{
+		Family:  FamItem,
+		Genus:   GenConsumable,
+		Species: SpecCure,
+		Name:    "CURE",
+		Traits:  &Traits{},
+	}
+
+	// A potion.
+	item := g.NewObj(cspec)
+	// A weapon.
+	equip := g.NewObj(atItemSpec)
+	user.Packer.Inventory().Add(item)
+	user.Packer.Inventory().Add(equip)
+	user.User.TryUse()
+	user.User.Use(1)
+
+	if mode := g.mode; mode != ModeHud {
+		t.Errorf(`Using item switched to mode %v, want %v`, mode, ModeHud)
+	}
+	if nitems := user.Packer.Inventory().Len(); nitems != 2 {
+		t.Error(`Use() consumed nonitem.`)
 	}
 }

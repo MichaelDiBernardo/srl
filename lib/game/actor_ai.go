@@ -33,12 +33,11 @@ func (s *SMAI) Act() bool {
 }
 
 func (s *SMAI) transition(trans smaiTransition) {
-	rule, ok := s.Brain[smaiKey{s.cur.State(), trans}]
+	nextState, ok := s.Brain[smaiKey{s.cur.State(), trans}]
 	if !ok {
 		panic(fmt.Sprintf("Bad AI state machine transition: (%v, %v)", s.cur.State(), trans))
 	}
-	rule.action(s)
-	s.cur = newSMAIState(rule.next)
+	s.cur = newSMAIState(nextState)
 	s.cur.Init(s)
 }
 
@@ -76,20 +75,10 @@ type smaiState int
 // action.
 type smaiTransition int
 
-// This is something that should happen when we switch from one state to
-// another.
-type smaiTransitionAction func(me *SMAI)
-
 // The "key" used to lookup a start-state:transition pair in the machine.
 type smaiKey struct {
 	state      smaiState
 	transition smaiTransition
-}
-
-// What action and next state should be triggered when a transition is taken?
-type smaiRule struct {
-	action smaiTransitionAction
-	next   smaiState
 }
 
 // A state object that governs how a monster behaves turn-by-turn when in this
@@ -127,13 +116,15 @@ func newSMAIState(state smaiState) smaiStateObj {
 		return &smaiStateStopped{smaiSB: smaiSB{state: smaiStopped}}
 	case smaiWandering:
 		return &smaiStateWandering{smaiSB: smaiSB{state: smaiWandering}}
+	case smaiChasing:
+		return &smaiStateChasing{smaiSB: smaiSB{state: smaiChasing}}
 	default:
 		panic(fmt.Sprintf("Could not create stateobj for state %v", state))
 	}
 }
 
 // A specification of a certain behaviour.
-type SMAIStateMachine map[smaiKey]smaiRule
+type SMAIStateMachine map[smaiKey]smaiState
 
 const (
 	// The initial state.
@@ -195,6 +186,10 @@ func (s *smaiStateStopped) Init(me *SMAI) {
 }
 
 func (s *smaiStateStopped) Act(me *SMAI) smaiTransition {
+	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+		return smaiFoundPlayer
+	}
+
 	s.turns--
 	if s.turns <= 0 {
 		return smaiWander
@@ -225,10 +220,14 @@ func (s *smaiStateWandering) Init(me *SMAI) {
 		s.path = Path{}
 		return
 	}
-	s.pathfind(me, tile.Pos)
+	s.findpath(me, tile.Pos)
 }
 
 func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
+	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+		return smaiFoundPlayer
+	}
+
 	// We've reached our destination!
 	if len(s.path) == 0 {
 		log.Printf("Reached destination %v. Time to stop.", s.dest)
@@ -239,7 +238,7 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	mypos, nextpos := me.obj.Pos(), s.path[0]
 	if math.ChebyDist(mypos, nextpos) > 1 {
 		log.Printf("I was pushed off course! Repathing to %v.", s.dest)
-		s.pathfind(me, s.dest)
+		s.findpath(me, s.dest)
 		return s.Act(me)
 	}
 
@@ -261,7 +260,7 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	return smaiNoTransition
 }
 
-func (s *smaiStateWandering) pathfind(me *SMAI, dest math.Point) {
+func (s *smaiStateWandering) findpath(me *SMAI, dest math.Point) {
 	mypos := me.obj.Pos()
 	path, ok := me.obj.Level.FindPath(mypos, dest, PathCost)
 	if !ok {
@@ -276,16 +275,77 @@ func (s *smaiStateWandering) pathfind(me *SMAI, dest math.Point) {
 	log.Printf("OK! I'm going to walk from %v to %v in %d steps.", mypos, dest, len(path))
 }
 
-// TRANSITION ACTIONS
-func noTAction(me *SMAI) {
+// Chases the player when they're in sight or smell range.
+type smaiStateChasing struct {
+	smaiSB
+	// How many turns in a row we've been chasing without seeing the player.
+	turnsUnseen int
+}
+
+func (s *smaiStateChasing) Init(me *SMAI) {
+	me.obj.Game.Events.Message(fmt.Sprintf("%s shouts!", me.obj.Spec.Name))
+	log.Printf("I found the player! Chasing!")
+}
+
+func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
+	obj := me.obj
+	pos := obj.Pos()
+	dir := math.Origin
+
+	if !obj.Seer.CanSee(obj.Game.Player) {
+		s.turnsUnseen = 0
+
+		// Try chasing by sight.
+		playerpos := obj.Game.Player.Pos()
+
+		switch {
+		case pos.X < playerpos.X:
+			dir.X = 1
+		case pos.X > playerpos.X:
+			dir.X = -1
+		}
+		switch {
+		case pos.Y < playerpos.Y:
+			dir.Y = 1
+		case pos.Y > playerpos.Y:
+			dir.Y = -1
+		}
+	} else {
+		// Try chasing by smell.
+		s.turnsUnseen++
+		maxscent, maxloc, around := 0, math.Origin, me.obj.Level.Around(pos)
+
+		for _, tile := range around {
+			if curscent := tile.Flows[FlowScent]; curscent > maxscent {
+				maxscent = curscent
+				maxloc = tile.Pos
+			}
+		}
+
+		if maxscent != 0 {
+			dir = maxloc.Sub(pos)
+			log.Printf("I smell you! I'm chasing you: %v", dir)
+		}
+	}
+
+	if dir != math.Origin {
+		obj.Mover.Move(dir)
+	}
+	if s.turnsUnseen > 20 {
+		return smaiLostPlayer
+	}
+	return smaiNoTransition
 }
 
 // A wandering monster. Randomly picks destinations to walk to, until it
 // detects the player.
 var SMAIWanderer = SMAIStateMachine{
-	{smaiUnborn, smaiStart}:            {noTAction, smaiStopped},
-	{smaiStopped, smaiWander}:          {noTAction, smaiWandering},
-	{smaiWandering, smaiStopWandering}: {noTAction, smaiStopped},
+	{smaiUnborn, smaiStart}:            smaiStopped,
+	{smaiStopped, smaiWander}:          smaiWandering,
+	{smaiStopped, smaiFoundPlayer}:     smaiChasing,
+	{smaiWandering, smaiStopWandering}: smaiStopped,
+	{smaiWandering, smaiFoundPlayer}:   smaiChasing,
+	{smaiChasing, smaiLostPlayer}:      smaiStopped,
 }
 
 //// An AI that directs an actor to move completely randomly.
@@ -301,28 +361,6 @@ var SMAIWanderer = SMAIStateMachine{
 //// Move in any of the 8 directions with uniform chance. Does not take walls
 //// etc. in account so this will happily try to bump into things.
 //func (ai *RandomAI) Act(l *Level) bool {
-//	obj := ai.obj
-//	pos := obj.Pos()
-//	dir := math.Origin
-//
-//	// Try chasing by sight.
-//	if obj.Seer != nil && obj.Seer.CanSee(obj.Game.Player) {
-//		playerpos := obj.Game.Player.Pos()
-//		log.Printf("I see you! I'm at %v, ur at %v", pos, playerpos)
-//
-//		switch {
-//		case pos.X < playerpos.X:
-//			dir.X = 1
-//		case pos.X > playerpos.X:
-//			dir.X = -1
-//		}
-//		switch {
-//		case pos.Y < playerpos.Y:
-//			dir.Y = 1
-//		case pos.Y > playerpos.Y:
-//			dir.Y = -1
-//		}
-//		log.Printf("I'm chasing you: %v", dir)
 //	} else {
 //		// Try chasing by smell.
 //		maxscent, maxloc, around := 0, math.Origin, l.Around(pos)

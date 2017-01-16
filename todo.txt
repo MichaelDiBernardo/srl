@@ -4,7 +4,8 @@ NEXT:
         - Wandering
             x Wander (select point, walk towards it, wait a bit, select new one.)
               into
-            - Detect & Chase
+            x Detect & Chase
+            - Detection should be based on monster LOS in personality
         - Territorial 
             - Sit still
             - Chase when detected; return home when lose detection 
@@ -13,10 +14,8 @@ NEXT:
             - Chase when attacked
             - Stay at last position when lose detection
     - Should have 'sensors' (can detect by scent) or 'seers' (can only detect in LOS but chases by scent)
-    - Implement skillcheck based on perception vs. sneak
  
 Then:
-- Turncounting
 - Monsters drop loot
 - Add a basic "you got to level 5 you win"
 - Egos (?), artefacts.
@@ -33,6 +32,11 @@ Stuff:
 - Pack AI
 - Room variations ("vaults")
 - Room decorations
+
+Bugs:
+- Monsters in chase mode seem to be losing turns? Either scheduler is bad (probably) or AI is doing something odd.
+- Looks like swapping can put 2 monsters on same square?
+- Monsters don't seem to be following correctly in LOS -- the process for that is very simple, so is it being called at the wrong time? (using previous player pos or something?) They jiggle diagonally when the player is running straight in one cardinal direction, for example.
 
 HAX:
 - items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???
