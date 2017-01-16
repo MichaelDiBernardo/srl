@@ -347,35 +347,3 @@ var SMAIWanderer = SMAIStateMachine{
 	{smaiWandering, smaiFoundPlayer}:   smaiChasing,
 	{smaiChasing, smaiLostPlayer}:      smaiStopped,
 }
-
-//// An AI that directs an actor to move completely randomly.
-//type RandomAI struct {
-//	Trait
-//}
-//
-//// Constructor for random AI.
-//func NewRandomAI(obj *Obj) AI {
-//	return &RandomAI{Trait: Trait{obj: obj}}
-//}
-//
-//// Move in any of the 8 directions with uniform chance. Does not take walls
-//// etc. in account so this will happily try to bump into things.
-//func (ai *RandomAI) Act(l *Level) bool {
-//	} else {
-//		// Try chasing by smell.
-//		maxscent, maxloc, around := 0, math.Origin, l.Around(pos)
-//
-//		for _, tile := range around {
-//			if curscent := tile.Flows[FlowScent]; curscent > maxscent {
-//				maxscent = curscent
-//				maxloc = tile.Pos
-//			}
-//		}
-//
-//		if maxscent != 0 {
-//			dir = maxloc.Sub(pos)
-//			log.Printf("I smell you! I'm chasing you: %v", dir)
-//		}
-//	}
-//	return ai.obj.Mover.Move(dir)
-//}
