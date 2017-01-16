@@ -157,10 +157,8 @@ func randroom(l *Level) math.Rectangle {
 // Tries to generate a room that won't intersect with any other rooms or an
 // existing corridor.
 func placeroom(l *Level, rooms []math.Rectangle, paths []math.Point) math.Rectangle {
-	log.Printf("Placeroom:")
 	for tries := 0; tries < 15; tries++ {
 		newroom := randroom(l)
-		log.Printf("\tTrying to place room candidate: %v.", newroom)
 		if fits(newroom, rooms, paths) {
 			return newroom
 		}
@@ -183,7 +181,6 @@ func fits(newroom math.Rectangle, rooms []math.Rectangle, paths []math.Point) bo
 		// This is so we don't get rooms that are directly adjacent to one
 		// another (no "frankenrooms".)
 		if nrbounds.Intersect(room) != math.ZeroRect {
-			log.Printf("%v intersects %v -- no good.", newroom, room)
 			return false
 		}
 	}
@@ -199,8 +196,6 @@ func fits(newroom math.Rectangle, rooms []math.Rectangle, paths []math.Point) bo
 
 // Given two joints, this will return a path that joins them.
 func dig(startpt, endpt math.Point) []math.Point {
-	log.Printf("Connecting joint %v to %v", startpt, endpt)
-
 	var start, end, incr int
 	path := make([]math.Point, 0)
 
@@ -209,26 +204,22 @@ func dig(startpt, endpt math.Point) []math.Point {
 		for z := start; z != end; z += incr {
 			pt := math.Pt(z, startpt.Y)
 			path = append(path, pt)
-			log.Printf("\t%v", pt)
 		}
 		start, end, incr = drange(startpt.Y, endpt.Y, true)
 		for z := start; z != end; z += incr {
 			pt := math.Pt(endpt.X, z)
 			path = append(path, pt)
-			log.Printf("\t%v", pt)
 		}
 	} else {
 		start, end, incr = drange(startpt.Y, endpt.Y, true)
 		for z := start; z != end; z += incr {
 			pt := math.Pt(startpt.X, z)
 			path = append(path, pt)
-			log.Printf("\t%v", pt)
 		}
 		start, end, incr = drange(startpt.X, endpt.X, true)
 		for z := start; z != end; z += incr {
 			pt := math.Pt(z, endpt.Y)
 			path = append(path, pt)
-			log.Printf("\t%v", pt)
 		}
 	}
 
@@ -264,7 +255,6 @@ func drawpath(l *Level, path []math.Point, rooms []math.Rectangle) {
 	}
 	for i, pt := range path {
 		if tile := l.At(pt); placedoor(i, pt) {
-			log.Printf("Placed door at %v", pt)
 			tile.Feature = FeatClosedDoor
 		} else {
 			tile.Feature = FeatFloor

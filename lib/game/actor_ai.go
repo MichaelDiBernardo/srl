@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -182,7 +181,6 @@ type smaiStateStopped struct {
 
 func (s *smaiStateStopped) Init(me *SMAI) {
 	s.turns = RandInt(5, 25)
-	log.Printf("Time to rest! I'm going to wait %d turns.", s.turns)
 }
 
 func (s *smaiStateStopped) Act(me *SMAI) smaiTransition {
@@ -209,14 +207,12 @@ type smaiStateWandering struct {
 }
 
 func (s *smaiStateWandering) Init(me *SMAI) {
-	log.Printf("Time to wander!")
 	// Pick a random tile to wander to.
 	level := me.obj.Level
 	tile := level.RandomClearTile()
 
 	if tile == nil {
 		// We couldn't find a destination.
-		log.Printf("I couldn't find a good tile to wander to.")
 		s.path = Path{}
 		return
 	}
@@ -230,14 +226,12 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 
 	// We've reached our destination!
 	if len(s.path) == 0 {
-		log.Printf("Reached destination %v. Time to stop.", s.dest)
 		return smaiStopWandering
 	}
 
 	// Try to move to our next point.
 	mypos, nextpos := me.obj.Pos(), s.path[0]
 	if math.ChebyDist(mypos, nextpos) > 1 {
-		log.Printf("I was pushed off course! Repathing to %v.", s.dest)
 		s.findpath(me, s.dest)
 		return s.Act(me)
 	}
@@ -253,7 +247,6 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	}
 
 	if s.turnsBlocked > 5 {
-		log.Printf("Giving up on destination %v, I'm stuck at %v.", s.dest, me.obj.Pos())
 		return smaiStopWandering
 	}
 
@@ -266,13 +259,11 @@ func (s *smaiStateWandering) findpath(me *SMAI, dest math.Point) {
 	if !ok {
 		// We can't find our way to our destination. Let's pretend our
 		// destination is right here.
-		log.Printf("I couldn't find a path from %v to %v.", mypos, dest)
 		s.path = Path{}
 		return
 	}
 	s.path = path
 	s.dest = dest
-	log.Printf("OK! I'm going to walk from %v to %v in %d steps.", mypos, dest, len(path))
 }
 
 // Chases the player when they're in sight or smell range.
@@ -284,7 +275,6 @@ type smaiStateChasing struct {
 
 func (s *smaiStateChasing) Init(me *SMAI) {
 	me.obj.Game.Events.Message(fmt.Sprintf("%s shouts!", me.obj.Spec.Name))
-	log.Printf("I found the player! Chasing!")
 }
 
 func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
@@ -324,7 +314,6 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 
 		if maxscent != 0 {
 			dir = maxloc.Sub(pos)
-			log.Printf("I smell you! I'm chasing you: %v", dir)
 		}
 	}
 

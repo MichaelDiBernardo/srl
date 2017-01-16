@@ -3,7 +3,6 @@ package game
 import (
 	"container/list"
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 )
 
 const MaxFloor = 5
@@ -40,7 +39,6 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 
 // Handle a command from the client, and then evolve the world.
 func (g *Game) Handle(c Command) {
-	log.Printf("Handling command: %#v", c)
 	controllers[g.mode](g, c)
 }
 

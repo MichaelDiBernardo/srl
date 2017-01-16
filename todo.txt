@@ -34,7 +34,6 @@ Stuff:
 - Room decorations
 
 Bugs:
-- Monsters in chase mode seem to be losing turns? Either scheduler is bad (probably) or AI is doing something odd.
 - Looks like swapping can put 2 monsters on same square?
 - Monsters don't seem to be following correctly in LOS -- the process for that is very simple, so is it being called at the wrong time? (using previous player pos or something?) They jiggle diagonally when the player is running straight in one cardinal direction, for example.
 

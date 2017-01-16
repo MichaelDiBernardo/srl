@@ -3,6 +3,7 @@ package game
 import (
 	"container/heap"
 	"fmt"
+
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
@@ -402,7 +403,8 @@ func (s *SQ) Pop() interface{} {
 }
 
 type Scheduler struct {
-	pq *SQ
+	pq   *SQ
+	bump int
 }
 
 func NewScheduler() *Scheduler {
@@ -416,7 +418,14 @@ func (s *Scheduler) Len() int {
 
 // Add an actor to the schedule.
 func (s *Scheduler) Add(actor *Obj) {
-	delay := getdelay(actor.Sheet.Speed())
+	// In Next(), we adjust everyone's delay and then call Init() to re-heapify
+	// pq. This isn't a stable "sort", so actors of equal speed end up randomly
+	// taking their turns in no particular order if they all start the game at
+	// the same delay. So, we add a tiny 'bump' to their delay which will
+	// synchronize their ordering in subsequent turns, since they only ever
+	// lose delay in much larger increments.
+	delay := getdelay(actor.Sheet.Speed()) + s.bump
+	s.bump++
 
 	// Player should always get the first turn.
 	if actor.IsPlayer() {
@@ -456,8 +465,7 @@ func (s *Scheduler) Remove(actor *Obj) {
 		panic("Tried to remove actor but wasn't in list.")
 	}
 
-	*(s.pq) = append((*(s.pq))[:index], (*(s.pq))[index+1:]...)
-	heap.Init(s.pq)
+	heap.Remove(s.pq, index)
 }
 
 // Given the speed of an actor, this will tell you how much delay to add after
@@ -465,13 +473,13 @@ func (s *Scheduler) Remove(actor *Obj) {
 func getdelay(spd int) int {
 	switch spd {
 	case 1:
-		return 150
+		return 1500
 	case 2:
-		return 100
+		return 1000
 	case 3:
-		return 75
+		return 750
 	case 4:
-		return 50
+		return 500
 	default:
 		panic(fmt.Sprintf("Spd %d does not have a delay", spd))
 	}
