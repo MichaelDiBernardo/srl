@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -275,6 +276,7 @@ type smaiStateChasing struct {
 
 func (s *smaiStateChasing) Init(me *SMAI) {
 	me.obj.Game.Events.Message(fmt.Sprintf("%s shouts!", me.obj.Spec.Name))
+	log.Printf("id%d. I see player at %v. Time to chase!!", me.obj.id, me.obj.Game.Player.Pos())
 }
 
 func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
@@ -282,7 +284,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	pos := obj.Pos()
 	dir := math.Origin
 
-	if !obj.Seer.CanSee(obj.Game.Player) {
+	if obj.Seer.CanSee(obj.Game.Player) {
 		s.turnsUnseen = 0
 
 		// Try chasing by sight.
@@ -300,6 +302,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		case pos.Y > playerpos.Y:
 			dir.Y = -1
 		}
+		log.Printf("id%d. I see player at %v. I'm at %v moving %v", obj.id, playerpos, pos, dir)
 	} else {
 		// Try chasing by smell.
 		s.turnsUnseen++
@@ -314,11 +317,15 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 
 		if maxscent != 0 {
 			dir = maxloc.Sub(pos)
+			log.Printf("id%d. I smell player at %v. I'm at %v moving %v", obj.id, maxloc, pos, dir)
 		}
 	}
 
 	if dir != math.Origin {
-		obj.Mover.Move(dir)
+		ok := obj.Mover.Move(dir)
+		if !ok {
+			log.Printf("id%d. I couldn't move %v.", obj.id, dir)
+		}
 	}
 	if s.turnsUnseen > 20 {
 		return smaiLostPlayer

@@ -106,7 +106,7 @@ func (l *Level) Place(o *Obj, p math.Point) bool {
 
 	switch o.Spec.Family {
 	case FamActor:
-		return l.placeActor(o, t, false)
+		return l.placeActor(o, t)
 	case FamItem:
 		return l.placeItem(o, t)
 	default:
@@ -119,6 +119,7 @@ func (l *Level) Remove(o *Obj) {
 	switch o.Spec.Family {
 	case FamActor:
 		l.removeActor(o)
+		l.scheduler.Remove(o)
 	default:
 		panic(fmt.Sprintf("Tried to remove object of family %v", o.Spec.Family))
 	}
@@ -159,8 +160,9 @@ func (l *Level) RandomClearTile() *Tile {
 
 func (l *Level) SwapActors(x *Obj, y *Obj) {
 	tx, ty := x.Tile, y.Tile
-	l.placeActor(x, ty, true)
-	l.placeActor(y, tx, true)
+	l.removeActor(y)
+	l.placeActor(x, ty)
+	l.placeActor(y, tx)
 }
 
 const ScentFactor = FOVRadius
@@ -328,8 +330,8 @@ func patheligible(t *Tile) bool {
 	return t.Feature != FeatWall
 }
 
-func (l *Level) placeActor(obj *Obj, tile *Tile, force bool) bool {
-	if !force && tile.Actor != nil {
+func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
+	if tile.Actor != nil {
 		return false
 	}
 
@@ -360,11 +362,13 @@ func (l *Level) placeItem(obj *Obj, tile *Tile) bool {
 	return tile.Items.Add(obj)
 }
 
+// Removes actor from the board. Unlike placeActor, this does NOT change the
+// actor's place in the scheduler; this is so other Level methods (like
+// SwapActors) can lift and replace some dudes without rescheduling them.
 func (l *Level) removeActor(obj *Obj) {
 	obj.Tile.Actor = nil
 	obj.Tile = nil
 	obj.Level = nil
-	l.scheduler.Remove(obj)
 }
 
 // Used to track which actor should be acting when.
@@ -418,6 +422,14 @@ func (s *Scheduler) Len() int {
 
 // Add an actor to the schedule.
 func (s *Scheduler) Add(actor *Obj) {
+	// Attempting to re-add anyone to the scheduler won't refresh their current
+	// delay. We just ignore the request.
+	for _, e := range *(s.pq) {
+		if e.actor == actor {
+			return
+		}
+	}
+
 	// In Next(), we adjust everyone's delay and then call Init() to re-heapify
 	// pq. This isn't a stable "sort", so actors of equal speed end up randomly
 	// taking their turns in no particular order if they all start the game at

@@ -34,8 +34,8 @@ Stuff:
 - Room decorations
 
 Bugs:
-- Looks like swapping can put 2 monsters on same square?
-- Monsters don't seem to be following correctly in LOS -- the process for that is very simple, so is it being called at the wrong time? (using previous player pos or something?) They jiggle diagonally when the player is running straight in one cardinal direction, for example.
+- Stochastic scheduler tests why?
+- Smell chasing and chaseswapping is causing problems.
 
 HAX:
 - items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???
