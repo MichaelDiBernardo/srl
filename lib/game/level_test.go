@@ -250,28 +250,33 @@ func TestPathfinding(t *testing.T) {
 	}
 }
 
+type schedulerTestPair struct {
+	actor string
+	speed int
+}
+
 type schedulerTest struct {
-	actors map[string]int
+	actors []schedulerTestPair
 	want   []string
 }
 
 func TestScheduling(t *testing.T) {
 	tests := []schedulerTest{
-		{map[string]int{"A": 1}, []string{"A", "A", "A", "A", "A"}},
-		{map[string]int{"A": 2}, []string{"A", "A", "A", "A", "A"}},
-		{map[string]int{"A": 3}, []string{"A", "A", "A", "A", "A"}},
-		{map[string]int{"A": 4}, []string{"A", "A", "A", "A", "A"}},
-		{map[string]int{"A": 1, "B": 2}, []string{"B", "A", "B", "A", "B", "B"}},
-		{map[string]int{"A": 1, "B": 2}, []string{"B", "A", "B", "A", "B", "B", "A", "B"}},
-		{map[string]int{"A": 2, "B": 4}, []string{"B", "A", "B", "B", "A", "B", "B", "A", "B", "B", "A"}},
+		{[]schedulerTestPair{{"A", 1}}, []string{"A", "A", "A", "A", "A"}},
+		{[]schedulerTestPair{{"A", 2}}, []string{"A", "A", "A", "A", "A"}},
+		{[]schedulerTestPair{{"A", 3}}, []string{"A", "A", "A", "A", "A"}},
+		{[]schedulerTestPair{{"A", 4}}, []string{"A", "A", "A", "A", "A"}},
+		{[]schedulerTestPair{{"A", 1}, {"B", 2}}, []string{"B", "A", "B", "A", "B", "B"}},
+		{[]schedulerTestPair{{"A", 1}, {"B", 2}}, []string{"B", "A", "B", "A", "B", "B", "A", "B"}},
+		{[]schedulerTestPair{{"A", 2}, {"B", 4}}, []string{"B", "A", "B", "B", "A", "B", "B", "A", "B", "B", "A"}},
 	}
 
 	g := newTestGame()
 
 	for ti, test := range tests {
 		s := NewScheduler()
-		for aname, speed := range test.actors {
-			s.Add(lTestSpd(g, aname, speed))
+		for _, actorspec := range test.actors {
+			s.Add(lTestSpd(g, actorspec.actor, actorspec.speed))
 		}
 
 		actual := make([]string, 0)

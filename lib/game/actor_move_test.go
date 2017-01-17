@@ -12,10 +12,8 @@ func TestOkMove(t *testing.T) {
 	startpos := math.Pt(1, 1)
 	g.Level.Place(obj, startpos)
 
-	ok := obj.Mover.Move(math.Pt(1, 0))
-
-	if !ok {
-		t.Error(`Move( (1, 0)) = false, want true`)
+	if err := obj.Mover.Move(math.Pt(1, 0)); err != nil {
+		t.Errorf(`Move( (1, 0)) = %v, want true`, err)
 	}
 
 	newpos := obj.Pos()
@@ -32,20 +30,42 @@ func TestOkMove(t *testing.T) {
 	}
 }
 
-func TestMonsterSwapping(t *testing.T) {
+func TestMonsterSwapWorks(t *testing.T) {
 	g := newTestGame()
 	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
 	g.Level.Place(a1, math.Pt(1, 1))
 	g.Level.Place(a2, math.Pt(2, 1))
 
-	ok := a1.Mover.Move(math.Pt(1, 0))
+	// There's a random failure rate attached to swapping. This forces swap.
+	FixRandomSource([]int{0})
+	defer RestoreRandom()
 
-	if !ok {
-		t.Error(`a1.Move( (1, 0)) = false, want true`)
+	if err := a1.Mover.Move(math.Pt(1, 0)); err != nil {
+		t.Errorf(`a1.Move( (1, 0)) = %v, want nil`, err)
 	}
 
 	if a1.Pos() != math.Pt(2, 1) && a2.Pos() != math.Pt(1, 1) {
 		t.Error(`Monsters did not swap`)
+	}
+}
+
+func TestMonsterSwapFails(t *testing.T) {
+	g := newTestGame()
+	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
+	g.Level.Place(a1, math.Pt(1, 1))
+	g.Level.Place(a2, math.Pt(2, 1))
+
+	// There's a random failure rate attached to swapping. This forces swap to
+	// fail.
+	FixRandomSource([]int{1})
+	defer RestoreRandom()
+
+	if err := a1.Mover.Move(math.Pt(1, 0)); err != ErrMoveSwapFailed {
+		t.Errorf(`a1.Move( (1, 0)) = %v, want %v`, err, ErrMoveSwapFailed)
+	}
+
+	if a1.Pos() != math.Pt(1, 1) && a2.Pos() != math.Pt(2, 1) {
+		t.Error(`Monsters swapped!`)
 	}
 }
 
@@ -58,10 +78,8 @@ func TestMoveOpensClosedDoor(t *testing.T) {
 	g.Level.Place(obj, startpos)
 	g.Level.At(doorpos).Feature = FeatClosedDoor
 
-	ok := obj.Mover.Move(math.Pt(0, 1))
-
-	if ok {
-		t.Error(`Move into closed door was ok = true, want false`)
+	if err := obj.Mover.Move(math.Pt(0, 1)); err != ErrMoveOpenedDoor {
+		t.Error(`Move into closed door was %v, want %v`, err)
 	}
 
 	if feat := g.Level.At(doorpos).Feature; feat != FeatOpenDoor {

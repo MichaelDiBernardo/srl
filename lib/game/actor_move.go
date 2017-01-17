@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -8,7 +9,7 @@ import (
 // A thing that can move given a specific direction.
 type Mover interface {
 	Objgetter
-	Move(dir math.Point) bool
+	Move(dir math.Point) error
 	Ascend() bool
 	Descend() bool
 }
@@ -23,33 +24,51 @@ func NewActorMover(obj *Obj) Mover {
 	return &ActorMover{Trait: Trait{obj: obj}}
 }
 
-// Try to move the actor. Return false if the player couldn't move.
-func (p *ActorMover) Move(dir math.Point) bool {
-	if math.ChebyDist(math.Origin, dir) > 1 {
-		panic(fmt.Sprintf("Tried to Move(%s)", dir))
+var (
+	ErrMove0Dir        = errors.New("Move0Dir")
+	ErrMoveTooFar      = errors.New("MoveTooFar")
+	ErrMoveHit         = errors.New("MoveHit")
+	ErrMoveBlocked     = errors.New("MoveBlocked")
+	ErrMoveOutOfBounds = errors.New("MoveOutOfBounds")
+	ErrMoveSwapFailed  = errors.New("MoveSwapFailed")
+	ErrMoveOpenedDoor  = errors.New("MoveOpenedDoor")
+)
+
+// Try to move the actor. Return err describing what happened if the move
+// fails.
+func (p *ActorMover) Move(dir math.Point) error {
+	if dist := math.ChebyDist(math.Origin, dir); dist > 1 {
+		return ErrMoveTooFar
+	} else if dist == 0 {
+		return ErrMove0Dir
 	}
+
 	obj := p.obj
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)
 
 	if !endpos.In(obj.Level) {
-		return false
+		return ErrMoveOutOfBounds
 	}
 
 	endtile := obj.Level.At(endpos)
 	if other := endtile.Actor; other != nil {
 		if opposing := obj.IsPlayer() != other.IsPlayer(); opposing {
 			p.obj.Fighter.Hit(other.Fighter)
-			return false
+			return ErrMoveHit
 		} else {
-			// Traveling monsters should swap with one another.
-			obj.Level.SwapActors(obj, other)
-			return true
+			// Traveling monsters should swap with one another, but it's kind
+			// of a pain.
+			if OneIn(2) {
+				obj.Level.SwapActors(obj, other)
+				return nil
+			}
+			return ErrMoveSwapFailed
 		}
 	}
 	if endtile.Feature == FeatClosedDoor {
 		endtile.Feature = FeatOpenDoor
-		return false
+		return ErrMoveOpenedDoor
 	}
 
 	moved := obj.Level.Place(obj, endpos)
@@ -64,8 +83,9 @@ func (p *ActorMover) Move(dir math.Point) bool {
 			}
 			obj.Game.Events.Message(msg)
 		}
+		return nil
 	}
-	return moved
+	return ErrMoveBlocked
 }
 
 // Try to go up stairs. If the current tile is not an upstair, return false.

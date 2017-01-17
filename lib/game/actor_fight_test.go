@@ -99,6 +99,7 @@ func TestHit(t *testing.T) {
 		g := newTestGame()
 		attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
 		FixRandomDie(test.rolls)
+		defer RestoreRandom()
 
 		attacker.Fighter.Hit(defender.Fighter)
 		if hp := defender.Sheet.HP(); hp != test.wanthp {

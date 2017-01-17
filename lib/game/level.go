@@ -83,8 +83,6 @@ func (l *Level) Around(loc math.Point) []*Tile {
 
 	neighbors := make([]*Tile, 0, len(adj))
 
-	// Figure out which neighbours we should even bother checking (e.g.
-	// walls are a bad idea at the moment. We don't have Kemenrauko.
 	for _, p := range adj {
 		neighbors = append(neighbors, l.At(p))
 	}

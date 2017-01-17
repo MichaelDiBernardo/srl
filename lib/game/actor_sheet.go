@@ -65,7 +65,7 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		Trait: Trait{obj: obj},
 		str:   3,
 		agi:   4,
-		vit:   20,
+		vit:   200,
 		mnd:   3,
 		speed: 2,
 	}

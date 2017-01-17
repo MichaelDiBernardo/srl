@@ -238,13 +238,13 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	}
 
 	dir := nextpos.Sub(mypos)
-	ok := me.obj.Mover.Move(dir)
+	err := me.obj.Mover.Move(dir)
 
-	if !ok {
-		s.turnsBlocked++
-	} else {
+	if err == nil {
 		s.turnsBlocked = 0
 		s.path = s.path[1:]
+	} else {
+		s.turnsBlocked++
 	}
 
 	if s.turnsBlocked > 5 {
@@ -282,9 +282,9 @@ func (s *smaiStateChasing) Init(me *SMAI) {
 func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	obj := me.obj
 	pos := obj.Pos()
-	dir := math.Origin
 
 	if obj.Seer.CanSee(obj.Game.Player) {
+		dir := math.Origin
 		s.turnsUnseen = 0
 
 		// Try chasing by sight.
@@ -303,29 +303,37 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 			dir.Y = -1
 		}
 		log.Printf("id%d. I see player at %v. I'm at %v moving %v", obj.id, playerpos, pos, dir)
-	} else {
-		// Try chasing by smell.
-		s.turnsUnseen++
-		maxscent, maxloc, around := 0, math.Origin, me.obj.Level.Around(pos)
 
-		for _, tile := range around {
-			if curscent := tile.Flows[FlowScent]; curscent > maxscent {
-				maxscent = curscent
-				maxloc = tile.Pos
-			}
+		// Try to move. If this doesn't work because we can see the character
+		// but the best direction moves us into a wall, we'll just use scent
+		// instead. However, that won't count towards the # of turns unseen.
+		if err := obj.Mover.Move(dir); err == nil {
+			return smaiNoTransition
+		} else {
+			log.Printf("id%d. I couldn't move %v: %v. Trying smell.", obj.id, err, dir)
 		}
+	} else {
+		s.turnsUnseen++
+	}
 
-		if maxscent != 0 {
-			dir = maxloc.Sub(pos)
-			log.Printf("id%d. I smell player at %v. I'm at %v moving %v", obj.id, maxloc, pos, dir)
+	// Try chasing by smell.
+	maxscent, maxloc, around := 0, math.Origin, me.obj.Level.Around(pos)
+
+	for _, tile := range around {
+		if curscent := tile.Flows[FlowScent]; !tile.Feature.Solid && curscent > maxscent {
+			maxscent = curscent
+			maxloc = tile.Pos
 		}
 	}
 
-	if dir != math.Origin {
-		ok := obj.Mover.Move(dir)
-		if !ok {
-			log.Printf("id%d. I couldn't move %v.", obj.id, dir)
-		}
+	dir := math.Origin
+	if maxscent != 0 {
+		dir = maxloc.Sub(pos)
+		log.Printf("id%d. I smell player at %v. I'm at %v moving %v", obj.id, maxloc, pos, dir)
+	}
+
+	if err := obj.Mover.Move(dir); err != nil {
+		log.Printf("id%d. I couldn't move %v: %v", obj.id, dir, err)
 	}
 	if s.turnsUnseen > 20 {
 		return smaiLostPlayer
