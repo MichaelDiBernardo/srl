@@ -307,7 +307,9 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		// Try to move. If this doesn't work because we can see the character
 		// but the best direction moves us into a wall, we'll just use scent
 		// instead. However, that won't count towards the # of turns unseen.
-		if err := obj.Mover.Move(dir); err == nil {
+		err := obj.Mover.Move(dir)
+
+		if err != ErrMoveBlocked {
 			return smaiNoTransition
 		} else {
 			log.Printf("id%d. I couldn't move %v: %v. Trying smell.", obj.id, err, dir)
@@ -336,6 +338,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		log.Printf("id%d. I couldn't move %v: %v", obj.id, dir, err)
 	}
 	if s.turnsUnseen > 20 {
+		log.Printf("id%d. I lost the player :(", obj.id)
 		return smaiLostPlayer
 	}
 	return smaiNoTransition
