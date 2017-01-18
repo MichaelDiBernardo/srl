@@ -38,7 +38,7 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{},
+				Attribs: &Personality{Fear: 75},
 				Brain:   SMAIWanderer,
 			}),
 			Fighter: NewActorFighter,
@@ -75,7 +75,7 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{},
+				Attribs: &Personality{Fear: 75},
 				Brain:   SMAIWanderer,
 			}),
 			Fighter: NewActorFighter,

@@ -25,6 +25,10 @@ type SMAI struct {
 }
 
 func (s *SMAI) Act() bool {
+	// Check for flight conditions.
+	if s.cur.State() != smaiFleeing && s.obj.Sheet.HP()*100/s.obj.Sheet.MaxHP() <= s.Attribs.Fear {
+		s.transition(smaiFlee)
+	}
 	t := s.cur.Act(s)
 	if t != smaiNoTransition {
 		s.transition(t)
@@ -118,6 +122,8 @@ func newSMAIState(state smaiState) smaiStateObj {
 		return &smaiStateWandering{smaiSB: smaiSB{state: smaiWandering}}
 	case smaiChasing:
 		return &smaiStateChasing{smaiSB: smaiSB{state: smaiChasing}}
+	case smaiFleeing:
+		return &smaiStateFleeing{smaiSB: smaiSB{state: smaiFleeing}}
 	default:
 		panic(fmt.Sprintf("Could not create stateobj for state %v", state))
 	}
@@ -240,11 +246,11 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	dir := nextpos.Sub(mypos)
 	err := me.obj.Mover.Move(dir)
 
-	if err == nil {
+	if err == ErrMoveBlocked {
+		s.turnsBlocked++
+	} else {
 		s.turnsBlocked = 0
 		s.path = s.path[1:]
-	} else {
-		s.turnsBlocked++
 	}
 
 	if s.turnsBlocked > 5 {
@@ -344,13 +350,96 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	return smaiNoTransition
 }
 
+// Chases the player when they're in sight or smell range.
+type smaiStateFleeing struct {
+	smaiSB
+	turnsBlocked int
+	path         Path
+	dest         math.Point
+	helpless     bool
+}
+
+func (s *smaiStateFleeing) Init(me *SMAI) {
+	me.obj.Game.Events.Message(fmt.Sprintf("%s flees!", me.obj.Spec.Name))
+	log.Printf("id%d. I'm running!!", me.obj.id, me.obj.Game.Player.Pos())
+	s.findsafety(me)
+}
+
+func (s *smaiStateFleeing) Act(me *SMAI) smaiTransition {
+	// If I'm stuck, don't do anything.
+	if s.helpless {
+		return smaiNoTransition
+	}
+
+	// If I arrived, repath.
+	if len(s.path) == 0 {
+		s.findsafety(me)
+		return s.Act(me)
+	}
+
+	// If I lost the path, repath.
+	mypos, nextpos := me.obj.Pos(), s.path[0]
+	if math.ChebyDist(mypos, nextpos) > 1 {
+		s.findsafety(me)
+		return s.Act(me)
+	}
+
+	// Move.
+	dir := nextpos.Sub(mypos)
+	err := me.obj.Mover.Move(dir)
+
+	if err == ErrMoveBlocked {
+		s.turnsBlocked++
+	} else {
+		s.turnsBlocked = 0
+		s.path = s.path[1:]
+	}
+
+	// If we're blocked, try a different direction.
+	if s.turnsBlocked > 3 {
+		s.findsafety(me)
+	}
+
+	return smaiNoTransition
+}
+
+func (s *smaiStateFleeing) findsafety(me *SMAI) {
+	tile := me.obj.Level.RandomClearTile()
+	if tile == nil {
+		s.helpless = true
+		return
+	}
+
+	dest := tile.Pos
+	path, ok := me.obj.Level.FindPath(me.obj.Pos(), dest, fleecost)
+
+	if !ok {
+		s.helpless = true
+		return
+	}
+	s.path = path
+	s.dest = dest
+}
+
+func fleecost(l *Level, loc math.Point) int {
+	if actor := l.At(loc).Actor; actor != nil && actor.IsPlayer() {
+		// I really don't want to run through the player unless I have no
+		// choice.
+		return 200
+	}
+	return PathCost(l, loc)
+}
+
 // A wandering monster. Randomly picks destinations to walk to, until it
 // detects the player.
 var SMAIWanderer = SMAIStateMachine{
 	{smaiUnborn, smaiStart}:            smaiStopped,
 	{smaiStopped, smaiWander}:          smaiWandering,
 	{smaiStopped, smaiFoundPlayer}:     smaiChasing,
+	{smaiStopped, smaiFlee}:            smaiFleeing,
 	{smaiWandering, smaiStopWandering}: smaiStopped,
 	{smaiWandering, smaiFoundPlayer}:   smaiChasing,
+	{smaiWandering, smaiFlee}:          smaiFleeing,
 	{smaiChasing, smaiLostPlayer}:      smaiStopped,
+	{smaiChasing, smaiFlee}:            smaiFleeing,
 }

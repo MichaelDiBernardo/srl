@@ -1,4 +1,5 @@
 NEXT:
+- Regen and ticks
 - Monster AI:
     Types:
         - Wandering
