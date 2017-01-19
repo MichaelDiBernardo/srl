@@ -25,10 +25,15 @@ type SMAI struct {
 }
 
 func (s *SMAI) Act() bool {
-	// Check for flight conditions.
-	if s.cur.State() != smaiFleeing && s.obj.Sheet.HP()*100/s.obj.Sheet.MaxHP() <= s.Attribs.Fear {
+	// Check for flight and recovery conditions.
+	percentHP := s.obj.Sheet.HP() * 100 / s.obj.Sheet.MaxHP()
+	if percentHP < s.Attribs.Fear && s.cur.State() != smaiFleeing {
 		s.transition(smaiFlee)
 	}
+	if percentHP >= s.Attribs.Fear && s.cur.State() == smaiFleeing {
+		s.transition(smaiStopFleeing)
+	}
+
 	t := s.cur.Act(s)
 	if t != smaiNoTransition {
 		s.transition(t)
@@ -442,4 +447,5 @@ var SMAIWanderer = SMAIStateMachine{
 	{smaiWandering, smaiFlee}:          smaiFleeing,
 	{smaiChasing, smaiLostPlayer}:      smaiStopped,
 	{smaiChasing, smaiFlee}:            smaiFleeing,
+	{smaiFleeing, smaiStopFleeing}:     smaiChasing,
 }

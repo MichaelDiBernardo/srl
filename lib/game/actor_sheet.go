@@ -36,6 +36,10 @@ type Sheet interface {
 	setMP(mp int)
 	MaxMP() int
 
+	// Regen factor. Normal healing is 1; 2 is twice as fast, etc.
+	// 0 means no regen.
+	Regen() int
+
 	// Hurt me.
 	Hurt(dmg int)
 	// Heal me.
@@ -56,8 +60,9 @@ type PlayerSheet struct {
 
 	speed int
 
-	hp int
-	mp int
+	hp    int
+	mp    int
+	regen int
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -65,12 +70,13 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		Trait: Trait{obj: obj},
 		str:   3,
 		agi:   4,
-		vit:   200,
+		vit:   4,
 		mnd:   3,
 		speed: 2,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
+	ps.regen = 1
 	return ps
 }
 
@@ -124,6 +130,10 @@ func (p *PlayerSheet) setMP(mp int) {
 
 func (p *PlayerSheet) MaxMP() int {
 	return 10 * (1 + p.Mnd())
+}
+
+func (p *PlayerSheet) Regen() int {
+	return p.regen
 }
 
 func (p *PlayerSheet) Hurt(dmg int) {
@@ -199,6 +209,8 @@ type MonsterSheet struct {
 	maxhp int
 	maxmp int
 
+	regen int
+
 	melee   int
 	evasion int
 	// Basically weapon weight.
@@ -218,6 +230,9 @@ func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 		sheet.obj = o
 		sheet.hp = sheet.maxhp
 		sheet.mp = sheet.maxmp
+		if sheet.regen == 0 {
+			sheet.regen = 1
+		}
 		return &sheet
 	}
 }
@@ -272,6 +287,10 @@ func (m *MonsterSheet) setMP(mp int) {
 
 func (m *MonsterSheet) MaxMP() int {
 	return m.maxmp
+}
+
+func (m *MonsterSheet) Regen() int {
+	return m.regen
 }
 
 func (m *MonsterSheet) Hurt(dmg int) {

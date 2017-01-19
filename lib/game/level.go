@@ -129,6 +129,9 @@ func (l *Level) Evolve() {
 	// Advance schedule until we find the player.
 	for {
 		actor := l.scheduler.Next()
+		// TODO: This may need to be done on _every_ actor for each turn taken.
+		actor.Ticker.Tick(l.scheduler.delay)
+
 		if seer := actor.Seer; seer != nil {
 			seer.CalcFOV()
 		}
@@ -404,9 +407,15 @@ func (s *SQ) Pop() interface{} {
 	return x
 }
 
+// Schedules which actors should act when.
 type Scheduler struct {
-	pq   *SQ
+	// The priority queue that orders the actors.
+	pq *SQ
+	// A tiny variance in initial delay to enforce ordering (see later
+	// comments.)
 	bump int
+	// How much total delay has been processed on this scheduler.
+	delay int
 }
 
 func NewScheduler() *Scheduler {
@@ -452,6 +461,7 @@ func (s *Scheduler) Next() *Obj {
 	for _, e := range *(s.pq) {
 		e.delay -= entry.delay
 	}
+	s.delay += entry.delay
 	heap.Init(s.pq)
 
 	actor := entry.actor

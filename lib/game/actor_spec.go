@@ -22,6 +22,7 @@ var PlayerSpec = &Spec{
 		User:     NewActorUser,
 		Sheet:    NewPlayerSheet,
 		Seer:     NewActorSeer,
+		Ticker:   NewActorTicker,
 	},
 }
 
@@ -38,12 +39,13 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{Fear: 75},
+				Attribs: &Personality{Fear: 25},
 				Brain:   SMAIWanderer,
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
 			Seer:    NewActorSeer,
+			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 2,
 				agi: 0,
@@ -75,12 +77,13 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{Fear: 75},
+				Attribs: &Personality{Fear: 0},
 				Brain:   SMAIWanderer,
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
 			Seer:    NewActorSeer,
+			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 3,
 				agi: 3,
