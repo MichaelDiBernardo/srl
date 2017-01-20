@@ -3,11 +3,10 @@ package game
 // We expect a speed 2 actor to fully recover in 100 turns.
 const RegenPeriod = 100
 
-// A thing that keeps track of time passing, and modifies the actor
-// accordingly.
+// Does all of the required upkeep to an actor before they take their turn.
 type Ticker interface {
 	Objgetter
-	// The absolute delay that has passed on the level.
+	// Notify the actor that 'delay' time has passed.
 	Tick(delay int)
 }
 
@@ -24,12 +23,20 @@ func NewActorTicker(obj *Obj) Ticker {
 }
 
 func (t *ActorTicker) Tick(delay int) {
-	// We've been placed into a new level.
+	// Non-time-related things.
+	if seer := t.obj.Seer; seer != nil {
+		seer.CalcFOV()
+	}
+
+	// Time-related things.
 	if delay < t.last {
+		// We've been placed into a new level.
 		t.last = 0
 	}
 	diff := delay - t.last
+
 	t.regen(diff)
+
 	t.last = delay
 }
 
