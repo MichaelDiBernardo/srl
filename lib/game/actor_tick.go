@@ -1,7 +1,5 @@
 package game
 
-import "log"
-
 // We expect a speed 2 actor to fully recover in 100 turns.
 const RegenPeriod = 100
 
@@ -44,7 +42,6 @@ func (t *ActorTicker) regen(diff int) {
 	heal := t.regenc / delayPerHp
 
 	if heal > 0 {
-		log.Printf("id%d. I healed %d", t.obj.id, heal)
 		sheet.Heal(heal)
 		t.regenc -= heal * delayPerHp
 	}

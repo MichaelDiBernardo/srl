@@ -121,6 +121,16 @@ func (s *Scheduler) Remove(actor *Obj) {
 	heap.Remove(s.pq, index)
 }
 
+// Runs f on each actor in the scheduler. Be careful with this, we assume
+// you're not doing anything that should affect the schedule at all.  We do
+// this instead of passing back a slice of actors so that we don't have to
+// accumulate them out of the heap. Also, it just seemed fun. Sorry.
+func (s *Scheduler) EachActor(f func(o *Obj)) {
+	for _, e := range *(s.pq) {
+		f(e.actor)
+	}
+}
+
 // Given the speed of an actor, this will tell you how much delay to add after
 // each of its turns.
 func GetDelay(spd int) int {

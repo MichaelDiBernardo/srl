@@ -70,7 +70,15 @@ func NewLevel(width, height int, game *Game, gen func(*Level) *Level) *Level {
 		game:      game,
 		scheduler: NewScheduler(),
 	}
-	return gen(level)
+	level = gen(level)
+
+	// Init all the actors brains, now that they have a place on the map.
+	level.scheduler.EachActor(func(o *Obj) {
+		if o.AI != nil {
+			o.AI.Init()
+		}
+	})
+	return level
 }
 
 func (l *Level) At(p math.Point) *Tile {

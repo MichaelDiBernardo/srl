@@ -33,7 +33,7 @@ var Monsters = []*Spec{
 		Species: SpecOrc,
 		Name:    "ORC",
 		Gen: Gen{
-			Floors:    []int{1},
+			Floors:    []int{10},
 			GroupSize: 2,
 		},
 		Traits: &Traits{
@@ -69,7 +69,7 @@ var Monsters = []*Spec{
 		Family:  FamActor,
 		Genus:   GenMonster,
 		Species: SpecAnt,
-		Name:    "ANT",
+		Name:    "DRAGON",
 		Gen: Gen{
 			Floors:    []int{1},
 			GroupSize: 2,
@@ -77,8 +77,8 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{Fear: 0},
-				Brain:   SMAIWanderer,
+				Attribs: &Personality{Fear: 50},
+				Brain:   SMAITerritorial,
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,

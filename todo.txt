@@ -1,4 +1,5 @@
 NEXT:
+- Create custom chasing for territorial monster that stops as soon as out of LOS
 
 - Monster AI:
     Types:

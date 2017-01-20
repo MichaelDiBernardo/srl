@@ -10,6 +10,7 @@ import (
 // A thing that can move given a specific direction.
 type AI interface {
 	Objgetter
+	Init()
 	Act() bool
 }
 
@@ -22,6 +23,22 @@ type SMAI struct {
 	Brain SMAIStateMachine
 	// My current state object
 	cur smaiStateObj
+}
+
+func NewSMAI(spec SMAI) func(*Obj) AI {
+	return func(o *Obj) AI {
+		// Copy AI.
+		smai := spec
+		smai.obj = o
+		smai.cur = newSMAIState(smaiUnborn)
+		smai.Attribs = &Personality{}
+		*(smai.Attribs) = *(spec.Attribs)
+		return &smai
+	}
+}
+
+func (s *SMAI) Init() {
+	s.transition(smaiStart)
 }
 
 func (s *SMAI) Act() bool {
@@ -52,29 +69,19 @@ func (s *SMAI) transition(trans smaiTransition) {
 
 // Stuff that this AI likes to do.
 type Personality struct {
+	// The following things are set externally, in configuration.
 	// How many squares away can I smell things?
 	SmellRange int
 	// How many squares away can I see things?
 	SightRange int
 	// How far away will I run from home if I'm territorial?
 	ChaseRange int
-	// Where is my home if I'm territorial?
-	Home math.Point
 	// What percent HP do I need to be at before I run away? '25' means '25%'.
 	Fear int
-}
 
-func NewSMAI(spec SMAI) func(*Obj) AI {
-	return func(o *Obj) AI {
-		// Copy AI.
-		// TODO: Copy personality
-		smai := spec
-		smai.obj = o
-		smai.cur = newSMAIState(smaiUnborn)
-		smai.transition(smaiStart)
-
-		return &smai
-	}
+	// These things are set by the state machine itself.
+	// Where is my home if I'm territorial?
+	home math.Point
 }
 
 // A state in the machine.
@@ -121,14 +128,18 @@ func newSMAIState(state smaiState) smaiStateObj {
 	switch state {
 	case smaiUnborn:
 		return &smaiStateDoNothing{smaiSB: smaiSB{state: smaiUnborn}}
-	case smaiStopped:
-		return &smaiStateStopped{smaiSB: smaiSB{state: smaiStopped}}
+	case smaiWaiting:
+		return &smaiStateWaiting{smaiSB: smaiSB{state: smaiWaiting}}
 	case smaiWandering:
 		return &smaiStateWandering{smaiSB: smaiSB{state: smaiWandering}}
 	case smaiChasing:
 		return &smaiStateChasing{smaiSB: smaiSB{state: smaiChasing}}
 	case smaiFleeing:
 		return &smaiStateFleeing{smaiSB: smaiSB{state: smaiFleeing}}
+	case smaiAtHome:
+		return &smaiStateAtHome{smaiSB: smaiSB{state: smaiAtHome}}
+	case smaiGoingHome:
+		return &smaiStateGoingHome{smaiSB: smaiSB{state: smaiGoingHome}}
 	default:
 		panic(fmt.Sprintf("Could not create stateobj for state %v", state))
 	}
@@ -141,7 +152,7 @@ const (
 	// The initial state.
 	smaiUnborn smaiState = iota
 	// Just chillin after wandering.
-	smaiStopped
+	smaiWaiting
 	// Sitting at my house.
 	smaiAtHome
 	// Walking to an arbitrary destination.
@@ -158,7 +169,7 @@ const (
 	// Start doing stuff. This is run when a monster is first spawned.
 	smaiStart smaiTransition = iota
 	// Pick a new destination and wander towards it.
-	smaiWander
+	smaiStopWaiting
 	// I found the player!
 	smaiFoundPlayer
 	// I lost the player!
@@ -169,6 +180,8 @@ const (
 	smaiStopWandering
 	// I need to stop running away!
 	smaiStopFleeing
+	// I found my house!
+	smaiFoundHome
 	// Dummy transition.
 	smaiNoTransition
 )
@@ -185,24 +198,24 @@ func (_ *smaiStateDoNothing) Act(me *SMAI) smaiTransition {
 }
 
 // A state that sits around for a fixed number of turns until wandering again.
-type smaiStateStopped struct {
+type smaiStateWaiting struct {
 	smaiSB
-	// How many more turns should we stay stopped for.
+	// How many more turns should we wait for.
 	turns int
 }
 
-func (s *smaiStateStopped) Init(me *SMAI) {
+func (s *smaiStateWaiting) Init(me *SMAI) {
 	s.turns = RandInt(5, 25)
 }
 
-func (s *smaiStateStopped) Act(me *SMAI) smaiTransition {
+func (s *smaiStateWaiting) Act(me *SMAI) smaiTransition {
 	if me.obj.Seer.CanSee(me.obj.Game.Player) {
 		return smaiFoundPlayer
 	}
 
 	s.turns--
 	if s.turns <= 0 {
-		return smaiWander
+		return smaiStopWaiting
 	}
 	return smaiNoTransition
 }
@@ -366,7 +379,7 @@ type smaiStateFleeing struct {
 
 func (s *smaiStateFleeing) Init(me *SMAI) {
 	me.obj.Game.Events.Message(fmt.Sprintf("%s flees!", me.obj.Spec.Name))
-	log.Printf("id%d. I'm running!!", me.obj.id, me.obj.Game.Player.Pos())
+	log.Printf("id%d. I'm running!! My pos is %v", me.obj.id, me.obj.Game.Player.Pos())
 	s.findsafety(me)
 }
 
@@ -426,6 +439,94 @@ func (s *smaiStateFleeing) findsafety(me *SMAI) {
 	s.dest = dest
 }
 
+// A very homey state.
+type smaiStateAtHome struct {
+	smaiSB
+}
+
+func (s *smaiStateAtHome) Init(me *SMAI) {
+	if me.Attribs.home != math.Origin {
+		log.Printf("id%d. I have a home already: %v.", me.obj.id, me.Attribs.home)
+		return
+	}
+	htile := me.obj.Level.RandomClearTile()
+	// Really shouldn't happen. If it does, I guess this monster is going to be
+	// really enamored of the top-left corner of the map :)
+	if htile == nil {
+		log.Printf("id%d. I couldn't find a home.", me.obj.id)
+		return
+	}
+	me.Attribs.home = htile.Pos
+	log.Printf("id%d. I have chosen %v as my home.", me.obj.id, me.Attribs.home)
+}
+
+func (s *smaiStateAtHome) Act(me *SMAI) smaiTransition {
+	// We have an uninvited guest.
+	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+		log.Printf("id%d. There's an intruder in my house!.", me.obj.id)
+		return smaiFoundPlayer
+	}
+	return smaiNoTransition
+}
+
+// This is how we get back home when we're lost.
+type smaiStateGoingHome struct {
+	smaiSB
+	path Path
+}
+
+func (s *smaiStateGoingHome) Init(me *SMAI) {
+	log.Printf("id%d. Things are clear. I'm going home.", me.obj.id)
+	s.findhome(me)
+}
+
+func (s *smaiStateGoingHome) Act(me *SMAI) smaiTransition {
+	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+		log.Printf("id%d. Found the player on my way home", me.obj.id)
+		return smaiFoundPlayer
+	}
+
+	// We're home!
+	if len(s.path) == 0 {
+		log.Printf("id%d. I have arrived home! I'm at %v, my home is %v.", me.obj.id, me.obj.Pos(), me.Attribs.home)
+		return smaiFoundHome
+	}
+
+	// Try to move to our next point.
+	mypos, nextpos := me.obj.Pos(), s.path[0]
+	if math.ChebyDist(mypos, nextpos) > 1 {
+		log.Printf("id%d. I got knocked off my homepath at %v to %v. Repathing.", me.obj.id, me.obj.Pos(), me.Attribs.home)
+		s.findhome(me)
+		return s.Act(me)
+	}
+
+	dir := nextpos.Sub(mypos)
+	err := me.obj.Mover.Move(dir)
+
+	if err == nil {
+		s.path = s.path[1:]
+		log.Printf("id%d. Moving closer to home. %v -> %v dest %v.", me.obj.id, me.obj.Pos(), dir, me.Attribs.home)
+	} else {
+		log.Printf("id%d. Stuck while moving home: %v %v -> %v dest %v.", me.obj.id, err, me.obj.Pos(), dir, me.Attribs.home)
+	}
+	return smaiNoTransition
+}
+
+func (s *smaiStateGoingHome) findhome(me *SMAI) {
+	mypos := me.obj.Pos()
+	path, ok := me.obj.Level.FindPath(mypos, me.Attribs.home, PathCost)
+	if !ok {
+		// We can't find our way to our destination. Let's pretend our
+		// destination is right here.
+		s.path = Path{}
+		return
+	}
+	s.path = path
+}
+
+// Pathfinding cost function to use when we're running away. This is the same
+// as the normal one, but it really, really doesn't like running through the
+// player. The player is scawy right now.
 func fleecost(l *Level, loc math.Point) int {
 	if actor := l.At(loc).Actor; actor != nil && actor.IsPlayer() {
 		// I really don't want to run through the player unless I have no
@@ -438,14 +539,31 @@ func fleecost(l *Level, loc math.Point) int {
 // A wandering monster. Randomly picks destinations to walk to, until it
 // detects the player.
 var SMAIWanderer = SMAIStateMachine{
-	{smaiUnborn, smaiStart}:            smaiStopped,
-	{smaiStopped, smaiWander}:          smaiWandering,
-	{smaiStopped, smaiFoundPlayer}:     smaiChasing,
-	{smaiStopped, smaiFlee}:            smaiFleeing,
-	{smaiWandering, smaiStopWandering}: smaiStopped,
+	{smaiUnborn, smaiStart}:            smaiWaiting,
+	{smaiWaiting, smaiStopWaiting}:     smaiWandering,
+	{smaiWaiting, smaiFoundPlayer}:     smaiChasing,
+	{smaiWaiting, smaiFlee}:            smaiFleeing,
+	{smaiWandering, smaiStopWandering}: smaiWaiting,
 	{smaiWandering, smaiFoundPlayer}:   smaiChasing,
 	{smaiWandering, smaiFlee}:          smaiFleeing,
-	{smaiChasing, smaiLostPlayer}:      smaiStopped,
+	{smaiChasing, smaiLostPlayer}:      smaiWaiting,
 	{smaiChasing, smaiFlee}:            smaiFleeing,
 	{smaiFleeing, smaiStopFleeing}:     smaiChasing,
+}
+
+// A territorial monster. Guards its home (spawn) square and returns there when
+// player is out of LOS.
+var SMAITerritorial = SMAIStateMachine{
+	{smaiUnborn, smaiStart}:          smaiAtHome,
+	{smaiAtHome, smaiFoundPlayer}:    smaiChasing,
+	{smaiAtHome, smaiFlee}:           smaiFleeing,
+	{smaiChasing, smaiLostPlayer}:    smaiWaiting,
+	{smaiChasing, smaiFlee}:          smaiFleeing,
+	{smaiWaiting, smaiStopWaiting}:   smaiGoingHome,
+	{smaiWaiting, smaiFoundPlayer}:   smaiChasing,
+	{smaiWaiting, smaiFlee}:          smaiFleeing,
+	{smaiGoingHome, smaiFoundHome}:   smaiAtHome,
+	{smaiGoingHome, smaiFoundPlayer}: smaiChasing,
+	{smaiGoingHome, smaiFlee}:        smaiFleeing,
+	{smaiFleeing, smaiStopFleeing}:   smaiWaiting,
 }

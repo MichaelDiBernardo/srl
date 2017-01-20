@@ -79,7 +79,7 @@ func TestMoveOpensClosedDoor(t *testing.T) {
 	g.Level.At(doorpos).Feature = FeatClosedDoor
 
 	if err := obj.Mover.Move(math.Pt(0, 1)); err != ErrMoveOpenedDoor {
-		t.Error(`Move into closed door was %v, want %v`, err)
+		t.Errorf(`Move into closed door was %v, want %v`, err, ErrMoveOpenedDoor)
 	}
 
 	if feat := g.Level.At(doorpos).Feature; feat != FeatOpenDoor {
