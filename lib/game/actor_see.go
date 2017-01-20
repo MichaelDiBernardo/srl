@@ -37,13 +37,13 @@ func (a *ActorSeer) CalcFOV() {
 	fov := newPointSet()
 	fov.Add(math.Origin)
 
-	pos, level := a.Obj().Pos(), a.Obj().Level
+	pos, level, rad := a.Obj().Pos(), a.Obj().Level, a.Obj().Sheet.Sight()
 
 	// Light begins casting in all directions.
 	light := make(map[math.Point]pointset)
 	light[math.Origin] = newPointSetL(math.ChebyEdge(1))
 
-	for r := 0; r < FOVRadius; r++ {
+	for r := 0; r < rad; r++ {
 		edge := math.ChebyEdge(r)
 		for _, cpt := range edge {
 			li, pt := light[cpt], pos.Add(cpt)

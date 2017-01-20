@@ -40,6 +40,9 @@ type Sheet interface {
 	// 0 means no regen.
 	Regen() int
 
+	// Sight radius.
+	Sight() int
+
 	// Hurt me.
 	Hurt(dmg int)
 	// Heal me.
@@ -58,6 +61,7 @@ type PlayerSheet struct {
 	vit int
 	mnd int
 
+	sight int
 	speed int
 
 	hp    int
@@ -73,10 +77,11 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		vit:   4,
 		mnd:   3,
 		speed: 4,
+		regen: 1,
+		sight: FOVRadius,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
-	ps.regen = 1
 	return ps
 }
 
@@ -134,6 +139,10 @@ func (p *PlayerSheet) MaxMP() int {
 
 func (p *PlayerSheet) Regen() int {
 	return p.regen
+}
+
+func (p *PlayerSheet) Sight() int {
+	return p.sight
 }
 
 func (p *PlayerSheet) Hurt(dmg int) {
@@ -203,6 +212,7 @@ type MonsterSheet struct {
 	mnd int
 
 	speed int
+	sight int
 
 	hp    int
 	mp    int
@@ -232,6 +242,9 @@ func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 		sheet.mp = sheet.maxmp
 		if sheet.regen == 0 {
 			sheet.regen = 1
+		}
+		if sheet.sight == 0 {
+			sheet.sight = FOVRadius
 		}
 		return &sheet
 	}
@@ -291,6 +304,10 @@ func (m *MonsterSheet) MaxMP() int {
 
 func (m *MonsterSheet) Regen() int {
 	return m.regen
+}
+
+func (m *MonsterSheet) Sight() int {
+	return m.sight
 }
 
 func (m *MonsterSheet) Hurt(dmg int) {

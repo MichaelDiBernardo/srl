@@ -1,5 +1,5 @@
 NEXT:
-- Sight is a sheet attribute
+- Move scent into its own workflow -- right now scent radius is tied to LOS
 
 - Monster AI:
     Types:
