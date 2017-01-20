@@ -18,7 +18,7 @@ type AI interface {
 type SMAI struct {
 	Trait
 	// Fixed attributes for this AI.
-	Attribs *Personality
+	Personality *Personality
 	// My behaviour in the form of a state machine.
 	Brain SMAIStateMachine
 	// My current state object
@@ -31,8 +31,8 @@ func NewSMAI(spec SMAI) func(*Obj) AI {
 		smai := spec
 		smai.obj = o
 		smai.cur = newSMAIState(smaiUnborn)
-		smai.Attribs = &Personality{}
-		*(smai.Attribs) = *(spec.Attribs)
+		smai.Personality = &Personality{}
+		*(smai.Personality) = *(spec.Personality)
 		return &smai
 	}
 }
@@ -44,10 +44,10 @@ func (s *SMAI) Init() {
 func (s *SMAI) Act() bool {
 	// Check for flight and recovery conditions.
 	percentHP := s.obj.Sheet.HP() * 100 / s.obj.Sheet.MaxHP()
-	if percentHP < s.Attribs.Fear && s.cur.State() != smaiFleeing {
+	if percentHP < s.Personality.Fear && s.cur.State() != smaiFleeing {
 		s.transition(smaiFlee)
 	}
-	if percentHP >= s.Attribs.Fear && s.cur.State() == smaiFleeing {
+	if percentHP >= s.Personality.Fear && s.cur.State() == smaiFleeing {
 		s.transition(smaiStopFleeing)
 	}
 
@@ -70,12 +70,10 @@ func (s *SMAI) transition(trans smaiTransition) {
 // Stuff that this AI likes to do.
 type Personality struct {
 	// The following things are set externally, in configuration.
-	// How many squares away can I smell things?
-	SmellRange int
-	// How many squares away can I see things?
-	SightRange int
-	// How far away will I run from home if I'm territorial?
-	ChaseRange int
+
+	// Roughly how many turns will I spend chasing a player by smell, out of
+	// LOS? 0 means I'll only chase in LOS.
+	Persistence int
 	// What percent HP do I need to be at before I run away? '25' means '25%'.
 	Fear int
 
@@ -296,11 +294,25 @@ type smaiStateChasing struct {
 	smaiSB
 	// How many turns in a row we've been chasing without seeing the player.
 	turnsUnseen int
+	// How many turns are we willing to spend chasing by scent alone?
+	motivation int
 }
 
 func (s *smaiStateChasing) Init(me *SMAI) {
 	me.obj.Game.Events.Message(fmt.Sprintf("%s shouts!", me.obj.Spec.Name))
-	log.Printf("id%d. I see player at %v. Time to chase!!", me.obj.id, me.obj.Game.Player.Pos())
+
+	// Figure out how long I'll chase by scent.
+	persistence := me.Personality.Persistence
+
+	// 0 persistence is a signal that we only want to chase in LOS.
+	if persistence == 0 {
+		s.motivation = 0
+	} else {
+		plow, phigh := math.Max(0, persistence-10), persistence+11
+		s.motivation = RandInt(plow, phigh)
+	}
+
+	log.Printf("id%d. I see player at %v. I'm at %v. Time to chase!!", me.obj.id, me.obj.Game.Player.Pos(), me.obj.Pos())
 }
 
 func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
@@ -342,6 +354,11 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		s.turnsUnseen++
 	}
 
+	if s.turnsUnseen > s.motivation {
+		log.Printf("id%d. I gave up on smelling. %d/%d", obj.id, s.turnsUnseen, s.motivation)
+		return smaiLostPlayer
+	}
+
 	// Try chasing by smell.
 	maxscent, maxloc, around := 0, math.Origin, me.obj.Level.Around(pos)
 
@@ -361,14 +378,10 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	if err := obj.Mover.Move(dir); err != nil {
 		log.Printf("id%d. I couldn't move %v: %v", obj.id, dir, err)
 	}
-	if s.turnsUnseen > 20 {
-		log.Printf("id%d. I lost the player :(", obj.id)
-		return smaiLostPlayer
-	}
 	return smaiNoTransition
 }
 
-// Chases the player when they're in sight or smell range.
+// Runs away from the player.
 type smaiStateFleeing struct {
 	smaiSB
 	turnsBlocked int
@@ -445,19 +458,13 @@ type smaiStateAtHome struct {
 }
 
 func (s *smaiStateAtHome) Init(me *SMAI) {
-	if me.Attribs.home != math.Origin {
-		log.Printf("id%d. I have a home already: %v.", me.obj.id, me.Attribs.home)
+	if me.Personality.home != math.Origin {
+		log.Printf("id%d. I have a home already: %v.", me.obj.id, me.Personality.home)
 		return
 	}
-	htile := me.obj.Level.RandomClearTile()
-	// Really shouldn't happen. If it does, I guess this monster is going to be
-	// really enamored of the top-left corner of the map :)
-	if htile == nil {
-		log.Printf("id%d. I couldn't find a home.", me.obj.id)
-		return
-	}
-	me.Attribs.home = htile.Pos
-	log.Printf("id%d. I have chosen %v as my home.", me.obj.id, me.Attribs.home)
+
+	me.Personality.home = me.obj.Pos()
+	log.Printf("id%d. I have chosen %v as my home.", me.obj.id, me.Personality.home)
 }
 
 func (s *smaiStateAtHome) Act(me *SMAI) smaiTransition {
@@ -488,14 +495,14 @@ func (s *smaiStateGoingHome) Act(me *SMAI) smaiTransition {
 
 	// We're home!
 	if len(s.path) == 0 {
-		log.Printf("id%d. I have arrived home! I'm at %v, my home is %v.", me.obj.id, me.obj.Pos(), me.Attribs.home)
+		log.Printf("id%d. I have arrived home! I'm at %v, my home is %v.", me.obj.id, me.obj.Pos(), me.Personality.home)
 		return smaiFoundHome
 	}
 
 	// Try to move to our next point.
 	mypos, nextpos := me.obj.Pos(), s.path[0]
 	if math.ChebyDist(mypos, nextpos) > 1 {
-		log.Printf("id%d. I got knocked off my homepath at %v to %v. Repathing.", me.obj.id, me.obj.Pos(), me.Attribs.home)
+		log.Printf("id%d. I got knocked off my homepath at %v to %v. Repathing.", me.obj.id, me.obj.Pos(), me.Personality.home)
 		s.findhome(me)
 		return s.Act(me)
 	}
@@ -505,16 +512,16 @@ func (s *smaiStateGoingHome) Act(me *SMAI) smaiTransition {
 
 	if err == nil {
 		s.path = s.path[1:]
-		log.Printf("id%d. Moving closer to home. %v -> %v dest %v.", me.obj.id, me.obj.Pos(), dir, me.Attribs.home)
+		log.Printf("id%d. Moving closer to home. %v -> %v dest %v.", me.obj.id, me.obj.Pos(), dir, me.Personality.home)
 	} else {
-		log.Printf("id%d. Stuck while moving home: %v %v -> %v dest %v.", me.obj.id, err, me.obj.Pos(), dir, me.Attribs.home)
+		log.Printf("id%d. Stuck while moving home: %v %v -> %v dest %v.", me.obj.id, err, me.obj.Pos(), dir, me.Personality.home)
 	}
 	return smaiNoTransition
 }
 
 func (s *smaiStateGoingHome) findhome(me *SMAI) {
 	mypos := me.obj.Pos()
-	path, ok := me.obj.Level.FindPath(mypos, me.Attribs.home, PathCost)
+	path, ok := me.obj.Level.FindPath(mypos, me.Personality.home, PathCost)
 	if !ok {
 		// We can't find our way to our destination. Let's pretend our
 		// destination is right here.

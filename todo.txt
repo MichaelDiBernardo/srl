@@ -1,27 +1,27 @@
 NEXT:
-- Create custom chasing for territorial monster that stops as soon as out of LOS
+- Sight is a sheet attribute
 
 - Monster AI:
     Types:
-        - Wandering
+        x Wandering
             x Wander (select point, walk towards it, wait a bit, select new one.)
               into
             x Detect & Chase
-            - Detection should be based on monster LOS in personality
-        - Territorial 
-            - Sit still
-            - Chase when detected; return home when lose detection 
+            x Detection should be based on monster LOS in personality
+        x Territorial 
+            x Sit still
+            x Chase when detected; return home when lose detection 
         - Lazy
             - Sit still
             - Chase when attacked
             - Stay at last position when lose detection
-    - Should have 'sensors' (can detect by scent) or 'seers' (can only detect in LOS but chases by scent)
  
 Then:
 - Monsters drop loot
 - Add a basic "you got to level 5 you win"
 - Egos (?), artefacts.
 - Consumables can have duration effects.
+- Monster capabilities: Can/can't open doors.
 
 Stuff:
 - Consumables stack in inventories.

@@ -39,8 +39,11 @@ var Monsters = []*Spec{
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{Fear: 25},
-				Brain:   SMAIWanderer,
+				Brain: SMAIWanderer,
+				Personality: &Personality{
+					Fear:        25,
+					Persistence: 1000,
+				},
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
@@ -72,13 +75,16 @@ var Monsters = []*Spec{
 		Name:    "DRAGON",
 		Gen: Gen{
 			Floors:    []int{1},
-			GroupSize: 2,
+			GroupSize: 1,
 		},
 		Traits: &Traits{
 			Mover: NewActorMover,
 			AI: NewSMAI(SMAI{
-				Attribs: &Personality{Fear: 50},
-				Brain:   SMAITerritorial,
+				Brain: SMAITerritorial,
+				Personality: &Personality{
+					Fear:        50,
+					Persistence: 0,
+				},
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
