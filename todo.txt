@@ -1,10 +1,4 @@
 NEXT:
-- Regen, ticks, recovering from fleeing
-    - Need to accumulate total delay.
-    - Speed 2 should take 100 turns to fully recover.
-    - When you accumulate enough delay to hit a speed 2 fencepost, you get more HP.
-    - This can be level specific (who cares if it restarts when you enter / exit a level.)
-    - Need a 'ticker' trait? One that responds to passage of time.
 
 - Monster AI:
     Types:
