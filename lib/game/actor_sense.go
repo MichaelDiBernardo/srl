@@ -7,28 +7,76 @@ import (
 const (
 	FOVRadiusMax = 8
 	FOVRadius    = 4
+	ScentRadius  = FOVRadius
 )
 
 // Senses all the things an actor can sense.
 type Senser interface {
 	Objgetter
-	CalcFOV()
-	FOV() FOV
+	CalcFlows()
+	FOV() []math.Point
 	CanSee(other *Obj) bool
 }
 
-type FOV []math.Point
-
 type ActorSenser struct {
 	Trait
-	fov FOV
+	fov []math.Point
 }
 
 func NewActorSenser(obj *Obj) Senser {
 	return &ActorSenser{Trait: Trait{obj: obj}}
 }
 
-func (a *ActorSenser) CalcFOV() {
+// Calculates this actor's flows. If it's the player, they get FOV + scent.
+// Monsters just get FOV. Instead of making two different Senser
+// implementations to do this, we use simple branch in this method.
+func (a *ActorSenser) CalcFlows() {
+	// If we're doing sense and scent, we calculate whichever has the bigger
+	// radius and then use a subset of the points for each.
+	obj := a.obj
+	sightrad, scentrad := obj.Sheet.Sight(), ScentRadius
+	radius := math.Max(sightrad, scentrad)
+	flow := a.flow(radius)
+
+	// Premature optimization -- if the FOV radius is the biggest one, just set
+	// it as fov.
+	a.fov = trimflow(flow, sightrad, radius)
+	if !obj.IsPlayer() {
+		return
+	}
+
+	// Do scent
+	scent := trimflow(flow, scentrad, radius)
+	l := obj.Level
+	pos, turns := l.game.Player.Pos(), l.game.Turns
+
+	for _, pt := range scent {
+		tile := l.At(pt)
+		tile.Visible = true
+		tile.Seen = true
+		// HAX for now: Update scent flows. If we have to update more than one
+		// flow related to LOS (or at all really), we should move into its own
+		// workflow.
+		tile.Flows[FlowScent] = turns*ScentFactor - math.ChebyDist(pos, pt)
+	}
+}
+
+func (a *ActorSenser) FOV() []math.Point {
+	return a.fov
+}
+
+func (a *ActorSenser) CanSee(other *Obj) bool {
+	pos := other.Pos()
+	for _, pt := range a.fov {
+		if pos == pt {
+			return true
+		}
+	}
+	return false
+}
+
+// Calculates a "field-of-vision" type "flow" around the actor.
+func (a *ActorSenser) flow(radius int) []math.Point {
 	// TODO: This is basically a direct translation of fcrawl's raycasting FOV
 	// algorithm. I didn't try at all to make it less pythony and more go-ey.
 	// Should replace with something less churny or just a totally different
@@ -37,13 +85,13 @@ func (a *ActorSenser) CalcFOV() {
 	fov := newPointSet()
 	fov.Add(math.Origin)
 
-	pos, level, rad := a.Obj().Pos(), a.Obj().Level, a.Obj().Sheet.Sight()
+	pos, level := a.Obj().Pos(), a.Obj().Level
 
 	// Light begins casting in all directions.
 	light := make(map[math.Point]pointset)
 	light[math.Origin] = newPointSetL(math.ChebyEdge(1))
 
-	for r := 0; r < rad; r++ {
+	for r := 0; r < radius; r++ {
 		edge := math.ChebyEdge(r)
 		for _, cpt := range edge {
 			li, pt := light[cpt], pos.Add(cpt)
@@ -70,25 +118,7 @@ func (a *ActorSenser) CalcFOV() {
 			transfov = append(transfov, tpt)
 		}
 	}
-	a.fov = transfov
-
-	if actor := a.Obj(); actor.IsPlayer() {
-		actor.Level.UpdateVis()
-	}
-}
-
-func (a *ActorSenser) FOV() FOV {
-	return a.fov
-}
-
-func (a *ActorSenser) CanSee(other *Obj) bool {
-	pos := other.Pos()
-	for _, pt := range a.fov {
-		if pos == pt {
-			return true
-		}
-	}
-	return false
+	return transfov
 }
 
 func adj45dirs(d math.Point) pointset {
@@ -153,4 +183,18 @@ func (ps pointset) Intersect(other pointset) pointset {
 		}
 	}
 	return intersection
+}
+
+func trimflow(flow []math.Point, r int, max int) []math.Point {
+	if r == max {
+		return flow
+	}
+	i := 0
+	for _, p := range flow {
+		i++
+		if math.ChebyDist(math.Origin, p) > r {
+			break
+		}
+	}
+	return flow[:i]
 }

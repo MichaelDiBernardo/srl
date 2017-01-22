@@ -25,9 +25,11 @@ func NewActorTicker(obj *Obj) Ticker {
 func (t *ActorTicker) Tick(delay int) {
 	// Non-time-related things.
 	if seer := t.obj.Senser; seer != nil {
-		seer.CalcFOV()
+		seer.CalcFlows()
 	}
-
+	if actor := t.obj; actor.IsPlayer() {
+		actor.Level.UpdateVis()
+	}
 	// Time-related things.
 	if delay < t.last {
 		// We've been placed into a new level.
