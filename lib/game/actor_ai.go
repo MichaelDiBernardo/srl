@@ -207,7 +207,7 @@ func (s *smaiStateWaiting) Init(me *SMAI) {
 }
 
 func (s *smaiStateWaiting) Act(me *SMAI) smaiTransition {
-	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+	if me.obj.Senser.CanSee(me.obj.Game.Player) {
 		return smaiFoundPlayer
 	}
 
@@ -243,7 +243,7 @@ func (s *smaiStateWandering) Init(me *SMAI) {
 }
 
 func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
-	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+	if me.obj.Senser.CanSee(me.obj.Game.Player) {
 		return smaiFoundPlayer
 	}
 
@@ -319,7 +319,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	obj := me.obj
 	pos := obj.Pos()
 
-	if obj.Seer.CanSee(obj.Game.Player) {
+	if obj.Senser.CanSee(obj.Game.Player) {
 		dir := math.Origin
 		s.turnsUnseen = 0
 
@@ -469,7 +469,7 @@ func (s *smaiStateAtHome) Init(me *SMAI) {
 
 func (s *smaiStateAtHome) Act(me *SMAI) smaiTransition {
 	// We have an uninvited guest.
-	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+	if me.obj.Senser.CanSee(me.obj.Game.Player) {
 		log.Printf("id%d. There's an intruder in my house!.", me.obj.id)
 		return smaiFoundPlayer
 	}
@@ -488,7 +488,7 @@ func (s *smaiStateGoingHome) Init(me *SMAI) {
 }
 
 func (s *smaiStateGoingHome) Act(me *SMAI) smaiTransition {
-	if me.obj.Seer.CanSee(me.obj.Game.Player) {
+	if me.obj.Senser.CanSee(me.obj.Game.Player) {
 		log.Printf("id%d. Found the player on my way home", me.obj.id)
 		return smaiFoundPlayer
 	}

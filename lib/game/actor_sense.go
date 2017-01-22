@@ -9,8 +9,8 @@ const (
 	FOVRadius    = 4
 )
 
-// A thing that has a FOV
-type Seer interface {
+// Senses all the things an actor can sense.
+type Senser interface {
 	Objgetter
 	CalcFOV()
 	FOV() FOV
@@ -19,16 +19,16 @@ type Seer interface {
 
 type FOV []math.Point
 
-type ActorSeer struct {
+type ActorSenser struct {
 	Trait
 	fov FOV
 }
 
-func NewActorSeer(obj *Obj) Seer {
-	return &ActorSeer{Trait: Trait{obj: obj}}
+func NewActorSenser(obj *Obj) Senser {
+	return &ActorSenser{Trait: Trait{obj: obj}}
 }
 
-func (a *ActorSeer) CalcFOV() {
+func (a *ActorSenser) CalcFOV() {
 	// TODO: This is basically a direct translation of fcrawl's raycasting FOV
 	// algorithm. I didn't try at all to make it less pythony and more go-ey.
 	// Should replace with something less churny or just a totally different
@@ -77,11 +77,11 @@ func (a *ActorSeer) CalcFOV() {
 	}
 }
 
-func (a *ActorSeer) FOV() FOV {
+func (a *ActorSenser) FOV() FOV {
 	return a.fov
 }
 
-func (a *ActorSeer) CanSee(other *Obj) bool {
+func (a *ActorSenser) CanSee(other *Obj) bool {
 	pos := other.Pos()
 	for _, pt := range a.fov {
 		if pos == pt {

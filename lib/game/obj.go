@@ -81,7 +81,7 @@ type Obj struct {
 	Packer   Packer
 	Equipper Equipper
 	User     User
-	Seer     Seer
+	Senser   Senser
 	Ticker   Ticker
 
 	// Item traits. Since these don't ever conceivably need alternate
@@ -108,7 +108,7 @@ type Traits struct {
 	Packer   func(*Obj) Packer
 	Equipper func(*Obj) Equipper
 	User     func(*Obj) User
-	Seer     func(*Obj) Seer
+	Senser   func(*Obj) Senser
 	Ticker   func(*Obj) Ticker
 
 	Equipment  func(*Obj) *Equipment
@@ -147,8 +147,8 @@ func newObj(spec *Spec) *Obj {
 	if traits.User != nil {
 		newobj.User = traits.User(newobj)
 	}
-	if traits.Seer != nil {
-		newobj.Seer = traits.Seer(newobj)
+	if traits.Senser != nil {
+		newobj.Senser = traits.Senser(newobj)
 	}
 	if traits.Ticker != nil {
 		newobj.Ticker = traits.Ticker(newobj)

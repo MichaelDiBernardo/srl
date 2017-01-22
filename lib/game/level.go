@@ -140,9 +140,6 @@ func (l *Level) Evolve() {
 		// TODO: This may need to be done on _every_ actor for each turn taken.
 		actor.Ticker.Tick(l.scheduler.delay)
 
-		if seer := actor.Seer; seer != nil {
-			seer.CalcFOV()
-		}
 		if ai := actor.AI; ai != nil {
 			ai.Act()
 		}
@@ -184,7 +181,7 @@ func (l *Level) UpdateVis() {
 		}
 	}
 
-	fov := l.game.Player.Seer.FOV()
+	fov := l.game.Player.Senser.FOV()
 	pos := l.game.Player.Pos()
 	turns := l.game.Turns
 
@@ -358,10 +355,9 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 
 	tile.Actor = obj
 
-	// Mostly done for the player's sake; when we start the game,
-	// Level.Evolve() hasn't been called yet, which is what refreshes FOV.
-	if seer := obj.Seer; seer != nil {
-		seer.CalcFOV()
+	// Refresh any flows for the actor here.
+	if ticker := obj.Ticker; ticker != nil {
+		ticker.Tick(0)
 	}
 
 	return true

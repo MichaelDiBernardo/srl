@@ -1,5 +1,6 @@
 NEXT:
 - Move scent into its own workflow -- right now scent radius is tied to LOS
+    - Change actor_see to actor_sense and do all radius / flow stuff there.
 
 - Monster AI:
     Types:

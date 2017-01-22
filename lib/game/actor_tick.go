@@ -24,7 +24,7 @@ func NewActorTicker(obj *Obj) Ticker {
 
 func (t *ActorTicker) Tick(delay int) {
 	// Non-time-related things.
-	if seer := t.obj.Seer; seer != nil {
+	if seer := t.obj.Senser; seer != nil {
 		seer.CalcFOV()
 	}
 

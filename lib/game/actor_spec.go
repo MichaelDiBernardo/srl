@@ -21,7 +21,7 @@ var PlayerSpec = &Spec{
 		Equipper: NewActorEquipper,
 		User:     NewActorUser,
 		Sheet:    NewPlayerSheet,
-		Seer:     NewActorSeer,
+		Senser:   NewActorSenser,
 		Ticker:   NewActorTicker,
 	},
 }
@@ -47,7 +47,7 @@ var Monsters = []*Spec{
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
-			Seer:    NewActorSeer,
+			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 2,
@@ -88,7 +88,7 @@ var Monsters = []*Spec{
 			}),
 			Fighter: NewActorFighter,
 			Packer:  NewActorPacker,
-			Seer:    NewActorSeer,
+			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
 				str: 3,
