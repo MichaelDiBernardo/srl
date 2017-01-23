@@ -10,58 +10,59 @@ const (
 	ScentRadius  = FOVRadius
 )
 
+type Field []math.Point
+
 // Senses all the things an actor can sense.
 type Senser interface {
 	Objgetter
-	CalcFlows()
-	FOV() []math.Point
+	CalcFields()
+	FOV() Field
 	CanSee(other *Obj) bool
 }
 
 type ActorSenser struct {
 	Trait
-	fov []math.Point
+	fov Field
 }
 
 func NewActorSenser(obj *Obj) Senser {
 	return &ActorSenser{Trait: Trait{obj: obj}}
 }
 
-// Calculates this actor's flows. If it's the player, they get FOV + scent.
+// Calculates this actor's fields. If it's the player, they get FOV + scent.
 // Monsters just get FOV. Instead of making two different Senser
-// implementations to do this, we use simple branch in this method.
-func (a *ActorSenser) CalcFlows() {
+// implementations to do this, we use simple branch in this method.  If this is
+// the player, calculating fields will also update the relevant bits on the map
+// (scent, visibility.)
+func (a *ActorSenser) CalcFields() {
 	// If we're doing sense and scent, we calculate whichever has the bigger
 	// radius and then use a subset of the points for each.
 	obj := a.obj
-	sightrad, scentrad := obj.Sheet.Sight(), ScentRadius
-	radius := math.Max(sightrad, scentrad)
-	flow := a.flow(radius)
+	player := obj.IsPlayer()
+	sightrad, scentrad := obj.Sheet.Sight(), 0
+	if player {
+		scentrad = ScentRadius
+	}
 
-	// Premature optimization -- if the FOV radius is the biggest one, just set
-	// it as fov.
-	a.fov = trimflow(flow, sightrad, radius)
+	// Calculate field.
+	radius := math.Max(sightrad, scentrad)
+	field := a.field(radius)
+
+	// Sight.
+	a.fov = trimfield(field, sightrad, radius)
 	if !obj.IsPlayer() {
 		return
 	}
 
-	// Do scent
-	scent := trimflow(flow, scentrad, radius)
-	l := obj.Level
-	pos, turns := l.game.Player.Pos(), l.game.Turns
+	// Scent, if you're the player. The player is smelly.
+	scent := trimfield(field, scentrad, radius)
 
-	for _, pt := range scent {
-		tile := l.At(pt)
-		tile.Visible = true
-		tile.Seen = true
-		// HAX for now: Update scent flows. If we have to update more than one
-		// flow related to LOS (or at all really), we should move into its own
-		// workflow.
-		tile.Flows[FlowScent] = turns*ScentFactor - math.ChebyDist(pos, pt)
-	}
+	// Update these fields on the level.
+	obj.Level.UpdateVis(a.fov)
+	obj.Level.UpdateScent(scent)
 }
 
-func (a *ActorSenser) FOV() []math.Point {
+func (a *ActorSenser) FOV() Field {
 	return a.fov
 }
 
@@ -75,8 +76,8 @@ func (a *ActorSenser) CanSee(other *Obj) bool {
 	return false
 }
 
-// Calculates a "field-of-vision" type "flow" around the actor.
-func (a *ActorSenser) flow(radius int) []math.Point {
+// Calculates a "field-of-vision" type "field" around the actor.
+func (a *ActorSenser) field(radius int) Field {
 	// TODO: This is basically a direct translation of fcrawl's raycasting FOV
 	// algorithm. I didn't try at all to make it less pythony and more go-ey.
 	// Should replace with something less churny or just a totally different
@@ -111,7 +112,7 @@ func (a *ActorSenser) flow(radius int) []math.Point {
 	// fov is currently relative to 0,0 as center, and has not yet been
 	// translated to the map coords. We also take this opportunity to coerce
 	// the set into a slice.
-	transfov := make([]math.Point, 0, len(fov))
+	transfov := make(Field, 0, len(fov))
 	for p, _ := range fov {
 		tpt := p.Add(pos)
 		if tpt.In(level) {
@@ -185,16 +186,18 @@ func (ps pointset) Intersect(other pointset) pointset {
 	return intersection
 }
 
-func trimflow(flow []math.Point, r int, max int) []math.Point {
+func trimfield(field Field, r int, max int) []math.Point {
+	// Premature optimization -- if the radius we're asking to trim to is the
+	// max, don't bother searching for a trim point.
 	if r == max {
-		return flow
+		return field
 	}
 	i := 0
-	for _, p := range flow {
+	for _, p := range field {
 		i++
 		if math.ChebyDist(math.Origin, p) > r {
 			break
 		}
 	}
-	return flow[:i]
+	return field[:i]
 }

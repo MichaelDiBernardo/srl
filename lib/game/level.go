@@ -3,6 +3,7 @@ package game
 import (
 	"container/heap"
 	"fmt"
+	num "math"
 
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -19,11 +20,6 @@ func (f *Feature) String() string {
 	return string(f.Type)
 }
 
-const (
-	FlowScent = iota
-	NumFlows
-)
-
 type Tile struct {
 	Feature *Feature
 	Actor   *Obj
@@ -31,7 +27,7 @@ type Tile struct {
 	Pos     math.Point
 	Visible bool
 	Seen    bool
-	Flows   [NumFlows]int
+	Scent   int
 }
 
 func (t *Tile) String() string {
@@ -171,30 +167,32 @@ func (l *Level) SwapActors(x *Obj, y *Obj) {
 	l.placeActor(y, tx)
 }
 
-const ScentFactor = FOVRadius
-
-// Updates what the player can see on the level.
-func (l *Level) UpdateVis() {
+// Update what the player can see.
+func (l *Level) UpdateVis(fov Field) {
 	for _, row := range l.Map {
 		for _, tile := range row {
 			tile.Visible = false
 		}
 	}
 
-	fov := l.game.Player.Senser.FOV()
-	pos := l.game.Player.Pos()
-	turns := l.game.Turns
-
 	for _, pt := range fov {
 		tile := l.At(pt)
 		tile.Visible = true
 		tile.Seen = true
-		// HAX for now: Update scent flows. If we have to update more than one
-		// flow related to LOS (or at all really), we should move into its own
-		// workflow.
-		tile.Flows[FlowScent] = turns*ScentFactor - math.ChebyDist(pos, pt)
 	}
 }
+
+// Update the player's smell on the map.
+func (l *Level) UpdateScent(scent Field) {
+	pos, turns := l.game.Player.Pos(), l.game.Turns
+
+	for _, pt := range scent {
+		tile := l.At(pt)
+		tile.Scent = turns*ScentRadius - math.ChebyDist(pos, pt)
+	}
+}
+
+// Update the given field on the map.
 
 // Return type of FindPath. This is what you follow to travel the found route.
 type Path []math.Point
@@ -208,7 +206,7 @@ func (d dists) get(p math.Point) int {
 	if ok {
 		return dist
 	}
-	return 10000000
+	return num.MaxInt32
 }
 
 // An unvisited position on the map. We hold a reference to the distances dict
@@ -355,7 +353,7 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 
 	tile.Actor = obj
 
-	// Refresh any flows for the actor here.
+	// Refresh any fields for the actor here.
 	if ticker := obj.Ticker; ticker != nil {
 		ticker.Tick(0)
 	}

@@ -33,7 +33,7 @@ var Monsters = []*Spec{
 		Species: SpecOrc,
 		Name:    "ORC",
 		Gen: Gen{
-			Floors:    []int{10},
+			Floors:    []int{1},
 			GroupSize: 2,
 		},
 		Traits: &Traits{

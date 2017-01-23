@@ -363,7 +363,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 	maxscent, maxloc, around := 0, math.Origin, me.obj.Level.Around(pos)
 
 	for _, tile := range around {
-		if curscent := tile.Flows[FlowScent]; !tile.Feature.Solid && curscent > maxscent {
+		if curscent := tile.Scent; !tile.Feature.Solid && curscent > maxscent {
 			maxscent = curscent
 			maxloc = tile.Pos
 		}

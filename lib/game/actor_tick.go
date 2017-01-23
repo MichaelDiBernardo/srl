@@ -25,10 +25,7 @@ func NewActorTicker(obj *Obj) Ticker {
 func (t *ActorTicker) Tick(delay int) {
 	// Non-time-related things.
 	if seer := t.obj.Senser; seer != nil {
-		seer.CalcFlows()
-	}
-	if actor := t.obj; actor.IsPlayer() {
-		actor.Level.UpdateVis()
+		seer.CalcFields()
 	}
 	// Time-related things.
 	if delay < t.last {
