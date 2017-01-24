@@ -18,13 +18,14 @@ func hit(attacker Fighter, defender Fighter) {
 
 	if residual > 0 {
 		crits := residual / atk.CritDiv
-		dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
+		extra, verb := applybrands(atk.Effects, def.Effects)
+		dmg := math.Max(0, atk.RollDamage(crits+extra)-def.RollProt())
 
 		critstr := ""
 		if crits > 0 {
 			critstr = fmt.Sprintf(" %dx critical!", crits)
 		}
-		msg := fmt.Sprintf("%v hit %v (%d).%s", aname, dname, dmg, critstr)
+		msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
 		attacker.Obj().Game.Events.Message(msg)
 
 		defender.Obj().Sheet.Hurt(dmg)
@@ -32,6 +33,18 @@ func hit(attacker Fighter, defender Fighter) {
 		msg := fmt.Sprintf("%v missed %v.", aname, dname)
 		attacker.Obj().Game.Events.Message(msg)
 	}
+}
+
+func applybrands(atk Effects, def Effects) (dice int, verb string) {
+	brands := atk.Brands()
+	dice, verb = 0, "hits"
+	for _, brand := range brands {
+		if !def.Resists(brand) {
+			verb = EffectVerbs[brand]
+			dice += 1
+		}
+	}
+	return dice, verb
 }
 
 // Melee combat.

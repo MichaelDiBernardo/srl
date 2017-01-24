@@ -157,13 +157,16 @@ func (p *PlayerSheet) Attack() Attack {
 	melee := p.obj.Equipper.Body().Melee() + p.Melee()
 
 	weap := p.weapon()
-	str := p.Str()
+	equip := weap.Equipment
 
+	str := p.Str()
 	bonusSides := math.Min(math.Abs(str), weap.Equipment.Weight) * math.Sgn(str)
+
 	return Attack{
 		Melee:   melee,
-		Damroll: weap.Equipment.Damroll.Add(0, bonusSides),
-		CritDiv: weap.Equipment.Weight + baseCritDiv,
+		Damroll: equip.Damroll.Add(0, bonusSides),
+		CritDiv: equip.Weight + baseCritDiv,
+		Effects: equip.Effects,
 	}
 }
 
@@ -196,9 +199,19 @@ func (p *PlayerSheet) Defense() Defense {
 	body := p.obj.Equipper.Body()
 	evasion := body.Evasion() + p.Evasion()
 	dice := body.ProtDice()
+	effects := body.ArmorEffects()
+
+	// When it comes to a physical defense, we only care about the presence or
+	// absence of effects, _not_ their count.
+	effectset := make(Effects, 0, len(effects))
+	for k, _ := range effects {
+		effectset = append(effectset, k)
+	}
+
 	return Defense{
 		Evasion:  evasion,
 		ProtDice: dice,
+		Effects:  effectset,
 	}
 }
 
@@ -228,6 +241,10 @@ type MonsterSheet struct {
 
 	protroll Dice
 	damroll  Dice
+
+	// Innate attack + defense effects for this monster.
+	atkeffects Effects
+	defeffects Effects
 }
 
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
@@ -323,6 +340,7 @@ func (m *MonsterSheet) Attack() Attack {
 		Melee:   m.melee,
 		Damroll: m.damroll,
 		CritDiv: m.critdivmod + baseCritDiv,
+		Effects: m.atkeffects,
 	}
 }
 
@@ -330,6 +348,7 @@ func (m *MonsterSheet) Defense() Defense {
 	return Defense{
 		Evasion:  m.evasion,
 		ProtDice: []Dice{m.protroll},
+		Effects:  m.defeffects,
 	}
 }
 
@@ -340,11 +359,12 @@ type Attack struct {
 	Melee   int
 	Damroll Dice
 	CritDiv int
+	Effects []Effect
 }
 
 // Roll damage for this attack, given that `crits` crits were rolled.
-func (atk Attack) RollDamage(crits int) int {
-	return atk.Damroll.Add(crits, 0).Roll()
+func (atk Attack) RollDamage(extradice int) int {
+	return atk.Damroll.Add(extradice, 0).Roll()
 }
 
 // Details about an actor's defense, before the evasion roll is applied. i.e.
@@ -353,6 +373,7 @@ func (atk Attack) RollDamage(crits int) int {
 type Defense struct {
 	Evasion  int
 	ProtDice []Dice
+	Effects  Effects
 }
 
 func (def Defense) RollProt() int {

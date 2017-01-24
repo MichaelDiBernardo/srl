@@ -1,4 +1,29 @@
 NEXT:
+- Figure out why poison brand isn't working on ORC
+- write tests for everything
+- test multiple brands
+- we need timed effects to work before we can inflict them
+
+- Monsters have multiple abilities.
+    - Abilities need:
+        - cooldown
+        - function that implements behaviour
+        - a predicate that says whether they're applicable or not. (e.g. steal
+          needs to be in melee range.)
+        - Ability to affect transitions on AI. (i.e. if a thief steals
+          something, it should flee and not stop until it's dead)
+    - Monsters need:
+        - Collection of abilities with their probability of using it
+        - Do angband-ish thing? One in X chance of using an ability, then
+          %chance of each. If no ability available, then move/attack as normal.
+- Monsters have multiple attacks.
+    - Same idea -- monsters can have multiple attacks to choose from, and when
+      they bump into an opponent, they choose.
+- Attacks can be branded or hit with certain effects.
+    - Hit to confuse, bite to wound, hit with frost, etc.
+    
+- Ranged weapons
+    - Monsters and the player can shoot.
 
 - Monster AI:
     Types:

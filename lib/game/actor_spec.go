@@ -65,6 +65,8 @@ var Monsters = []*Spec{
 
 				damroll:  NewDice(2, 7),
 				protroll: NewDice(1, 4),
+
+				atkeffects: Effects{BrandPoison},
 			}),
 		},
 	},
@@ -106,6 +108,9 @@ var Monsters = []*Spec{
 
 				damroll:  NewDice(1, 11),
 				protroll: NewDice(2, 4),
+
+				atkeffects: Effects{BrandFire},
+				defeffects: Effects{ResistFire},
 			}),
 		},
 	},

@@ -19,6 +19,7 @@ type Equipment struct {
 	Evasion  int
 	Weight   int
 	Slot     Slot
+	Effects  []Effect
 }
 
 // See NewSheet in actor.go to understand why this is written this way.
