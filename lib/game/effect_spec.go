@@ -19,6 +19,7 @@ var Brands = Effects{
 	BrandFire,
 	BrandElec,
 	BrandIce,
+	BrandPoison,
 }
 
 var ResistMap = map[Effect]Effect{

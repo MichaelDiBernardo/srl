@@ -1,8 +1,7 @@
 package game
 
 // An effect is something that a monster or a piece of equipment can have. This
-// includes, brands, resists, status effects, etc. This lives here instead of
-// actor_sheet because... no good reason.
+// includes, brands, resists, status effects, etc.
 type Effect uint
 
 // A collection of effects on a monster, piece of equipment, etc.

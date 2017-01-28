@@ -1,5 +1,4 @@
 NEXT:
-- Figure out why poison brand isn't working on ORC
 - write tests for everything
 - test multiple brands
 - we need timed effects to work before we can inflict them

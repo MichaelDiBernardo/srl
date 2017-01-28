@@ -342,10 +342,10 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 	// If this actor has been placed before, we need to clear the tile they
 	// were on previously. If they haven't, we need to add them to the actor
 	// list so we know who they are.
+	placedBefore := false
 	if obj.Tile != nil && obj.Level == l {
 		obj.Tile.Actor = nil
-	} else {
-		l.scheduler.Add(obj)
+		placedBefore = true
 	}
 
 	obj.Level = l
@@ -353,9 +353,13 @@ func (l *Level) placeActor(obj *Obj, tile *Tile) bool {
 
 	tile.Actor = obj
 
-	// Refresh any fields for the actor here.
-	if ticker := obj.Ticker; ticker != nil {
-		ticker.Tick(0)
+	// Now that the actor has been safely placed, do setup stuff if this is the
+	// first time we're placing them.
+	if !placedBefore {
+		l.scheduler.Add(obj)
+		if ticker := obj.Ticker; ticker != nil {
+			ticker.Tick(0)
+		}
 	}
 
 	return true
