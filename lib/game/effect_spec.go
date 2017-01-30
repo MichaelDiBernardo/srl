@@ -13,6 +13,8 @@ const (
 	ResistIce
 	ResistStun
 	ResistPoison
+
+	NumEffects
 )
 
 var Brands = Effects{
