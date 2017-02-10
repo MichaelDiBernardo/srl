@@ -1,8 +1,5 @@
 package game
 
-// We expect a speed 2 actor to fully recover in 100 turns.
-const RegenPeriod = 100
-
 // Does all of the required upkeep to an actor before they take their turn.
 type Ticker interface {
 	Objgetter
@@ -37,16 +34,34 @@ func (t *ActorTicker) Tick(delay int) {
 		// We've been placed into a new level.
 		t.last = 0
 	}
-	diff := delay - t.last
 
-	for _, ae := range t.Effects {
-		ae.OnTick(ae, t, diff)
+	diff := delay - t.last
+	ended := make(Effects, 0)
+
+	// Apply each active effect.
+	for e, ae := range t.Effects {
+		done := ae.OnTick(ae, t, diff)
+		if done {
+			ae.OnEnd(ae, t)
+			ended = append(ended, e)
+		}
 	}
+
+	// Remove any effects that are no longer active.
+	for _, e := range ended {
+		delete(t.Effects, e)
+	}
+
 	t.last = delay
 }
 
+// Adds a new active effect to this actor.
 func (t *ActorTicker) AddEffect(e Effect, counter int) {
-	// TODO: Active effects should be cumulative.
-	// TODO: Call OnBegin.
-	t.Effects[e] = NewActiveEffect(e, counter)
+	if ae := t.Effects[e]; ae == nil {
+		ae := NewActiveEffect(e, counter)
+		ae.OnBegin(ae, t)
+		t.Effects[e] = ae
+	} else {
+		ae.Counter += counter
+	}
 }

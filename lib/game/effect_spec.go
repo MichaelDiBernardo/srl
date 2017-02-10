@@ -85,3 +85,6 @@ func regen(e *ActiveEffect, t *ActorTicker, diff int) bool {
 	}
 	return false
 }
+
+// We expect a speed 2 actor to fully recover in 100 turns.
+const RegenPeriod = 100

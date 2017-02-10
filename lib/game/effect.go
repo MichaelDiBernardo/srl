@@ -59,5 +59,13 @@ func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 	ae := &ActiveEffect{}
 	*ae = ActiveEffects[e]
 	ae.Counter = counter
+
+	dummy := func(*ActiveEffect, *ActorTicker) {}
+	if ae.OnBegin == nil {
+		ae.OnBegin = dummy
+	}
+	if ae.OnEnd == nil {
+		ae.OnEnd = dummy
+	}
 	return ae
 }
