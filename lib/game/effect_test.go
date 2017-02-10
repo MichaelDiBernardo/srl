@@ -10,10 +10,12 @@ const (
 	fakeBrand1
 	fakeBrand2
 	fakeResist1
+	fakeVuln1
 )
 
 var (
 	oldResistMap = ResistMap
+	oldVulnMap   = VulnMap
 	oldBrands    = Brands
 )
 
@@ -41,6 +43,19 @@ func TestResists(t *testing.T) {
 	}
 }
 
+func TestVulnTo(t *testing.T) {
+	effects := Effects{fakeVuln1}
+	VulnMap = map[Effect]Effect{fakeEffect1: fakeVuln1}
+	defer restoreEffectsDeps()
+
+	if !effects.VulnTo(fakeEffect1) {
+		t.Error(`effects.VulnTo(fakeEffect1) was false, want true`)
+	}
+	if effects.VulnTo(fakeEffect2) {
+		t.Error(`effects.Resists(fakeEffect2) was true, want false`)
+	}
+}
+
 func TestBrands(t *testing.T) {
 	effects := Effects{fakeBrand1, fakeEffect1, fakeBrand2, fakeResist1}
 	Brands = Effects{fakeBrand1, fakeBrand2}
@@ -60,5 +75,6 @@ func TestBrands(t *testing.T) {
 
 func restoreEffectsDeps() {
 	ResistMap = oldResistMap
+	VulnMap = oldVulnMap
 	Brands = oldBrands
 }

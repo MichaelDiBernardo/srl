@@ -37,11 +37,27 @@ func hit(attacker Fighter, defender Fighter) {
 
 func applybrands(atk Effects, def Effects) (dice int, verb string) {
 	brands := atk.Brands()
+	fixverb := false
 	dice, verb = 0, "hits"
+
 	for _, brand := range brands {
-		if !def.Resists(brand) {
-			verb = EffectVerbs[brand]
+		if def.Resists(brand) {
+			continue
+		}
+		dice += 1
+		newverb := EffectVerbs[brand]
+		if def.VulnTo(brand) {
 			dice += 1
+			fixverb = true
+			verb = fmt.Sprintf("*%s*", newverb)
+		}
+
+		// If we've found a vulnerability before, keep the old verb because it's
+		// at least as important as any other verb we might use. e.g. if you
+		// have fire and cold brands, and the target is vuln to fire, we want
+		// '*burns*' to have priority over 'freezes'
+		if !fixverb {
+			verb = newverb
 		}
 	}
 	return dice, verb

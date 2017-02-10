@@ -107,3 +107,56 @@ func TestHit(t *testing.T) {
 		}
 	}
 }
+
+type applyBrandTest struct {
+	atk  Effects
+	def  Effects
+	verb string
+	dice int
+}
+
+func TestApplyBrand(t *testing.T) {
+	var (
+		oldEffectVerbs = EffectVerbs
+		oldResistMap   = ResistMap
+		oldVulnMap     = VulnMap
+		oldBrands      = Brands
+	)
+	const (
+		fakeBrand1 Effect = NumEffects + iota
+		fakeBrand2
+		fakeVuln1
+		fakeResist1
+	)
+
+	Brands = Effects{fakeBrand1, fakeBrand2}
+	ResistMap = map[Effect]Effect{fakeBrand1: fakeResist1}
+	VulnMap = map[Effect]Effect{fakeBrand1: fakeVuln1}
+	EffectVerbs = map[Effect]string{fakeBrand1: "frobs", fakeBrand2: "norfs"}
+
+	restoreEffectsDeps := func() {
+		ResistMap = oldResistMap
+		VulnMap = oldVulnMap
+		EffectVerbs = oldEffectVerbs
+		Brands = oldBrands
+	}
+	defer restoreEffectsDeps()
+
+	tests := []applyBrandTest{
+		{atk: Effects{fakeBrand1}, def: Effects{}, verb: "frobs", dice: 1},
+		{atk: Effects{fakeBrand1}, def: Effects{fakeResist1}, verb: "hits", dice: 0},
+		{atk: Effects{fakeBrand1}, def: Effects{fakeVuln1}, verb: "*frobs*", dice: 2},
+		{atk: Effects{}, def: Effects{fakeVuln1}, verb: "hits", dice: 0},
+		{atk: Effects{}, def: Effects{fakeResist1}, verb: "hits", dice: 0},
+		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{}, verb: "norfs", dice: 2},
+		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{fakeVuln1}, verb: "*frobs*", dice: 3},
+		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{fakeResist1}, verb: "norfs", dice: 1},
+	}
+
+	// No resist.
+	for i, test := range tests {
+		if dice, verb := applybrands(test.atk, test.def); dice != test.dice || verb != test.verb {
+			t.Errorf(`Test %d: got (%d,"%s") want (%d,"%s")`, i, dice, verb, test.dice, test.verb)
+		}
+	}
+}

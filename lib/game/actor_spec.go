@@ -67,6 +67,7 @@ var Monsters = []*Spec{
 				protroll: NewDice(1, 4),
 
 				atkeffects: Effects{BrandPoison},
+				defeffects: Effects{VulnFire},
 			}),
 		},
 	},

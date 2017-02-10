@@ -14,6 +14,12 @@ const (
 	ResistStun
 	ResistPoison
 
+	VulnFire
+	VulnElec
+	VulnIce
+	VulnStun
+	VulnPoison
+
 	NumEffects
 )
 
@@ -31,6 +37,15 @@ var ResistMap = map[Effect]Effect{
 	BrandPoison:  ResistPoison,
 	EffectStun:   ResistStun,
 	EffectPoison: ResistPoison,
+}
+
+var VulnMap = map[Effect]Effect{
+	BrandFire:    VulnFire,
+	BrandElec:    VulnElec,
+	BrandIce:     VulnIce,
+	BrandPoison:  VulnPoison,
+	EffectStun:   VulnStun,
+	EffectPoison: VulnPoison,
 }
 
 var EffectVerbs = map[Effect]string{

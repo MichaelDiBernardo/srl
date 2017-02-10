@@ -17,10 +17,16 @@ func (effects Effects) Has(effect Effect) bool {
 	return false
 }
 
-// Do I have anything in this collection of resists that will resist 'effect'?
+// Do I have anything in this collection of effects that will resist 'effect'?
 func (effects Effects) Resists(effect Effect) bool {
 	resist := ResistMap[effect]
 	return effects.Has(resist)
+}
+
+// Do I have anything in this collection of effects that indicates vulnerability to 'effect'?
+func (effects Effects) VulnTo(effect Effect) bool {
+	vuln := VulnMap[effect]
+	return effects.Has(vuln)
 }
 
 // Filters out the brands from this collection of effects.
