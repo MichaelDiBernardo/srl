@@ -39,3 +39,25 @@ func (effects Effects) Brands() Effects {
 	}
 	return brands
 }
+
+// An instance of an effect that is currently affected an actor. These are
+// managed by the actor's ticker.
+type ActiveEffect struct {
+	// The effect counter. Might be turns, accumulated delay, residual damage, etc.
+	Counter int
+	// What to do when the effect is first inflicted on an actor.
+	OnBegin func(*ActiveEffect, *ActorTicker)
+	// Responsible for updating Left given the delay diff, plus enforcing the
+	// effect. A return value of 'true' indicates that the effect should be
+	// terminated.
+	OnTick func(*ActiveEffect, *ActorTicker, int) bool
+	// What to do when the effect has run its course.
+	OnEnd func(*ActiveEffect, *ActorTicker)
+}
+
+func NewActiveEffect(e Effect, counter int) *ActiveEffect {
+	ae := &ActiveEffect{}
+	*ae = ActiveEffects[e]
+	ae.Counter = counter
+	return ae
+}

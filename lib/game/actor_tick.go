@@ -14,12 +14,17 @@ type ActorTicker struct {
 	Trait
 	// The last delay value we saw.
 	last int
-	// regen counter
-	regenc int
+	// The effects currently active on this actor.
+	Effects map[Effect]*ActiveEffect
 }
 
 func NewActorTicker(obj *Obj) Ticker {
-	return &ActorTicker{Trait: Trait{obj: obj}}
+	t := &ActorTicker{
+		Trait:   Trait{obj: obj},
+		Effects: map[Effect]*ActiveEffect{},
+	}
+	t.AddEffect(EffectBaseRegen, 0)
+	return t
 }
 
 func (t *ActorTicker) Tick(delay int) {
@@ -34,21 +39,14 @@ func (t *ActorTicker) Tick(delay int) {
 	}
 	diff := delay - t.last
 
-	t.regen(diff)
-
+	for _, ae := range t.Effects {
+		ae.OnTick(ae, t, diff)
+	}
 	t.last = delay
 }
 
-func (t *ActorTicker) regen(diff int) {
-	sheet := t.obj.Sheet
-	regen := sheet.Regen()
-
-	t.regenc += regen * diff
-	delayPerHp := RegenPeriod * GetDelay(2) / sheet.MaxHP()
-	heal := t.regenc / delayPerHp
-
-	if heal > 0 {
-		sheet.Heal(heal)
-		t.regenc -= heal * delayPerHp
-	}
+func (t *ActorTicker) AddEffect(e Effect, counter int) {
+	// TODO: Active effects should be cumulative.
+	// TODO: Call OnBegin.
+	t.Effects[e] = NewActiveEffect(e, counter)
 }
