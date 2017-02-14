@@ -1,5 +1,10 @@
 NEXT:
 - we need timed effects to work before we can inflict them
+    x Effects need a count, not just a list. This is so we can find out how
+      much things are resisted.
+    - When attacking in melee, applymeffects should iterate through all the atk
+      effects and use a case statement to apply the necessary effect. If
+      patterns arise here, great.
 
 - Monsters have multiple abilities.
     - Abilities need:

@@ -10,71 +10,73 @@ const (
 	fakeBrand1
 	fakeBrand2
 	fakeResist1
-	fakeVuln1
+	fakeResist2
 )
 
-var (
-	oldResistMap = ResistMap
-	oldVulnMap   = VulnMap
-	oldBrands    = Brands
-)
+var oldEffectsSpecs = EffectsSpecs
+var testEffectsSpecs = EffectsSpec{
+	fakeEffect1: {Type: EffectTypeStatus, ResistedBy: fakeResist1},
+	fakeEffect2: {Type: EffectTypeStatus, ResistedBy: fakeResist2},
+	fakeBrand1:  {Type: EffectTypeBrand},
+	fakeBrand2:  {Type: EffectTypeBrand},
+	fakeResist1: {Type: EffectTypeResist},
+	fakeResist2: {Type: EffectTypeResist},
+}
 
 func TestHas(t *testing.T) {
-	effects := Effects{fakeEffect1}
+	EffectsSpecs = testEffectsSpecs
+	defer restoreEffectsDeps()
 
-	if !effects.Has(fakeEffect1) {
-		t.Error(`effects.Has(fakeEffect1) was false, want true`)
+	effects := NewEffects(map[Effect]int{fakeEffect1: 1})
+
+	if n := effects.Has(fakeEffect1); n != 1 {
+		t.Errorf(`effects.Has(fakeEffect1) was %d, want 1`, n)
 	}
-	if effects.Has(fakeEffect2) {
-		t.Error(`effects.Has(fakeEffect2) was true, want false`)
+	if n := effects.Has(fakeEffect2); n != 0 {
+		t.Errorf(`effects.Has(fakeEffect2) was %d, want 0`, n)
 	}
 }
 
 func TestResists(t *testing.T) {
-	effects := Effects{fakeResist1}
-	ResistMap = map[Effect]Effect{fakeEffect1: fakeResist1}
+	EffectsSpecs = testEffectsSpecs
 	defer restoreEffectsDeps()
 
-	if !effects.Resists(fakeEffect1) {
-		t.Error(`effects.Resists(fakeEffect1) was false, want true`)
-	}
-	if effects.Resists(fakeEffect2) {
-		t.Error(`effects.Resists(fakeEffect1) was true, want false`)
-	}
-}
+	effects := NewEffects(map[Effect]int{fakeResist1: 1, fakeResist2: -1})
 
-func TestVulnTo(t *testing.T) {
-	effects := Effects{fakeVuln1}
-	VulnMap = map[Effect]Effect{fakeEffect1: fakeVuln1}
-	defer restoreEffectsDeps()
-
-	if !effects.VulnTo(fakeEffect1) {
-		t.Error(`effects.VulnTo(fakeEffect1) was false, want true`)
+	if n := effects.Resists(fakeEffect1); n != 1 {
+		t.Errorf(`effects.Resists(fakeEffect1) was %d, want 1`, n)
 	}
-	if effects.VulnTo(fakeEffect2) {
-		t.Error(`effects.Resists(fakeEffect2) was true, want false`)
+	if n := effects.Resists(fakeEffect2); n != -1 {
+		t.Errorf(`effects.Resists(fakeEffect1) was %d, want -1`, n)
+	}
+	if n := effects.Resists(fakeBrand1); n != 0 {
+		t.Errorf(`effects.Resists(fakeEffect1) was %d, want 0`, n)
 	}
 }
 
 func TestBrands(t *testing.T) {
-	effects := Effects{fakeBrand1, fakeEffect1, fakeBrand2, fakeResist1}
-	Brands = Effects{fakeBrand1, fakeBrand2}
+	EffectsSpecs = testEffectsSpecs
 	defer restoreEffectsDeps()
+
+	effects := NewEffects(map[Effect]int{
+		fakeBrand1:  1,
+		fakeEffect1: 1,
+		fakeBrand2:  1,
+		fakeResist1: 2,
+	})
 
 	brands := effects.Brands()
 	if l := len(brands); l != 2 {
 		t.Errorf(`len(effects.Brands()) was %d, want 2`, l)
 	}
 
-	for i, b := range brands {
-		if b != Brands[i] {
-			t.Errorf(`effects.Brands(): Didn't find brand %d at %d, got %d`, b, i, Brands[i])
+	for e, info := range brands {
+		if info.Type != EffectTypeBrand {
+			t.Errorf(`Effect %v had type %v, want %v`, e, info.Type, EffectTypeBrand)
 		}
 	}
 }
 
 func restoreEffectsDeps() {
-	ResistMap = oldResistMap
-	VulnMap = oldVulnMap
-	Brands = oldBrands
+	EffectsSpecs = oldEffectsSpecs
 }

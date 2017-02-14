@@ -36,7 +36,7 @@ func (t *ActorTicker) Tick(delay int) {
 	}
 
 	diff := delay - t.last
-	ended := make(Effects, 0)
+	ended := make([]Effect, 0)
 
 	// Apply each active effect.
 	for e, ae := range t.Effects {

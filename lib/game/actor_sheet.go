@@ -201,17 +201,10 @@ func (p *PlayerSheet) Defense() Defense {
 	dice := body.ProtDice()
 	effects := body.ArmorEffects()
 
-	// When it comes to a physical defense, we only care about the presence or
-	// absence of effects, _not_ their count.
-	effectset := make(Effects, 0, len(effects))
-	for k, _ := range effects {
-		effectset = append(effectset, k)
-	}
-
 	return Defense{
 		Evasion:  evasion,
 		ProtDice: dice,
-		Effects:  effectset,
+		Effects:  effects,
 	}
 }
 
@@ -359,7 +352,7 @@ type Attack struct {
 	Melee   int
 	Damroll Dice
 	CritDiv int
-	Effects []Effect
+	Effects Effects
 }
 
 // Roll damage for this attack, given that `crits` crits were rolled.

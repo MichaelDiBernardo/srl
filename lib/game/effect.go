@@ -1,43 +1,99 @@
 package game
 
+import (
+	"fmt"
+)
+
 // An effect is something that a monster or a piece of equipment can have. This
 // includes, brands, resists, status effects, etc.
 type Effect uint
 
-// A collection of effects on a monster, piece of equipment, etc.
-type Effects []Effect
+// An effect 'type' is a grouping of that effect e.g. is it a brand, a status
+// effect, etc.
+type EffectType uint
 
-// Does a collection of effects have this effect?
-func (effects Effects) Has(effect Effect) bool {
-	for _, e := range effects {
-		if e == effect {
-			return true
-		}
+// Defines basic information about an effect -- i.e what type it is, and if it
+// is an offensive effect or brand, what it is resisted by.
+type EffectSpec struct {
+	Type       EffectType
+	ResistedBy Effect
+	Verb       string
+}
+
+// Definition of _all_ effects and their types.
+type EffectsSpec map[Effect]*EffectSpec
+
+// A single instance of an effect on a creature, attack, defense, etc.
+type EffectInfo struct {
+	*EffectSpec
+	Count int
+}
+
+// Given an effect and its count, this will create an EffectInfo that
+// represents the same.
+func newEffectInfo(effect Effect, count int) EffectInfo {
+	spec := EffectsSpecs[effect]
+	if spec == nil {
+		panic(fmt.Sprintf("Could not find spec for effect %v", effect))
 	}
-	return false
+	return EffectInfo{EffectSpec: spec, Count: count}
 }
 
-// Do I have anything in this collection of effects that will resist 'effect'?
-func (effects Effects) Resists(effect Effect) bool {
-	resist := ResistMap[effect]
-	return effects.Has(resist)
+// A collection of effects on a monster, piece of equipment, etc.
+type Effects map[Effect]EffectInfo
+
+// Given a histogram of Effect -> resist/vuln count, this will create a Effects
+// collection with the given counts in place.
+func NewEffects(counts map[Effect]int) Effects {
+	effects := Effects{}
+
+	for effect, count := range counts {
+		effects[effect] = newEffectInfo(effect, count)
+	}
+
+	return effects
 }
 
-// Do I have anything in this collection of effects that indicates vulnerability to 'effect'?
-func (effects Effects) VulnTo(effect Effect) bool {
-	vuln := VulnMap[effect]
-	return effects.Has(vuln)
+// Returns the number of 'pips' of this effect that this collection has.
+func (effects Effects) Has(effect Effect) int {
+	return effects[effect].Count
+}
+
+// How many pips of resistance do I have against 'effect'? This can be
+// negative, which indicates a vulnerability to 'effect'.
+func (effects Effects) Resists(effect Effect) int {
+	info := EffectsSpecs[effect]
+	if info == nil {
+		return 0
+	}
+	return effects.Has(info.ResistedBy)
 }
 
 // Filters out the brands from this collection of effects.
 func (effects Effects) Brands() Effects {
-	brands := make(Effects, 0)
-	for _, e := range effects {
-		if Brands.Has(e) {
-			brands = append(brands, e)
+	brands := make(Effects)
+	for effect, info := range effects {
+		if info.Type == EffectTypeBrand {
+			brands[effect] = info
 		}
 	}
 	return brands
+}
+
+// Produces a new Effects that is the union of 'e1' and 'e2', accumulating the
+// counts of each effect. This does not mutate either of the inputs.
+func (e1 Effects) Merge(e2 Effects) Effects {
+	merged := Effects{}
+	for k, v := range e1 {
+		merged[k] = v
+	}
+
+	for k, v := range e2 {
+		info := merged[k]
+		info.Count += v.Count
+		merged[k] = info
+	}
+	return merged
 }
 
 // An instance of an effect that is currently affected an actor. These are
@@ -55,6 +111,7 @@ type ActiveEffect struct {
 	OnEnd func(*ActiveEffect, *ActorTicker)
 }
 
+// Creates a new ActiveEffect record for the given effect.
 func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 	ae := &ActiveEffect{}
 	*ae = ActiveEffects[e]

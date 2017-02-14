@@ -2,65 +2,54 @@ package game
 
 // Brands, effects, resists, vulnerabilities found in the game.
 const (
-	// Regen that is applied every tick to every actor.
-	EffectBaseRegen Effect = iota
+	// Sentinel.
+	EffectNone Effect = iota
 
+	// Brands
 	BrandFire
 	BrandElec
 	BrandIce
 	BrandPoison
+
+	// Effects
+	EffectBaseRegen // Regen that is applied every tick to every actor.
 	EffectStun
 	EffectPoison
 
+	// Resists
 	ResistFire
 	ResistElec
 	ResistIce
 	ResistStun
 	ResistPoison
 
-	VulnFire
-	VulnElec
-	VulnIce
-	VulnStun
-	VulnPoison
-
+	// Sentinel
 	NumEffects
 )
 
-// The subset of effects that are brands.
-var Brands = Effects{
-	BrandFire,
-	BrandElec,
-	BrandIce,
-	BrandPoison,
-}
+// Types of permissible effects.
+const (
+	EffectTypeBrand = iota
+	EffectTypeResist
+	EffectTypeStatus
+)
 
-// Which effects are resisted by which.
-var ResistMap = map[Effect]Effect{
-	BrandFire:    ResistFire,
-	BrandElec:    ResistElec,
-	BrandIce:     ResistIce,
-	BrandPoison:  ResistPoison,
-	EffectStun:   ResistStun,
-	EffectPoison: ResistPoison,
-}
+// Mapping of effects to their types.
+var EffectsSpecs = EffectsSpec{
+	BrandFire:   {Type: EffectTypeBrand, ResistedBy: ResistFire, Verb: "burns"},
+	BrandElec:   {Type: EffectTypeBrand, ResistedBy: ResistElec, Verb: "shocks"},
+	BrandIce:    {Type: EffectTypeBrand, ResistedBy: ResistIce, Verb: "freezes"},
+	BrandPoison: {Type: EffectTypeBrand, ResistedBy: ResistPoison, Verb: "poisons"},
 
-// Which effects are vulnerable to which.
-var VulnMap = map[Effect]Effect{
-	BrandFire:    VulnFire,
-	BrandElec:    VulnElec,
-	BrandIce:     VulnIce,
-	BrandPoison:  VulnPoison,
-	EffectStun:   VulnStun,
-	EffectPoison: VulnPoison,
-}
+	EffectBaseRegen: {Type: EffectTypeStatus},
+	EffectStun:      {Type: EffectTypeStatus, ResistedBy: ResistStun},
+	EffectPoison:    {Type: EffectTypeStatus, ResistedBy: ResistPoison},
 
-// Verbs associated with effects when they take effect in melee.
-var EffectVerbs = map[Effect]string{
-	BrandFire:   "burns",
-	BrandElec:   "shocks",
-	BrandIce:    "freezes",
-	BrandPoison: "poisons",
+	ResistFire:   {Type: EffectTypeResist},
+	ResistElec:   {Type: EffectTypeResist},
+	ResistIce:    {Type: EffectTypeResist},
+	ResistStun:   {Type: EffectTypeResist},
+	ResistPoison: {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.

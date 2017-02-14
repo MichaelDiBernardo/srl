@@ -116,41 +116,86 @@ type applyBrandTest struct {
 }
 
 func TestApplyBrand(t *testing.T) {
-	var (
-		oldEffectVerbs = EffectVerbs
-		oldResistMap   = ResistMap
-		oldVulnMap     = VulnMap
-		oldBrands      = Brands
-	)
 	const (
 		fakeBrand1 Effect = NumEffects + iota
 		fakeBrand2
-		fakeVuln1
 		fakeResist1
 	)
 
-	Brands = Effects{fakeBrand1, fakeBrand2}
-	ResistMap = map[Effect]Effect{fakeBrand1: fakeResist1}
-	VulnMap = map[Effect]Effect{fakeBrand1: fakeVuln1}
-	EffectVerbs = map[Effect]string{fakeBrand1: "frobs", fakeBrand2: "norfs"}
+	oldEffectsSpecs := EffectsSpecs
+
+	EffectsSpecs = EffectsSpec{
+		fakeBrand1:  {Type: EffectTypeBrand, ResistedBy: fakeResist1, Verb: "frobs"},
+		fakeBrand2:  {Type: EffectTypeBrand, Verb: "norfs"},
+		fakeResist1: {Type: EffectTypeResist},
+	}
 
 	restoreEffectsDeps := func() {
-		ResistMap = oldResistMap
-		VulnMap = oldVulnMap
-		EffectVerbs = oldEffectVerbs
-		Brands = oldBrands
+		EffectsSpecs = oldEffectsSpecs
 	}
 	defer restoreEffectsDeps()
 
 	tests := []applyBrandTest{
-		{atk: Effects{fakeBrand1}, def: Effects{}, verb: "frobs", dice: 1},
-		{atk: Effects{fakeBrand1}, def: Effects{fakeResist1}, verb: "hits", dice: 0},
-		{atk: Effects{fakeBrand1}, def: Effects{fakeVuln1}, verb: "*frobs*", dice: 2},
-		{atk: Effects{}, def: Effects{fakeVuln1}, verb: "hits", dice: 0},
-		{atk: Effects{}, def: Effects{fakeResist1}, verb: "hits", dice: 0},
-		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{}, verb: "norfs", dice: 2},
-		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{fakeVuln1}, verb: "*frobs*", dice: 3},
-		{atk: Effects{fakeBrand1, fakeBrand2}, def: Effects{fakeResist1}, verb: "norfs", dice: 1},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1}),
+			def:  Effects{},
+			verb: "frobs",
+			dice: 1,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 2}),
+			def:  Effects{},
+			verb: "frobs",
+			dice: 1,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: 1}),
+			verb: "hits",
+			dice: 0,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: 2}),
+			verb: "hits",
+			dice: 0,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: -1}),
+			verb: "*frobs*",
+			dice: 2,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: -2}),
+			verb: "*frobs*",
+			dice: 2,
+		},
+		{
+			atk:  Effects{},
+			def:  NewEffects(map[Effect]int{fakeResist1: -1}),
+			verb: "hits",
+			dice: 0,
+		},
+		{
+			atk:  Effects{},
+			def:  NewEffects(map[Effect]int{fakeResist1: 1}),
+			verb: "hits",
+			dice: 0,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1, fakeBrand2: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: -1}),
+			verb: "*frobs*",
+			dice: 3,
+		},
+		{
+			atk:  NewEffects(map[Effect]int{fakeBrand1: 1, fakeBrand2: 1}),
+			def:  NewEffects(map[Effect]int{fakeResist1: 1}),
+			verb: "norfs",
+			dice: 1,
+		},
 	}
 
 	// No resist.

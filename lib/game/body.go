@@ -78,18 +78,15 @@ func (b *Body) Weapon() *Obj {
 	return b.Slots[SlotHand]
 }
 
-// Accumulate all the effects on all of our armor. The result is a histogram of
-// how often each effect appeared on this body's collection of armor.
-func (b *Body) ArmorEffects() map[Effect]int {
-	effects := make(map[Effect]int)
+// Accumulate all the effects on all of our armor.
+func (b *Body) ArmorEffects() Effects {
+	effects := Effects{}
 
 	for slot, equip := range b.all() {
 		if slot == SlotHand {
 			continue
 		}
-		for _, e := range equip.Equipment.Effects {
-			effects[e] += 1
-		}
+		effects = effects.Merge(equip.Equipment.Effects)
 	}
 	return effects
 }
