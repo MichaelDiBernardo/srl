@@ -2,18 +2,13 @@ NEXT:
 - we need timed effects to work before we can inflict them
     x Effects need a count, not just a list. This is so we can find out how
       much things are resisted.
-    - When attacking in melee, applymeffects should iterate through all the atk
-      effects and use a case statement to apply the necessary effect. If
-      patterns arise here, great.
-    - We're using ActorTicker in callbacks for ActiveEffect instead of Ticker
     - The effect stuff that is happening in actor_fight seems like it should sort of be in effect_spec???
 
 - Monsters have multiple abilities.
     - Abilities need:
         - cooldown
         - function that implements behaviour
-        - a predicate that says whether they're applicable or not. (e.g. steal
-          needs to be in melee range.)
+        - a predicate that says whether they're applicable or not. (?)
         - Ability to affect transitions on AI. (i.e. if a thief steals
           something, it should flee and not stop until it's dead)
     - Monsters need:
@@ -23,9 +18,7 @@ NEXT:
 - Monsters have multiple attacks.
     - Same idea -- monsters can have multiple attacks to choose from, and when
       they bump into an opponent, they choose.
-- Attacks can be branded or hit with certain effects.
-    - Hit to confuse, bite to wound, hit with frost, etc.
-    
+
 - Ranged weapons
     - Monsters and the player can shoot.
 

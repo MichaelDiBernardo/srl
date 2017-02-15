@@ -63,19 +63,19 @@ var ActiveEffects = map[Effect]ActiveEffect{
 		OnTick: regen,
 	},
 	EffectPoison: ActiveEffect{
-		OnBegin: func(_ *ActiveEffect, t *ActorTicker) {
+		OnBegin: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s is poisoned.", t.Obj().Spec.Name))
 		},
 		OnTick: poison,
-		OnEnd: func(_ *ActiveEffect, t *ActorTicker) {
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
 		},
 	},
 }
 
 // Regenerate the actor every turn.
-func regen(e *ActiveEffect, t *ActorTicker, diff int) bool {
-	sheet := t.obj.Sheet
+func regen(e *ActiveEffect, t Ticker, diff int) bool {
+	sheet := t.Obj().Sheet
 	regen := sheet.Regen()
 
 	e.Counter += regen * diff
@@ -93,7 +93,7 @@ func regen(e *ActiveEffect, t *ActorTicker, diff int) bool {
 const RegenPeriod = 100
 
 // Apply poison damage each turn.
-func poison(e *ActiveEffect, t *ActorTicker, _ int) bool {
+func poison(e *ActiveEffect, t Ticker, _ int) bool {
 	dmg := math.Max(20*e.Counter/100, 1)
 	t.Obj().Sheet.Hurt(dmg)
 	e.Counter -= dmg

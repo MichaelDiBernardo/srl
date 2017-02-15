@@ -102,13 +102,13 @@ type ActiveEffect struct {
 	// The effect counter. Might be turns, accumulated delay, residual damage, etc.
 	Counter int
 	// What to do when the effect is first inflicted on an actor.
-	OnBegin func(*ActiveEffect, *ActorTicker)
+	OnBegin func(*ActiveEffect, Ticker)
 	// Responsible for updating Left given the delay diff, plus enforcing the
 	// effect. A return value of 'true' indicates that the effect should be
 	// terminated.
-	OnTick func(*ActiveEffect, *ActorTicker, int) bool
+	OnTick func(*ActiveEffect, Ticker, int) bool
 	// What to do when the effect has run its course.
-	OnEnd func(*ActiveEffect, *ActorTicker)
+	OnEnd func(*ActiveEffect, Ticker)
 }
 
 // Creates a new ActiveEffect record for the given effect.
@@ -117,7 +117,7 @@ func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 	*ae = ActiveEffects[e]
 	ae.Counter = counter
 
-	dummy := func(*ActiveEffect, *ActorTicker) {}
+	dummy := func(*ActiveEffect, Ticker) {}
 	if ae.OnBegin == nil {
 		ae.OnBegin = dummy
 	}
