@@ -5,6 +5,9 @@ type Ticker interface {
 	Objgetter
 	// Notify the actor that 'delay' time has passed.
 	Tick(delay int)
+	AddEffect(e Effect, counter int)
+	// What is the counter remaining for the current effect?
+	Counter(e Effect) int
 }
 
 type ActorTicker struct {
@@ -63,5 +66,13 @@ func (t *ActorTicker) AddEffect(e Effect, counter int) {
 		t.Effects[e] = ae
 	} else {
 		ae.Counter += counter
+	}
+}
+
+func (t *ActorTicker) Counter(e Effect) int {
+	if ae := t.Effects[e]; ae == nil {
+		return 0
+	} else {
+		return ae.Counter
 	}
 }

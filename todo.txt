@@ -5,6 +5,8 @@ NEXT:
     - When attacking in melee, applymeffects should iterate through all the atk
       effects and use a case statement to apply the necessary effect. If
       patterns arise here, great.
+    - We're using ActorTicker in callbacks for ActiveEffect instead of Ticker
+    - The effect stuff that is happening in actor_fight seems like it should sort of be in effect_spec???
 
 - Monsters have multiple abilities.
     - Abilities need:

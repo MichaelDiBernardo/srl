@@ -66,7 +66,7 @@ var Monsters = []*Spec{
 				damroll:  NewDice(2, 7),
 				protroll: NewDice(1, 4),
 
-				atkeffects: NewEffects(map[Effect]int{BrandIce: 1}),
+				atkeffects: NewEffects(map[Effect]int{BrandPoison: 1}),
 			}),
 		},
 	},

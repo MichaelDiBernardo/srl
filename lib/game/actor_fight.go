@@ -31,24 +31,31 @@ func hit(attacker Fighter, defender Fighter) {
 	residual := DieRoll(1, 20) + atk.Melee - DieRoll(1, 20) + def.Evasion
 	aname, dname := attacker.Obj().Spec.Name, defender.Obj().Spec.Name
 
-	if residual > 0 {
-		crits := residual / atk.CritDiv
-		extra, verb := applybrands(atk.Effects, def.Effects)
-		dmg := math.Max(0, atk.RollDamage(crits+extra)-def.RollProt())
-
-		critstr := ""
-		if crits > 0 {
-			critstr = fmt.Sprintf(" %dx critical!", crits)
-		}
-		msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
-		attacker.Obj().Game.Events.Message(msg)
-		defender.Obj().Sheet.Hurt(dmg)
-
-		applyeffects(atk.Effects, def.Effects, attacker, defender, dmg)
-	} else {
+	if residual <= 0 {
 		msg := fmt.Sprintf("%v missed %v.", aname, dname)
 		attacker.Obj().Game.Events.Message(msg)
+		return
 	}
+
+	crits := residual / atk.CritDiv
+	extra, verb := applybrands(atk.Effects, def.Effects)
+	dmg := math.Max(0, atk.RollDamage(crits+extra)-def.RollProt())
+
+	critstr := ""
+	if crits > 0 {
+		critstr = fmt.Sprintf(" %dx critical!", crits)
+	}
+	msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
+	attacker.Obj().Game.Events.Message(msg)
+
+	for effect, _ := range atk.Effects {
+		switch effect {
+		case BrandPoison:
+			defender.Obj().Ticker.AddEffect(EffectPoison, dmg)
+			dmg = 0
+		}
+	}
+	defender.Obj().Sheet.Hurt(dmg)
 }
 
 func applybrands(atk Effects, def Effects) (dice int, verb string) {
@@ -87,8 +94,4 @@ func applybrands(atk Effects, def Effects) (dice int, verb string) {
 		}
 	}
 	return dice, verb
-}
-
-// TODO: Needs a resist histogram, not a list.
-func applyeffects(atk Effects, def Effects, attacker Fighter, defender Fighter, dmg int) {
 }
