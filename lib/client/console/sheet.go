@@ -52,10 +52,10 @@ func (s *sheetPanel) Render(g *game.Game) {
 	s.display.Write(1, 2, fmt.Sprintf("NAME   %v", p.Spec.Name), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 3, fmt.Sprintf("RACE   %v", p.Spec.Species.Describe()), termbox.ColorWhite, termbox.ColorBlack)
 
-	s.display.Write(22, 2, fmt.Sprintf("STR   %d", sheet.Str()), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 3, fmt.Sprintf("AGI   %d", sheet.Agi()), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 4, fmt.Sprintf("VIT   %d", sheet.Vit()), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 5, fmt.Sprintf("MND   %d", sheet.Mnd()), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 2, fmt.Sprintf("STR   %d", sheet.Stat(game.Str)), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 3, fmt.Sprintf("AGI   %d", sheet.Stat(game.Agi)), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 4, fmt.Sprintf("VIT   %d", sheet.Stat(game.Vit)), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 5, fmt.Sprintf("MND   %d", sheet.Stat(game.Mnd)), termbox.ColorWhite, termbox.ColorBlack)
 
 	s.display.Write(1, 7, fmt.Sprintf("TURN %13d", g.Turns), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(1, 8, fmt.Sprintf("XP LEFT %10d", 152), termbox.ColorWhite, termbox.ColorBlack)

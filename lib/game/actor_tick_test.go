@@ -7,7 +7,10 @@ import (
 func TestRegen0(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1, hp: 0, regen: 0}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+	}
 	// The regen period should heal 0 HP.
 	delay := GetDelay(2) * RegenPeriod
 	obj.Ticker.Tick(delay)
@@ -20,7 +23,11 @@ func TestRegen0(t *testing.T) {
 func TestRegen1(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1, hp: 0, regen: 1}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		regen: 1,
+	}
 	// Half the regen period should heal 50% HP
 	delay := GetDelay(2) * RegenPeriod / 2
 	obj.Ticker.Tick(delay)
@@ -33,7 +40,11 @@ func TestRegen1(t *testing.T) {
 func TestRegen2(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1, hp: 0, regen: 2}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		regen: 2,
+	}
 	// Quarter the regen period should heal 50% HP
 	delay := GetDelay(2) * RegenPeriod / 4
 	obj.Ticker.Tick(delay)
@@ -46,7 +57,12 @@ func TestRegen2(t *testing.T) {
 func TestRegenAcrossLevels(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1, hp: 0, regen: 1}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		hp:    0,
+		regen: 1,
+	}
 	// If we regen a long time on one floor, and then a shorter time on the
 	// next, it should be the same as if we'd regened everything on the same
 	// floor. (We're talking about floors here because the total delay counter

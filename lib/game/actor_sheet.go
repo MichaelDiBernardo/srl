@@ -11,10 +11,12 @@ type Sheet interface {
 	Objgetter
 
 	// Stats
-	Str() int
-	Agi() int
-	Vit() int
-	Mnd() int
+	Stat(stat StatName) int
+	SetStat(stat StatName, amt int)
+
+	UnmodStat(stat StatName) int
+	StatMod(stat StatName) int
+	SetStatMod(stat StatName, amt int)
 
 	// Skills.
 	Melee() int
@@ -57,10 +59,7 @@ type Sheet interface {
 // Sheet used for player, which has a lot of derived attributes.
 type PlayerSheet struct {
 	Trait
-	str int
-	agi int
-	vit int
-	mnd int
+	stats *stats
 
 	sight int
 	speed int
@@ -74,10 +73,14 @@ type PlayerSheet struct {
 func NewPlayerSheet(obj *Obj) Sheet {
 	ps := &PlayerSheet{
 		Trait: Trait{obj: obj},
-		str:   3,
-		agi:   4,
-		vit:   4,
-		mnd:   3,
+		stats: &stats{
+			stats: statlist{
+				Str: 2,
+				Agi: 4,
+				Vit: 4,
+				Mnd: 3,
+			},
+		},
 		speed: 2,
 		regen: 1,
 		sight: FOVRadius,
@@ -87,28 +90,34 @@ func NewPlayerSheet(obj *Obj) Sheet {
 	return ps
 }
 
-func (s *PlayerSheet) Str() int {
-	return s.str
+func (p *PlayerSheet) Stat(stat StatName) int {
+	return p.stats.stat(stat)
 }
 
-func (s *PlayerSheet) Agi() int {
-	return s.agi
+func (p *PlayerSheet) SetStat(stat StatName, amt int) {
+	p.stats.set(stat, amt)
+	// TODO: Modify skills if agi or mnd.
 }
 
-func (s *PlayerSheet) Vit() int {
-	return s.vit
+func (p *PlayerSheet) UnmodStat(stat StatName) int {
+	return p.stats.unmodstat(stat)
 }
 
-func (s *PlayerSheet) Mnd() int {
-	return s.mnd
+func (p *PlayerSheet) StatMod(stat StatName) int {
+	return p.stats.mod(stat)
+}
+
+func (p *PlayerSheet) SetStatMod(stat StatName, amt int) {
+	p.stats.setmod(stat, amt)
+	// TODO: Modify skills if agi or mnd.
 }
 
 func (p *PlayerSheet) Melee() int {
-	return p.Agi()
+	return p.stats.stat(Agi)
 }
 
 func (p *PlayerSheet) Evasion() int {
-	return p.Agi()
+	return p.stats.stat(Agi)
 }
 
 func (p *PlayerSheet) Speed() int {
@@ -124,7 +133,7 @@ func (p *PlayerSheet) setHP(hp int) {
 }
 
 func (p *PlayerSheet) MaxHP() int {
-	return 10 * (1 + p.Vit())
+	return 10 * (1 + p.stats.stat(Vit))
 }
 
 func (p *PlayerSheet) MP() int {
@@ -136,7 +145,7 @@ func (p *PlayerSheet) setMP(mp int) {
 }
 
 func (p *PlayerSheet) MaxMP() int {
-	return 10 * (1 + p.Mnd())
+	return 10 * (1 + p.stats.stat(Mnd))
 }
 
 func (p *PlayerSheet) Regen() int {
@@ -170,7 +179,7 @@ func (p *PlayerSheet) Attack() Attack {
 	weap := p.weapon()
 	equip := weap.Equipment
 
-	str := p.Str()
+	str := p.stats.stat(Str)
 	bonusSides := math.Min(math.Abs(str), weap.Equipment.Weight) * math.Sgn(str)
 
 	return Attack{
@@ -197,7 +206,7 @@ func (p *PlayerSheet) fist() *Obj {
 		Name:    "FIST",
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
-				Damroll: NewDice(1, p.Str()+1),
+				Damroll: NewDice(1, p.stats.stat(Str)+1),
 				Melee:   0,
 				Weight:  0,
 				Slot:    SlotHand,
@@ -223,10 +232,7 @@ func (p *PlayerSheet) Defense() Defense {
 type MonsterSheet struct {
 	Trait
 
-	str int
-	agi int
-	vit int
-	mnd int
+	stats *stats
 
 	speed int
 	sight int
@@ -259,6 +265,15 @@ func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 	return func(o *Obj) Sheet {
 		// Copy sheet.
 		sheet := sheetspec
+
+		// Copy stats.
+		// TODO: Just write Copy() on sheet, god.
+		newstats := &stats{}
+		if sheetspec.stats != nil {
+			*newstats = *(sheetspec.stats)
+		}
+		sheet.stats = newstats
+
 		sheet.obj = o
 		sheet.hp = sheet.maxhp
 		sheet.mp = sheet.maxmp
@@ -272,20 +287,24 @@ func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 	}
 }
 
-func (s *MonsterSheet) Str() int {
-	return s.str
+func (m *MonsterSheet) Stat(stat StatName) int {
+	return m.stats.stat(stat)
 }
 
-func (s *MonsterSheet) Agi() int {
-	return s.agi
+func (m *MonsterSheet) SetStat(stat StatName, amt int) {
+	m.stats.set(stat, amt)
 }
 
-func (s *MonsterSheet) Vit() int {
-	return s.vit
+func (m *MonsterSheet) UnmodStat(stat StatName) int {
+	return m.stats.unmodstat(stat)
 }
 
-func (s *MonsterSheet) Mnd() int {
-	return s.mnd
+func (m *MonsterSheet) StatMod(stat StatName) int {
+	return m.stats.mod(stat)
+}
+
+func (m *MonsterSheet) SetStatMod(stat StatName, amt int) {
+	m.stats.setmod(stat, amt)
 }
 
 func (m *MonsterSheet) Melee() int {
@@ -365,6 +384,52 @@ func (m *MonsterSheet) Defense() Defense {
 		Effects:  m.defeffects,
 	}
 }
+
+// Maintains stats and modifications for a sheet.
+type stats struct {
+	stats statlist
+	mods  statlist
+}
+
+// An array of statistics.
+type statlist [NumStats]int
+
+// Get the given stat combined with any active modifiersto it.
+func (s *stats) stat(stat StatName) int {
+	return s.stats[stat] + s.mods[stat]
+}
+
+// Get the unmodified stat.
+func (s *stats) unmodstat(stat StatName) int {
+	return s.stats[stat]
+}
+
+// Set the given stat to 'amt'.
+func (s *stats) set(stat StatName, amt int) {
+	s.stats[stat] = amt
+}
+
+// Get the modifier (mod) for this stat.
+func (s *stats) mod(stat StatName) int {
+	return s.mods[stat]
+}
+
+// Set a modifier for this stat. Can be +ve or -ve.
+func (s *stats) setmod(stat StatName, amt int) {
+	s.mods[stat] = amt
+}
+
+// Index into stats arrays.
+type StatName uint
+
+// The actual stats our actors have.
+const (
+	Str StatName = iota
+	Agi
+	Vit
+	Mnd
+	NumStats
+)
 
 // Details about an actor's melee attack, before the melee roll is applied --
 // i.e. what melee bonus + damage should be done if no crits happen? What's the

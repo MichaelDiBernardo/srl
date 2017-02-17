@@ -7,7 +7,10 @@ import (
 func TestPlayerMaxHPCalc(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, vit: 1}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+	}
 
 	if maxhp, want := obj.Sheet.MaxHP(), 20; maxhp != want {
 		t.Errorf(`MaxHP() was %d, want %d`, maxhp, want)
@@ -17,7 +20,10 @@ func TestPlayerMaxHPCalc(t *testing.T) {
 func TestPlayerMaxMPCalc(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, mnd: 2}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Mnd: 2}},
+	}
 
 	if maxmp, want := obj.Sheet.MaxMP(), 30; maxmp != want {
 		t.Errorf(`MaxMP() was %d, want %d`, maxmp, want)
@@ -27,7 +33,7 @@ func TestPlayerMaxMPCalc(t *testing.T) {
 func TestHurtingPlayerToDeathEndsGame(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}}
 	g.Player = obj
 
 	obj.Sheet.Hurt(9999999)
@@ -39,7 +45,7 @@ func TestHurtingPlayerToDeathEndsGame(t *testing.T) {
 func TestHealPlayerDoesntExceedMaxHP(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, hp: 1}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}, hp: 1}
 	g.Player = obj
 
 	obj.Sheet.Heal(9999999)
@@ -79,7 +85,7 @@ func testAtkEq(t *testing.T, atk Attack, want Attack) {
 func TestPlayerAttackNoBonuses(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}}
 
 	weap := g.NewObj(astKnifeSpec)
 	obj.Equipper.Body().Wear(weap)
@@ -91,7 +97,10 @@ func TestPlayerAttackNoBonuses(t *testing.T) {
 func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 1, agi: 0}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Str: 1}},
+	}
 
 	weap := g.NewObj(astKnifeSpec)
 	obj.Equipper.Body().Wear(weap)
@@ -103,7 +112,10 @@ func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
 func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 3, agi: 0}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Str: 3}},
+	}
 
 	weap := g.NewObj(astKnifeSpec)
 	obj.Equipper.Body().Wear(weap)
@@ -115,7 +127,10 @@ func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
 func TestPlayerAttackMeleeBonus(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 3}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Agi: 3}},
+	}
 
 	weap := g.NewObj(astKnifeSpec)
 	obj.Equipper.Body().Wear(weap)
@@ -127,8 +142,7 @@ func TestPlayerAttackMeleeBonus(t *testing.T) {
 func TestPlayerAttackFistNoStrSides(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 0, agi: 0}
-
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}}
 	atk := obj.Sheet.Attack()
 	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 1)})
 }
@@ -136,7 +150,10 @@ func TestPlayerAttackFistNoStrSides(t *testing.T) {
 func TestPlayerAttackFistStrSides(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, str: 10, agi: 0}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Str: 10}},
+	}
 
 	atk := obj.Sheet.Attack()
 	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 11)})
@@ -160,7 +177,7 @@ func testDefEq(t *testing.T, def Defense, want Defense) {
 func TestPlayerDefenseNoArmorOrEvasion(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 0}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}}
 
 	def := obj.Sheet.Defense()
 	testDefEq(t, def, Defense{Evasion: 0})
@@ -169,7 +186,10 @@ func TestPlayerDefenseNoArmorOrEvasion(t *testing.T) {
 func TestPlayerDefenseNoArmorWithEvasion(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 2}
+	obj.Sheet = &PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Agi: 2}},
+	}
 
 	def := obj.Sheet.Defense()
 	testDefEq(t, def, Defense{Evasion: 2})
@@ -178,7 +198,7 @@ func TestPlayerDefenseNoArmorWithEvasion(t *testing.T) {
 func TestPlayerDefenseWithArmor(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
-	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, agi: 0}
+	obj.Sheet = &PlayerSheet{Trait: Trait{obj: obj}, stats: &stats{}}
 
 	armspec1 := &Spec{
 		Family:  FamItem,

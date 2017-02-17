@@ -50,10 +50,14 @@ var Monsters = []*Spec{
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
-				str: 2,
-				agi: 0,
-				vit: 1,
-				mnd: 0,
+				stats: &stats{
+					stats: statlist{
+						Str: 2,
+						Agi: 0,
+						Vit: 1,
+						Mnd: 0,
+					},
+				},
 
 				speed: 2,
 
@@ -93,10 +97,14 @@ var Monsters = []*Spec{
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
 			Sheet: NewMonsterSheet(MonsterSheet{
-				str: 3,
-				agi: 3,
-				vit: 1,
-				mnd: 0,
+				stats: &stats{
+					stats: statlist{
+						Str: 3,
+						Agi: 3,
+						Vit: 1,
+						Mnd: 0,
+					},
+				},
 
 				speed: 2,
 
