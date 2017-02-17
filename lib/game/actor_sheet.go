@@ -5,9 +5,6 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
-// The base divisor to use for crits.
-const baseCritDiv = 7
-
 // A 'character sheet' for an actor. Basically, all the attributes for an actor
 // that are required to make calculations and game decisions live here.
 type Sheet interface {
@@ -40,15 +37,19 @@ type Sheet interface {
 	// 0 means no regen.
 	Regen() int
 
+	// How stunned is this actor?
+	Stun() StunLevel
+
 	// Sight radius.
 	Sight() int
 
-	// Hurt me.
+	// Remove 'dmg' hitpoints. Will kill the actor if HP falls <= 0.
 	Hurt(dmg int)
-	// Heal me.
+	// Heal 'amt' hp; actor's hp will not exceed maxhp.
 	Heal(amt int)
-	// Touch me.
-	// Feel me.
+	// Set stun level. Effects are documented with the stun level definitions
+	// in this module.
+	SetStun(lvl StunLevel)
 
 	Speed() int
 }
@@ -67,6 +68,7 @@ type PlayerSheet struct {
 	hp    int
 	mp    int
 	regen int
+	stun  StunLevel
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -153,6 +155,15 @@ func (p *PlayerSheet) Heal(amt int) {
 	heal(p, amt)
 }
 
+func (p *PlayerSheet) Stun() StunLevel {
+	return p.stun
+}
+
+func (p *PlayerSheet) SetStun(level StunLevel) {
+	changestun(p, level)
+	p.stun = level
+}
+
 func (p *PlayerSheet) Attack() Attack {
 	melee := p.obj.Equipper.Body().Melee() + p.Melee()
 
@@ -226,6 +237,7 @@ type MonsterSheet struct {
 	maxmp int
 
 	regen int
+	stun  StunLevel
 
 	melee   int
 	evasion int
@@ -328,6 +340,15 @@ func (m *MonsterSheet) Heal(amt int) {
 	heal(m, amt)
 }
 
+func (m *MonsterSheet) Stun() StunLevel {
+	return m.stun
+}
+
+func (m *MonsterSheet) SetStun(level StunLevel) {
+	changestun(m, level)
+	m.stun = level
+}
+
 func (m *MonsterSheet) Attack() Attack {
 	return Attack{
 		Melee:   m.melee,
@@ -390,6 +411,26 @@ func hurt(s Sheet, dmg int) {
 	checkDeath(s)
 }
 
+func changestun(s Sheet, newstun StunLevel) {
+	oldstun := s.Stun()
+	if oldstun >= newstun {
+		return
+	}
+
+	msg := s.Obj().Spec.Name + " is "
+
+	switch newstun {
+	case Stunned:
+		msg += "stunned."
+	case MoreStunned:
+		msg += "more stunned."
+	case KnockedOut:
+		msg += "knocked out!"
+	}
+
+	s.Obj().Game.Events.Message(msg)
+}
+
 func checkDeath(s Sheet) {
 	if s.HP() > 0 {
 		return
@@ -401,3 +442,20 @@ func checkDeath(s Sheet) {
 	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
 	game.Kill(obj)
 }
+
+type StunLevel uint
+
+// Stun status definitions.
+const (
+	// Not stunned, no effect.
+	NotStunned StunLevel = iota
+	// -2 to all skills
+	Stunned
+	// -4 to all skills
+	MoreStunned
+	// knocked out, cannot move.
+	KnockedOut
+)
+
+// The base divisor to use for crits.
+const baseCritDiv = 7
