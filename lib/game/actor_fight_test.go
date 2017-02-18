@@ -87,7 +87,7 @@ func TestHit(t *testing.T) {
 			Name:    "ORC",
 			Traits: &Traits{
 				Fighter: NewActorFighter,
-				Sheet: NewMonsterSheet(MonsterSheet{
+				Sheet: NewMonsterSheet(&MonsterSheet{
 					critdivmod: 0,
 					maxhp:      20,
 					damroll:    NewDice(1, 5),

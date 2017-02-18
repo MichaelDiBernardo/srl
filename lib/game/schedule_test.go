@@ -58,7 +58,7 @@ func lTestSpd(g *Game, name string, spd int) *Obj {
 		Species: "TestSpecies",
 		Name:    name,
 		Traits: &Traits{
-			Sheet: NewMonsterSheet(MonsterSheet{speed: spd}),
+			Sheet: NewMonsterSheet(&MonsterSheet{speed: spd}),
 		},
 	})
 }

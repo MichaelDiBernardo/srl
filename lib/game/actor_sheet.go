@@ -10,56 +10,79 @@ import (
 type Sheet interface {
 	Objgetter
 
-	// Stats
+	// Get the total value for statistic 'stat', including mods.
 	Stat(stat StatName) int
+	// Set the base value for statistic 'stat'.
 	SetStat(stat StatName, amt int)
 
+	// Get the unmodified (base) value of statistic 'stat'.
 	UnmodStat(stat StatName) int
+	// Get the mod for statistic 'stat'.
 	StatMod(stat StatName) int
-	SetStatMod(stat StatName, amt int)
 
-	// Skills.
-	Melee() int
-	Evasion() int
+	// Get the total value for skill 'skill', including mods.
+	Skill(skill SkillName) int
+	// Set the base value for skill 'skill'.
+	SetSkill(skill SkillName, amt int)
 
-	// Attack and defense.
+	// Get the unmodified (base) value of skill 'skill'.
+	UnmodSkill(skill SkillName) int
+	// Get the mod for skill 'skill'.
+	SkillMod(skill SkillName) int
+	// Set the mod for skill 'skill'.
+	SetSkillMod(skill SkillName, amt int)
+
+	// Get information about this actor's melee attack capability.
 	Attack() Attack
+	// Get information about this actor's defensive capability.
 	Defense() Defense
 
-	// Vitals.
+	// Get this actor's current HP.
 	HP() int
+	// Set this actor's current HP. This will ignore MaxHP constraints.
 	setHP(hp int)
+	// Get this actor's maximum HP.
 	MaxHP() int
 
+	// Remove 'dmg' hitpoints. Will kill the actor if HP falls <= 0.
+	Hurt(dmg int)
+	// Heal 'amt' hp; actor's hp will not exceed maxhp.
+	Heal(amt int)
+
+	// Get this actor's current MP.
 	MP() int
+	// Set this actor's current MP. This will ignore MaxMP constraints.
 	setMP(mp int)
+	// Get this actor's current MP.
 	MaxMP() int
 
 	// Regen factor. Normal healing is 1; 2 is twice as fast, etc.
 	// 0 means no regen.
 	Regen() int
 
-	// How stunned is this actor?
+	// How stunned is this actor? See StunLevel definition to see what each
+	// level means.
 	Stun() StunLevel
-
-	// Sight radius.
-	Sight() int
-
-	// Remove 'dmg' hitpoints. Will kill the actor if HP falls <= 0.
-	Hurt(dmg int)
-	// Heal 'amt' hp; actor's hp will not exceed maxhp.
-	Heal(amt int)
 	// Set stun level. Effects are documented with the stun level definitions
 	// in this module.
 	SetStun(lvl StunLevel)
 
+	// Sight radius.
+	Sight() int
+
+	// Get this actor's current speed.
+	// 1: Slow (0.5x normal)
+	// 2: Normal
+	// 3: Fast (1.5x normal)
+	// 4: Very fast (2.x normal)
 	Speed() int
 }
 
 // Sheet used for player, which has a lot of derived attributes.
 type PlayerSheet struct {
 	Trait
-	stats *stats
+	stats  *stats
+	skills *skills
 
 	sight int
 	speed int
@@ -81,13 +104,42 @@ func NewPlayerSheet(obj *Obj) Sheet {
 				Mnd: 3,
 			},
 		},
-		speed: 2,
-		regen: 1,
-		sight: FOVRadius,
+		skills: &skills{},
+		speed:  2,
+		regen:  1,
+		sight:  FOVRadius,
 	}
 	ps.hp = ps.MaxHP()
 	ps.mp = ps.MaxMP()
+	ps.initmods()
 	return ps
+}
+
+// For testing.
+func NewPlayerSheetFromSpec(pspec *PlayerSheet) *PlayerSheet {
+	sheet := pspec.Copy()
+	sheet.initmods()
+	return sheet
+}
+
+func (p *PlayerSheet) Copy() *PlayerSheet {
+	// Copy sheet.
+	sheet := &PlayerSheet{}
+	*sheet = *p
+
+	// Copy stats.
+	newstats := &stats{}
+	if p.stats != nil {
+		*newstats = *(p.stats)
+	}
+	sheet.stats = newstats
+
+	newskills := &skills{}
+	if p.skills != nil {
+		*newskills = *(p.skills)
+	}
+	sheet.skills = newskills
+	return sheet
 }
 
 func (p *PlayerSheet) Stat(stat StatName) int {
@@ -95,8 +147,14 @@ func (p *PlayerSheet) Stat(stat StatName) int {
 }
 
 func (p *PlayerSheet) SetStat(stat StatName, amt int) {
+	switch stat {
+	case Agi:
+		p.modAgiSkills(amt - p.stats.stat(stat))
+	case Mnd:
+		p.modMndSkills(amt - p.stats.stat(stat))
+	}
+
 	p.stats.set(stat, amt)
-	// TODO: Modify skills if agi or mnd.
 }
 
 func (p *PlayerSheet) UnmodStat(stat StatName) int {
@@ -107,17 +165,24 @@ func (p *PlayerSheet) StatMod(stat StatName) int {
 	return p.stats.mod(stat)
 }
 
-func (p *PlayerSheet) SetStatMod(stat StatName, amt int) {
-	p.stats.setmod(stat, amt)
-	// TODO: Modify skills if agi or mnd.
+func (p *PlayerSheet) Skill(skill SkillName) int {
+	return p.skills.skill(skill)
 }
 
-func (p *PlayerSheet) Melee() int {
-	return p.stats.stat(Agi)
+func (p *PlayerSheet) SetSkill(skill SkillName, amt int) {
+	p.skills.set(skill, amt)
 }
 
-func (p *PlayerSheet) Evasion() int {
-	return p.stats.stat(Agi)
+func (p *PlayerSheet) UnmodSkill(skill SkillName) int {
+	return p.skills.unmodskill(skill)
+}
+
+func (p *PlayerSheet) SkillMod(skill SkillName) int {
+	return p.skills.mod(skill)
+}
+
+func (p *PlayerSheet) SetSkillMod(skill SkillName, amt int) {
+	p.skills.setmod(skill, amt)
 }
 
 func (p *PlayerSheet) Speed() int {
@@ -174,7 +239,7 @@ func (p *PlayerSheet) SetStun(level StunLevel) {
 }
 
 func (p *PlayerSheet) Attack() Attack {
-	melee := p.obj.Equipper.Body().Melee() + p.Melee()
+	melee := p.obj.Equipper.Body().Melee() + p.skills.skill(Melee)
 
 	weap := p.weapon()
 	equip := weap.Equipment
@@ -217,7 +282,7 @@ func (p *PlayerSheet) fist() *Obj {
 
 func (p *PlayerSheet) Defense() Defense {
 	body := p.obj.Equipper.Body()
-	evasion := body.Evasion() + p.Evasion()
+	evasion := body.Evasion() + p.skills.skill(Evasion)
 	dice := body.ProtDice()
 	effects := body.ArmorEffects()
 
@@ -228,11 +293,29 @@ func (p *PlayerSheet) Defense() Defense {
 	}
 }
 
+func (p *PlayerSheet) modAgiSkills(diff int) {
+	for sk := Melee; sk <= Stealth; sk++ {
+		p.skills.changemod(sk, diff)
+	}
+}
+
+func (p *PlayerSheet) modMndSkills(diff int) {
+	for sk := Chi; sk < NumSkills; sk++ {
+		p.skills.changemod(sk, diff)
+	}
+}
+
+func (p *PlayerSheet) initmods() {
+	p.modAgiSkills(p.stats.stat(Agi))
+	p.modMndSkills(p.stats.stat(Mnd))
+}
+
 // Sheet used for monsters, which have a lot of hardcoded attributes.
 type MonsterSheet struct {
 	Trait
 
-	stats *stats
+	stats  *stats
+	skills *skills
 
 	speed int
 	sight int
@@ -245,8 +328,6 @@ type MonsterSheet struct {
 	regen int
 	stun  StunLevel
 
-	melee   int
-	evasion int
 	// Basically weapon weight.
 	critdivmod int
 
@@ -261,19 +342,12 @@ type MonsterSheet struct {
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
 // the owner of the sheet to it at object creation time. See the syntax for
 // this in actor_spec.go.
-func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
+func NewMonsterSheet(sheetspec *MonsterSheet) func(*Obj) Sheet {
 	return func(o *Obj) Sheet {
 		// Copy sheet.
-		sheet := sheetspec
+		sheet := sheetspec.Copy()
 
 		// Copy stats.
-		// TODO: Just write Copy() on sheet, god.
-		newstats := &stats{}
-		if sheetspec.stats != nil {
-			*newstats = *(sheetspec.stats)
-		}
-		sheet.stats = newstats
-
 		sheet.obj = o
 		sheet.hp = sheet.maxhp
 		sheet.mp = sheet.maxmp
@@ -283,8 +357,29 @@ func NewMonsterSheet(sheetspec MonsterSheet) func(*Obj) Sheet {
 		if sheet.sight == 0 {
 			sheet.sight = FOVRadius
 		}
-		return &sheet
+		return sheet
 	}
+}
+
+// Make a deep copy of this sheet.
+func (m *MonsterSheet) Copy() *MonsterSheet {
+	// Copy sheet.
+	sheet := &MonsterSheet{}
+	*sheet = *m
+
+	// Copy stats.
+	newstats := &stats{}
+	if m.stats != nil {
+		*newstats = *(m.stats)
+	}
+	sheet.stats = newstats
+
+	newskills := &skills{}
+	if m.skills != nil {
+		*newskills = *(m.skills)
+	}
+	sheet.skills = newskills
+	return sheet
 }
 
 func (m *MonsterSheet) Stat(stat StatName) int {
@@ -303,16 +398,24 @@ func (m *MonsterSheet) StatMod(stat StatName) int {
 	return m.stats.mod(stat)
 }
 
-func (m *MonsterSheet) SetStatMod(stat StatName, amt int) {
-	m.stats.setmod(stat, amt)
+func (m *MonsterSheet) Skill(skill SkillName) int {
+	return m.skills.skill(skill)
 }
 
-func (m *MonsterSheet) Melee() int {
-	return m.melee
+func (m *MonsterSheet) SetSkill(skill SkillName, amt int) {
+	m.skills.set(skill, amt)
 }
 
-func (m *MonsterSheet) Evasion() int {
-	return m.evasion
+func (m *MonsterSheet) UnmodSkill(skill SkillName) int {
+	return m.skills.unmodskill(skill)
+}
+
+func (m *MonsterSheet) SkillMod(skill SkillName) int {
+	return m.skills.mod(skill)
+}
+
+func (m *MonsterSheet) SetSkillMod(skill SkillName, amt int) {
+	m.skills.setmod(skill, amt)
 }
 
 func (m *MonsterSheet) Speed() int {
@@ -370,7 +473,7 @@ func (m *MonsterSheet) SetStun(level StunLevel) {
 
 func (m *MonsterSheet) Attack() Attack {
 	return Attack{
-		Melee:   m.melee,
+		Melee:   m.skills.skill(Melee),
 		Damroll: m.damroll,
 		CritDiv: m.critdivmod + baseCritDiv,
 		Effects: m.atkeffects,
@@ -379,7 +482,7 @@ func (m *MonsterSheet) Attack() Attack {
 
 func (m *MonsterSheet) Defense() Defense {
 	return Defense{
-		Evasion:  m.evasion,
+		Evasion:  m.skills.skill(Evasion),
 		ProtDice: []Dice{m.protroll},
 		Effects:  m.defeffects,
 	}
@@ -394,7 +497,7 @@ type stats struct {
 // An array of statistics.
 type statlist [NumStats]int
 
-// Get the given stat combined with any active modifiersto it.
+// Get the given stat combined with any active modifiers to it.
 func (s *stats) stat(stat StatName) int {
 	return s.stats[stat] + s.mods[stat]
 }
@@ -419,6 +522,11 @@ func (s *stats) setmod(stat StatName, amt int) {
 	s.mods[stat] = amt
 }
 
+// Change a modifier for this stat by 'amt'.
+func (s *stats) changemod(stat StatName, amt int) {
+	s.mods[stat] += amt
+}
+
 // Index into stats arrays.
 type StatName uint
 
@@ -429,6 +537,74 @@ const (
 	Vit
 	Mnd
 	NumStats
+)
+
+// Maintains skills and modifications for a sheet. There are a number of ways
+// that the stats and skills collections could have been combined into a single
+// reusable data structure, but they were kept separate to make it very clear
+// what is being used for what purpose, and especially so that indexing would
+// be strongly typed, which otherwise would have been annoying to enforce.
+type skills struct {
+	skills skilllist
+	mods   skilllist
+}
+
+// An array of skills
+type skilllist [NumSkills]int
+
+// Get the given skill combined with any active modifiers to it.
+func (s *skills) skill(skill SkillName) int {
+	return s.skills[skill] + s.mods[skill]
+}
+
+// Get the unmodified skill.
+func (s *skills) unmodskill(skill SkillName) int {
+	return s.skills[skill]
+}
+
+// Set the given skill to 'amt'.
+func (s *skills) set(skill SkillName, amt int) {
+	s.skills[skill] = amt
+}
+
+// Get the modifier (mod) for this skill.
+func (s *skills) mod(skill SkillName) int {
+	return s.mods[skill]
+}
+
+// Set a modifier for this skill. Can be +ve or -ve.
+func (s *skills) setmod(skill SkillName, amt int) {
+	s.mods[skill] = amt
+}
+
+// Change a modifier for this skill by 'amt'.
+func (s *skills) changemod(skill SkillName, amt int) {
+	s.mods[skill] += amt
+}
+
+// Index into stats arrays.
+type SkillName uint
+
+// The actual stats our actors have.
+const (
+	// Called FIGHT in the game, but that is nasty to grep.
+	Melee SkillName = iota
+	// Called DODGE in the game, but also very verby.
+	Evasion
+	// SHOOT
+	Shooting
+	// SNEAK
+	Stealth
+	// CHI
+	Chi
+	// SENSE
+	Sense
+	// MAGIC
+	Magic
+	// SONG
+	Song
+	// Sentinel.
+	NumSkills
 )
 
 // Details about an actor's melee attack, before the melee roll is applied --

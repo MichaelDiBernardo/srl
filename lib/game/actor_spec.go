@@ -49,7 +49,7 @@ var Monsters = []*Spec{
 			Packer:  NewActorPacker,
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
-			Sheet: NewMonsterSheet(MonsterSheet{
+			Sheet: NewMonsterSheet(&MonsterSheet{
 				stats: &stats{
 					stats: statlist{
 						Str: 2,
@@ -58,11 +58,13 @@ var Monsters = []*Spec{
 						Mnd: 0,
 					},
 				},
-
-				speed: 2,
-
-				melee:      1,
-				evasion:    1,
+				skills: &skills{
+					skills: skilllist{
+						Melee:   1,
+						Evasion: 1,
+					},
+				},
+				speed:      2,
 				critdivmod: 4,
 				maxhp:      20,
 				maxmp:      10,
@@ -96,7 +98,7 @@ var Monsters = []*Spec{
 			Packer:  NewActorPacker,
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
-			Sheet: NewMonsterSheet(MonsterSheet{
+			Sheet: NewMonsterSheet(&MonsterSheet{
 				stats: &stats{
 					stats: statlist{
 						Str: 3,
@@ -105,11 +107,13 @@ var Monsters = []*Spec{
 						Mnd: 0,
 					},
 				},
-
-				speed: 2,
-
-				melee:      5,
-				evasion:    5,
+				skills: &skills{
+					skills: skilllist{
+						Melee:   5,
+						Evasion: 5,
+					},
+				},
+				speed:      2,
 				critdivmod: 4,
 				maxhp:      20,
 				maxmp:      10,
