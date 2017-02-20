@@ -1,7 +1,5 @@
 package game
 
-import ()
-
 // Slots where items are worn/wielded on an actor's body.
 type Slot int
 
@@ -82,7 +80,8 @@ func (b *Body) Weapon() *Obj {
 func (b *Body) ArmorEffects() Effects {
 	effects := Effects{}
 
-	for slot, equip := range b.all() {
+	a := b.all()
+	for slot, equip := range a {
 		if slot == SlotHand {
 			continue
 		}
@@ -93,11 +92,11 @@ func (b *Body) ArmorEffects() Effects {
 
 // Return a collection of all the equipped stuff on this body, without all the
 // nil slots.
-func (b *Body) all() []*Obj {
-	equips := make([]*Obj, 0, numSlots)
-	for _, equip := range b.Slots {
+func (b *Body) all() map[Slot]*Obj {
+	equips := make(map[Slot]*Obj, numSlots)
+	for slot, equip := range b.Slots {
 		if equip != nil {
-			equips = append(equips, equip)
+			equips[Slot(slot)] = equip
 		}
 	}
 	return equips

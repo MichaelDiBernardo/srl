@@ -10,6 +10,12 @@ package game
 // total score higher than 'difficulty'; a tie results in a loss.
 func skillcheck(skill, difficulty int, challenger, defender *Obj) (won bool, by int) {
 	by = (skill + DieRoll(1, 10)) - (difficulty + DieRoll(1, 10))
-	won = by < 0
+	won = by > 0
 	return won, by
+}
+
+// Calculates how much a skill roll should be modified because of
+// resistances/vulnerabilities to the effect being tested.
+func resistmod(num int) int {
+	return num * 10
 }

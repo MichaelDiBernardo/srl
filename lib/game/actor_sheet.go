@@ -29,8 +29,8 @@ type Sheet interface {
 	UnmodSkill(skill SkillName) int
 	// Get the mod for skill 'skill'.
 	SkillMod(skill SkillName) int
-	// Set the mod for skill 'skill'.
-	SetSkillMod(skill SkillName, amt int)
+	// Change the mod for skill 'skill'.
+	ChangeSkillMod(skill SkillName, diff int)
 
 	// Get information about this actor's melee attack capability.
 	Attack() Attack
@@ -149,9 +149,9 @@ func (p *PlayerSheet) Stat(stat StatName) int {
 func (p *PlayerSheet) SetStat(stat StatName, amt int) {
 	switch stat {
 	case Agi:
-		p.modAgiSkills(amt - p.stats.stat(stat))
+		modAgiSkills(p, amt-p.stats.stat(stat))
 	case Mnd:
-		p.modMndSkills(amt - p.stats.stat(stat))
+		modMndSkills(p, amt-p.stats.stat(stat))
 	}
 
 	p.stats.set(stat, amt)
@@ -181,8 +181,8 @@ func (p *PlayerSheet) SkillMod(skill SkillName) int {
 	return p.skills.mod(skill)
 }
 
-func (p *PlayerSheet) SetSkillMod(skill SkillName, amt int) {
-	p.skills.setmod(skill, amt)
+func (p *PlayerSheet) ChangeSkillMod(skill SkillName, diff int) {
+	p.skills.changemod(skill, diff)
 }
 
 func (p *PlayerSheet) Speed() int {
@@ -250,7 +250,7 @@ func (p *PlayerSheet) Attack() Attack {
 	return Attack{
 		Melee:   melee,
 		Damroll: equip.Damroll.Add(0, bonusSides),
-		CritDiv: equip.Weight + baseCritDiv,
+		CritDiv: equip.Weight + BaseCritDiv,
 		Effects: equip.Effects,
 	}
 }
@@ -293,21 +293,9 @@ func (p *PlayerSheet) Defense() Defense {
 	}
 }
 
-func (p *PlayerSheet) modAgiSkills(diff int) {
-	for sk := Melee; sk <= Stealth; sk++ {
-		p.skills.changemod(sk, diff)
-	}
-}
-
-func (p *PlayerSheet) modMndSkills(diff int) {
-	for sk := Chi; sk < NumSkills; sk++ {
-		p.skills.changemod(sk, diff)
-	}
-}
-
 func (p *PlayerSheet) initmods() {
-	p.modAgiSkills(p.stats.stat(Agi))
-	p.modMndSkills(p.stats.stat(Mnd))
+	modAgiSkills(p, p.stats.stat(Agi))
+	modMndSkills(p, p.stats.stat(Mnd))
 }
 
 // Sheet used for monsters, which have a lot of hardcoded attributes.
@@ -414,8 +402,8 @@ func (m *MonsterSheet) SkillMod(skill SkillName) int {
 	return m.skills.mod(skill)
 }
 
-func (m *MonsterSheet) SetSkillMod(skill SkillName, amt int) {
-	m.skills.setmod(skill, amt)
+func (m *MonsterSheet) ChangeSkillMod(skill SkillName, diff int) {
+	m.skills.changemod(skill, diff)
 }
 
 func (m *MonsterSheet) Speed() int {
@@ -475,7 +463,7 @@ func (m *MonsterSheet) Attack() Attack {
 	return Attack{
 		Melee:   m.skills.skill(Melee),
 		Damroll: m.damroll,
-		CritDiv: m.critdivmod + baseCritDiv,
+		CritDiv: m.critdivmod + BaseCritDiv,
 		Effects: m.atkeffects,
 	}
 }
@@ -486,6 +474,23 @@ func (m *MonsterSheet) Defense() Defense {
 		ProtDice: []Dice{m.protroll},
 		Effects:  m.defeffects,
 	}
+}
+
+func modAgiSkills(s Sheet, diff int) {
+	for sk := Melee; sk <= Stealth; sk++ {
+		s.ChangeSkillMod(sk, diff)
+	}
+}
+
+func modMndSkills(s Sheet, diff int) {
+	for sk := Chi; sk < NumSkills; sk++ {
+		s.ChangeSkillMod(sk, diff)
+	}
+}
+
+func modAllSkills(s Sheet, diff int) {
+	modAgiSkills(s, diff)
+	modMndSkills(s, diff)
 }
 
 // Maintains stats and modifications for a sheet.
@@ -515,11 +520,6 @@ func (s *stats) set(stat StatName, amt int) {
 // Get the modifier (mod) for this stat.
 func (s *stats) mod(stat StatName) int {
 	return s.mods[stat]
-}
-
-// Set a modifier for this stat. Can be +ve or -ve.
-func (s *stats) setmod(stat StatName, amt int) {
-	s.mods[stat] = amt
 }
 
 // Change a modifier for this stat by 'amt'.
@@ -570,11 +570,6 @@ func (s *skills) set(skill SkillName, amt int) {
 // Get the modifier (mod) for this skill.
 func (s *skills) mod(skill SkillName) int {
 	return s.mods[skill]
-}
-
-// Set a modifier for this skill. Can be +ve or -ve.
-func (s *skills) setmod(skill SkillName, amt int) {
-	s.mods[skill] = amt
 }
 
 // Change a modifier for this skill by 'amt'.
@@ -654,21 +649,29 @@ func hurt(s Sheet, dmg int) {
 
 func changestun(s Sheet, newstun StunLevel) {
 	oldstun := s.Stun()
-	if oldstun >= newstun {
+	if oldstun == newstun {
 		return
 	}
 
+	modAllSkills(s, int(2*(oldstun-newstun)))
+
 	msg := s.Obj().Spec.Name + " is "
 
-	switch newstun {
-	case Stunned:
-		msg += "stunned."
-	case MoreStunned:
-		msg += "more stunned."
-	case KnockedOut:
-		msg += "knocked out!"
+	if oldstun > newstun {
+		switch newstun {
+		case Stunned:
+			msg += "less stunned."
+		case NotStunned:
+			msg += "no longer stunned."
+		}
+	} else {
+		switch newstun {
+		case Stunned:
+			msg += "stunned."
+		case MoreStunned:
+			msg += "very stunned."
+		}
 	}
-
 	s.Obj().Game.Events.Message(msg)
 }
 
@@ -694,9 +697,7 @@ const (
 	Stunned
 	// -4 to all skills
 	MoreStunned
-	// knocked out, cannot move.
-	KnockedOut
 )
 
 // The base divisor to use for crits.
-const baseCritDiv = 7
+const BaseCritDiv = 7

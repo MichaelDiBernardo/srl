@@ -60,13 +60,15 @@ func (t *ActorTicker) Tick(delay int) {
 
 // Adds a new active effect to this actor.
 func (t *ActorTicker) AddEffect(e Effect, counter int) {
-	if ae := t.Effects[e]; ae == nil {
-		ae := NewActiveEffect(e, counter)
-		ae.OnBegin(ae, t)
+	ae, prev := t.Effects[e], 0
+	if ae == nil {
+		ae = NewActiveEffect(e, counter)
 		t.Effects[e] = ae
 	} else {
+		prev = ae.Counter
 		ae.Counter += counter
 	}
+	ae.OnBegin(ae, t, prev)
 }
 
 func (t *ActorTicker) Counter(e Effect) int {

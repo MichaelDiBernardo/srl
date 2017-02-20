@@ -77,6 +77,46 @@ func TestBrands(t *testing.T) {
 	}
 }
 
+func TestMerge(t *testing.T) {
+	EffectsSpecs = testEffectsSpecs
+	defer restoreEffectsDeps()
+
+	e1 := NewEffects(map[Effect]int{fakeBrand1: 1})
+	e2 := NewEffects(map[Effect]int{fakeEffect1: 1})
+
+	merged := e1.Merge(e2)
+	// We should not modify e1 or e2 to produce merged.
+	if l := len(merged); l != 2 {
+		t.Errorf(`len(e1.Merge(e2)) was %d, want %d`, l, 2)
+	}
+	if l := len(e1); l != 1 {
+		t.Errorf(`e1 changed after merge: new length %d`, l)
+	}
+	if l := len(e2); l != 1 {
+		t.Errorf(`e2 changed after merge: new length %d`, l)
+	}
+
+	// Are the elements of merged ok?
+	if f1, f2 := merged[fakeBrand1], e1[fakeBrand1]; f1 != f2 {
+		t.Errorf(`merged[fakeBrand1] != e1[fakeBrand1]; %v vs %v`, f1, f2)
+	}
+	if f1, f2 := merged[fakeEffect1], e2[fakeEffect1]; f1 != f2 {
+		t.Errorf(`merged[fakeEffect1] != e2[fakeEffect1]; %v vs %v`, f1, f2)
+	}
+
+	// Merge merged with e1 to see if count increments.
+	merged = merged.Merge(e1)
+	if l := len(merged); l != 2 {
+		t.Errorf(`len(e1.Merge(e2)) was %d, want %d`, l, 2)
+	}
+	if newcount := merged[fakeBrand1].Count; newcount != 2 {
+		t.Errorf(`merged[fakeBrand1].Count was %d, want 2`, newcount)
+	}
+	if count := merged[fakeEffect1].Count; count != 1 {
+		t.Errorf(`merged[fakeEffect1].Count was %d, want 1`, count)
+	}
+}
+
 func restoreEffectsDeps() {
 	EffectsSpecs = oldEffectsSpecs
 }

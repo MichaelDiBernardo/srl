@@ -63,12 +63,33 @@ var ActiveEffects = map[Effect]ActiveEffect{
 		OnTick: regen,
 	},
 	EffectPoison: ActiveEffect{
-		OnBegin: func(_ *ActiveEffect, t Ticker) {
-			t.Obj().Game.Events.Message(fmt.Sprintf("%s is poisoned.", t.Obj().Spec.Name))
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			var msg string
+			if prev == 0 {
+				msg = "%s is poisoned."
+			} else {
+				msg = "%s is more poisoned."
+			}
+			t.Obj().Game.Events.Message(fmt.Sprintf(msg, t.Obj().Spec.Name))
 		},
 		OnTick: poison,
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
+		},
+	},
+	EffectStun: ActiveEffect{
+		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
+			e.Counter -= 1
+			cstun, sheet := e.Counter, t.Obj().Sheet
+			if (0 < cstun) && (cstun < 50) {
+				sheet.SetStun(Stunned)
+			} else {
+				sheet.SetStun(MoreStunned)
+			}
+			return e.Counter <= 0
+		},
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetStun(NotStunned)
 		},
 	},
 }

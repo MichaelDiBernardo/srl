@@ -301,6 +301,9 @@ func (s *statusPanel) Render(g *game.Game) {
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+14, fmt.Sprintf("%dF", g.Floor), fg, bg)
 
 	if pois := player.Ticker.Counter(game.EffectPoison); pois > 0 {
-		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+16, fmt.Sprintf("POIS %2d☠", pois), fg, bg)
+		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+16, fmt.Sprintf("POIS %2d", pois), fg, bg)
+	}
+	if stun := player.Ticker.Counter(game.EffectStun); stun > 0 {
+		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+17, fmt.Sprintf("STUN %2d", stun), fg, bg)
 	}
 }

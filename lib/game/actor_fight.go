@@ -53,6 +53,14 @@ func hit(attacker Fighter, defender Fighter) {
 		case BrandPoison:
 			defender.Obj().Ticker.AddEffect(EffectPoison, dmg)
 			dmg = 0
+		case EffectStun:
+			score := atk.CritDiv - BaseCritDiv + attacker.Obj().Sheet.Stat(Str)
+			difficulty := defender.Obj().Sheet.Skill(Chi)
+			resists := resistmod(def.Effects.Resists(effect))
+			won, _ := skillcheck(score, difficulty+resists, attacker.Obj(), defender.Obj())
+			if won {
+				defender.Obj().Ticker.AddEffect(EffectStun, dmg)
+			}
 		}
 	}
 	defender.Obj().Sheet.Hurt(dmg)

@@ -1,8 +1,5 @@
 NEXT:
-- we need timed effects to work before we can inflict them
-    x Effects need a count, not just a list. This is so we can find out how
-      much things are resisted.
-    - The effect stuff that is happening in actor_fight seems like it should sort of be in effect_spec???
+- move all activeffect defs into effect.go, but leave the map in effects_spec
 
 - Monsters have multiple abilities.
     - Abilities need:

@@ -75,3 +75,67 @@ func TestIsNotNaked(t *testing.T) {
 		t.Error(`b.Naked() was true, want false`)
 	}
 }
+
+func TestArmorEffects(t *testing.T) {
+	// Sorry I was too lazy to register "testing effects"
+	const (
+		r1 = BrandFire
+		r2 = BrandElec
+		r3 = BrandIce
+	)
+	var (
+		a1 = &Spec{
+			Family:  FamItem,
+			Genus:   GenEquipment,
+			Species: "testspec",
+			Name:    "head",
+			Traits: &Traits{
+				Equipment: NewEquipment(Equipment{
+					Slot:    SlotHead,
+					Effects: NewEffects(map[Effect]int{r1: 1}),
+				}),
+			},
+		}
+		a2 = &Spec{
+			Family:  FamItem,
+			Genus:   GenEquipment,
+			Species: "testspec",
+			Name:    "arms",
+			Traits: &Traits{
+				Equipment: NewEquipment(Equipment{
+					Slot:    SlotArms,
+					Effects: NewEffects(map[Effect]int{r2: 1}),
+				}),
+			},
+		}
+		a3 = &Spec{
+			Family:  FamItem,
+			Genus:   GenEquipment,
+			Species: "testspec",
+			Name:    "legs",
+			Traits: &Traits{
+				Equipment: NewEquipment(Equipment{
+					Slot:    SlotLegs,
+					Effects: NewEffects(map[Effect]int{r2: 1, r3: 1}),
+				}),
+			},
+		}
+	)
+
+	b := NewBody()
+	b.Wear(newObj(a1))
+	b.Wear(newObj(a2))
+	b.Wear(newObj(a3))
+
+	effects := b.ArmorEffects()
+
+	if n := effects[r1].Count; n != 1 {
+		t.Errorf(`ArmorEffects() returned effects[r1].Count = %d; want 1 %v`, n, effects)
+	}
+	if n := effects[r2].Count; n != 2 {
+		t.Errorf(`ArmorEffects() returned effects[r2].Count = %d; want 2`, n)
+	}
+	if n := effects[r3].Count; n != 1 {
+		t.Errorf(`ArmorEffects() returned effects[r3].Count = %d; want 1`, n)
+	}
+}

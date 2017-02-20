@@ -90,8 +90,8 @@ func (e1 Effects) Merge(e2 Effects) Effects {
 
 	for k, v := range e2 {
 		info := merged[k]
-		info.Count += v.Count
-		merged[k] = info
+		v.Count += info.Count
+		merged[k] = v
 	}
 	return merged
 }
@@ -101,8 +101,10 @@ func (e1 Effects) Merge(e2 Effects) Effects {
 type ActiveEffect struct {
 	// The effect counter. Might be turns, accumulated delay, residual damage, etc.
 	Counter int
-	// What to do when the effect is first inflicted on an actor.
-	OnBegin func(*ActiveEffect, Ticker)
+	// What to do when the effect is first inflicted on an actor. The last
+	// integer argument will hold the previous value of the counter for this
+	// effect if it is being continued / augmented (e.g. "X is more poisoned")
+	OnBegin func(*ActiveEffect, Ticker, int)
 	// Responsible for updating Left given the delay diff, plus enforcing the
 	// effect. A return value of 'true' indicates that the effect should be
 	// terminated.
@@ -117,12 +119,11 @@ func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 	*ae = ActiveEffects[e]
 	ae.Counter = counter
 
-	dummy := func(*ActiveEffect, Ticker) {}
 	if ae.OnBegin == nil {
-		ae.OnBegin = dummy
+		ae.OnBegin = func(*ActiveEffect, Ticker, int) {}
 	}
 	if ae.OnEnd == nil {
-		ae.OnEnd = dummy
+		ae.OnEnd = func(*ActiveEffect, Ticker) {}
 	}
 	return ae
 }
