@@ -45,7 +45,7 @@ var Items = []*Spec{
 				Evasion:  -1,
 				Weight:   4,
 				Slot:     SlotBody,
-				Effects:  NewEffects(map[Effect]int{ResistStun: 1}),
+				Effects:  NewEffects(map[Effect]int{ResistFire: 1, ResistPoison: 1, ResistStun: 1}),
 			}),
 		},
 	},

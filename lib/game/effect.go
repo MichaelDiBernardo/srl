@@ -97,6 +97,18 @@ func (e1 Effects) Merge(e2 Effects) Effects {
 	return merged
 }
 
+// Given the amount of raw damage done by an effect 'effect', this figures out
+// how much damage should actually be done after resistances or vulnerabilities
+// to 'effect' are taken into account.
+func (e Effects) ResistDmg(effect Effect, dmg int) int {
+	resists := e.Resists(effect)
+	if resists >= 0 {
+		return dmg / (resists + 1)
+	} else {
+		return dmg * (resists + 1)
+	}
+}
+
 // An instance of an effect that is currently affected an actor. These are
 // managed by the actor's ticker.
 type ActiveEffect struct {

@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // Anything that fights in melee.
@@ -38,8 +39,11 @@ func hit(attacker Fighter, defender Fighter) {
 	}
 
 	crits := residual / atk.CritDiv
-	extra, verb := applybrands(atk.Effects, def.Effects)
-	dmg := math.Max(0, atk.RollDamage(crits+extra)-def.RollProt())
+	// Calculate raw phys damage.
+	dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
+	// Figure out how much branded damage we did.
+	branddmg, poisondmg, verb := applybrands(dmg, atk.Effects, def.Effects)
+	dmg += branddmg
 
 	critstr := ""
 	if crits > 0 {
@@ -51,8 +55,7 @@ func hit(attacker Fighter, defender Fighter) {
 	for effect, _ := range atk.Effects {
 		switch effect {
 		case BrandPoison:
-			defender.Obj().Ticker.AddEffect(EffectPoison, dmg)
-			dmg = 0
+			defender.Obj().Ticker.AddEffect(EffectPoison, poisondmg)
 		case EffectStun:
 			score := atk.CritDiv - BaseCritDiv + attacker.Obj().Sheet.Stat(Str)
 			difficulty := defender.Obj().Sheet.Skill(Chi)
@@ -66,28 +69,32 @@ func hit(attacker Fighter, defender Fighter) {
 	defender.Obj().Sheet.Hurt(dmg)
 }
 
-func applybrands(atk Effects, def Effects) (dice int, verb string) {
+// Given the base physical damage done by an attack, and the atk and def
+// effects, this figures out how much raw and poison damage should be done from
+// brands. Poison damage is separated out because it is applied as
+// damage-over-time, instead of being immediately inflicted on the target.
+func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int, verb string) {
 	brands := atk.Brands()
 	fixverb := false
-	dice, verb = 0, "hits"
+	branddmg, poisondmg, verb = 0, 0, "hits"
+	log.Printf("applybrand: %d %v vs %v", basedmg, atk, def)
 
 	for brand, info := range brands {
-		// Extra dice from a brand:
-		// Any amount of resist = 0
-		// No resist = 1
-		// Any amount of vuln = 2
-		resists := def.Resists(brand)
-		extradice := -(math.Sgn(resists) - 1)
-		dice += extradice
+		raw := DieRoll(1, basedmg)
+		resisted := def.ResistDmg(brand, raw)
 
-		if extradice == 0 {
-			continue
+		if brand == BrandPoison {
+			poisondmg += resisted
+			log.Printf("\tDid raw:%d resisted:%d poison", raw, resisted)
+		} else {
+			log.Printf("\tDid raw:%d resisted:%d for brand %v", raw, resisted, brand)
+			branddmg += resisted
 		}
 
 		newverb := info.Verb
 
 		// Vulnerability
-		if extradice == 2 {
+		if def.Resists(brand) < 0 {
 			fixverb = true
 			verb = fmt.Sprintf("*%s*", newverb)
 		}
@@ -101,5 +108,6 @@ func applybrands(atk Effects, def Effects) (dice int, verb string) {
 			verb = newverb
 		}
 	}
-	return dice, verb
+	log.Printf("\tReturning branddmg:%d poisondmg:%d verb:%s", branddmg, poisondmg, verb)
+	return branddmg, poisondmg, verb
 }
