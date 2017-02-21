@@ -108,6 +108,68 @@ func TestHit(t *testing.T) {
 	}
 }
 
+func TestHitPoison(t *testing.T) {
+	testMonSpec := &Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: SpecOrc,
+		Name:    "ORC",
+		Traits: &Traits{
+			Fighter: NewActorFighter,
+			Sheet: NewMonsterSheet(&MonsterSheet{
+				critdivmod: 0,
+				maxhp:      20,
+				damroll:    NewDice(1, 5),
+				atkeffects: NewEffects(map[Effect]int{BrandPoison: 1}),
+			}),
+			Ticker: NewActorTicker,
+		},
+	}
+
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage.
+	FixRandomDie([]int{7, 1, 5, 0})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if poison := defender.Ticker.Counter(EffectPoison); poison != 5 {
+		t.Errorf(`Poison counter %d; want 5`, poison)
+	}
+}
+
+func TestHitStun(t *testing.T) {
+	testMonSpec := &Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: SpecOrc,
+		Name:    "ORC",
+		Traits: &Traits{
+			Fighter: NewActorFighter,
+			Sheet: NewMonsterSheet(&MonsterSheet{
+				critdivmod: 0,
+				maxhp:      20,
+				damroll:    NewDice(1, 5),
+				atkeffects: NewEffects(map[Effect]int{EffectStun: 1}),
+			}),
+			Ticker: NewActorTicker,
+		},
+	}
+
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, and make sure to win stun skillroll (10 vs 0 on d10s.)
+	FixRandomDie([]int{7, 1, 5, 10, 0})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if stun := defender.Ticker.Counter(EffectStun); stun != 5 {
+		t.Errorf(`Stun counter %d; want 5`, stun)
+	}
+}
+
 type applyBrandTest struct {
 	atk  Effects
 	def  Effects
