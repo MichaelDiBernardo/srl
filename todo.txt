@@ -1,8 +1,7 @@
 NEXT:
-- change brands to be additional 0..dmg 
-- tests for skillcheck + resistmod
 - tests for stun infliction, activeeffect
 - tests for poison infliction, activeeffect
+- change brands to be additional 0..dmg 
 
 - Monsters have multiple abilities.
     - Abilities need:
