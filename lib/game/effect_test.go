@@ -117,6 +117,29 @@ func TestMerge(t *testing.T) {
 	}
 }
 
+func TestResistDmg(t *testing.T) {
+	EffectsSpecs = testEffectsSpecs
+	defer restoreEffectsDeps()
+
+	effects := NewEffects(map[Effect]int{fakeResist1: 1, fakeResist2: -1})
+
+	if n := effects.ResistDmg(fakeEffect1, 10); n != 5 {
+		t.Errorf(`effects.ResistDmg(fakeEffect1) was %d, want 5`, n)
+	}
+	if n := effects.ResistDmg(fakeEffect2, 10); n != 20 {
+		t.Errorf(`effects.ResistDmg(fakeEffect1) was %d, want 20`, n)
+	}
+
+	effects = NewEffects(map[Effect]int{fakeResist1: 2, fakeResist2: -3})
+
+	if n := effects.ResistDmg(fakeEffect1, 10); n != 3 {
+		t.Errorf(`effects.ResistDmg(fakeEffect1) was %d, want 3`, n)
+	}
+	if n := effects.ResistDmg(fakeEffect2, 10); n != 40 {
+		t.Errorf(`effects.ResistDmg(fakeEffect1) was %d, want 30`, n)
+	}
+}
+
 func restoreEffectsDeps() {
 	EffectsSpecs = oldEffectsSpecs
 }

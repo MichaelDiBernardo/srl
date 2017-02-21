@@ -1,5 +1,4 @@
 NEXT:
-- change brands to be additional 0..dmg 
 - tests for stun, poison activeeffect
 
 - Monsters have multiple abilities.

@@ -105,7 +105,7 @@ func (e Effects) ResistDmg(effect Effect, dmg int) int {
 	if resists >= 0 {
 		return dmg / (resists + 1)
 	} else {
-		return dmg * (resists + 1)
+		return dmg * (-resists + 1)
 	}
 }
 

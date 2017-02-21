@@ -166,10 +166,16 @@ func testDefEq(t *testing.T, def Defense, want Defense) {
 	if l, w := len(def.ProtDice), len(want.ProtDice); l != w {
 		t.Errorf(`len(def.ProtDice) was %d, want %d`, l, w)
 	}
-	for i, d := range def.ProtDice {
-		w := want.ProtDice[i]
-		if d != w {
-			t.Errorf(`def.ProtDice[%d] was '%s', want '%s'`, i, d, w)
+	// This is good enough for the cases we have.
+	for _, wd := range want.ProtDice {
+		found := false
+		for _, ad := range def.ProtDice {
+			if ad == wd {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf(`def.ProtDice was %+v, want %+v`, def.ProtDice, want.ProtDice)
 		}
 	}
 }
