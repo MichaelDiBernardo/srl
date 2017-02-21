@@ -80,8 +80,7 @@ func (b *Body) Weapon() *Obj {
 func (b *Body) ArmorEffects() Effects {
 	effects := Effects{}
 
-	a := b.all()
-	for slot, equip := range a {
+	for slot, equip := range b.all() {
 		if slot == SlotHand {
 			continue
 		}

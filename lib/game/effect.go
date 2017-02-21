@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
 // An effect is something that a monster or a piece of equipment can have. This
@@ -127,3 +128,64 @@ func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 	}
 	return ae
 }
+
+// Implementation of specific active effects.
+var (
+	// Base regen that actors get every turn.
+	AEBaseRegen = ActiveEffect{
+		OnTick: func(e *ActiveEffect, t Ticker, diff int) bool {
+			sheet := t.Obj().Sheet
+			regen := sheet.Regen()
+
+			e.Counter += regen * diff
+			delayPerHp := RegenPeriod * GetDelay(2) / sheet.MaxHP()
+			heal := e.Counter / delayPerHp
+
+			if heal > 0 {
+				sheet.Heal(heal)
+				e.Counter -= heal * delayPerHp
+			}
+			return false
+		},
+	}
+	// Actor is poisoned.
+	AEPoison = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			var msg string
+			if prev == 0 {
+				msg = "%s is poisoned."
+			} else {
+				msg = "%s is more poisoned."
+			}
+			t.Obj().Game.Events.Message(fmt.Sprintf(msg, t.Obj().Spec.Name))
+		},
+		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
+			dmg := math.Max(20*e.Counter/100, 1)
+			t.Obj().Sheet.Hurt(dmg)
+			e.Counter -= dmg
+			return e.Counter <= 0
+		},
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
+		},
+	}
+	// Actor is stunned.
+	AEStun = ActiveEffect{
+		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
+			e.Counter -= 1
+			cstun, sheet := e.Counter, t.Obj().Sheet
+			if (0 < cstun) && (cstun < 50) {
+				sheet.SetStun(Stunned)
+			} else {
+				sheet.SetStun(MoreStunned)
+			}
+			return e.Counter <= 0
+		},
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetStun(NotStunned)
+		},
+	}
+)
+
+// We expect a speed 2 actor to fully recover in 100 turns.
+const RegenPeriod = 100

@@ -1,10 +1,5 @@
 package game
 
-import (
-	"fmt"
-	"github.com/MichaelDiBernardo/srl/lib/math"
-)
-
 // Brands, effects, resists, vulnerabilities found in the game.
 const (
 	// Sentinel.
@@ -59,64 +54,7 @@ var EffectsSpecs = EffectsSpec{
 
 // Prototype map for effects that are applied every tick.
 var ActiveEffects = map[Effect]ActiveEffect{
-	EffectBaseRegen: ActiveEffect{
-		OnTick: regen,
-	},
-	EffectPoison: ActiveEffect{
-		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
-			var msg string
-			if prev == 0 {
-				msg = "%s is poisoned."
-			} else {
-				msg = "%s is more poisoned."
-			}
-			t.Obj().Game.Events.Message(fmt.Sprintf(msg, t.Obj().Spec.Name))
-		},
-		OnTick: poison,
-		OnEnd: func(_ *ActiveEffect, t Ticker) {
-			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
-		},
-	},
-	EffectStun: ActiveEffect{
-		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
-			e.Counter -= 1
-			cstun, sheet := e.Counter, t.Obj().Sheet
-			if (0 < cstun) && (cstun < 50) {
-				sheet.SetStun(Stunned)
-			} else {
-				sheet.SetStun(MoreStunned)
-			}
-			return e.Counter <= 0
-		},
-		OnEnd: func(_ *ActiveEffect, t Ticker) {
-			t.Obj().Sheet.SetStun(NotStunned)
-		},
-	},
-}
-
-// Regenerate the actor every turn.
-func regen(e *ActiveEffect, t Ticker, diff int) bool {
-	sheet := t.Obj().Sheet
-	regen := sheet.Regen()
-
-	e.Counter += regen * diff
-	delayPerHp := RegenPeriod * GetDelay(2) / sheet.MaxHP()
-	heal := e.Counter / delayPerHp
-
-	if heal > 0 {
-		sheet.Heal(heal)
-		e.Counter -= heal * delayPerHp
-	}
-	return false
-}
-
-// We expect a speed 2 actor to fully recover in 100 turns.
-const RegenPeriod = 100
-
-// Apply poison damage each turn.
-func poison(e *ActiveEffect, t Ticker, _ int) bool {
-	dmg := math.Max(20*e.Counter/100, 1)
-	t.Obj().Sheet.Hurt(dmg)
-	e.Counter -= dmg
-	return e.Counter <= 0
+	EffectBaseRegen: AEBaseRegen,
+	EffectPoison:    AEPoison,
+	EffectStun:      AEStun,
 }

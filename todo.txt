@@ -1,5 +1,8 @@
 NEXT:
-- move all activeffect defs into effect.go, but leave the map in effects_spec
+- change brands to be additional 0..dmg 
+- tests for skillcheck + resistmod
+- tests for stun infliction, activeeffect
+- tests for poison infliction, activeeffect
 
 - Monsters have multiple abilities.
     - Abilities need:
