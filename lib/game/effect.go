@@ -128,8 +128,13 @@ type ActiveEffect struct {
 
 // Creates a new ActiveEffect record for the given effect.
 func NewActiveEffect(e Effect, counter int) *ActiveEffect {
-	ae := &ActiveEffect{}
-	*ae = ActiveEffects[e]
+	ae, ok := &ActiveEffect{}, true
+	*ae, ok = ActiveEffects[e]
+
+	if !ok {
+		panic(fmt.Sprintf("%v not found in ActiveEffects", e))
+	}
+
 	ae.Counter = counter
 
 	if ae.OnBegin == nil {
@@ -142,6 +147,11 @@ func NewActiveEffect(e Effect, counter int) *ActiveEffect {
 }
 
 // Implementation of specific active effects.
+// TODO: This could have more simply been an interface type with a factory
+// function to create the right implementation for the given effect enum value.
+// I'm not quite sure how we got here. Maybe fix this.  Oops. Although, all
+// those structs would really have looked the same and just been aliases of a
+// base struct.
 var (
 	// Base regen that actors get every turn.
 	AEBaseRegen = ActiveEffect{
@@ -160,7 +170,6 @@ var (
 			return false
 		},
 	}
-	// Actor is poisoned.
 	AEPoison = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
 			var msg string
@@ -171,17 +180,26 @@ var (
 			}
 			t.Obj().Game.Events.Message(fmt.Sprintf(msg, t.Obj().Spec.Name))
 		},
-		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
-			dmg := math.Max(20*e.Counter/100, 1)
-			t.Obj().Sheet.Hurt(dmg)
-			e.Counter -= dmg
-			return e.Counter <= 0
-		},
+		OnTick: hpdecay,
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
 		},
 	}
-	// Actor is stunned.
+	AECut = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			var msg string
+			if prev == 0 {
+				msg = "%s is wounded."
+			} else {
+				msg = "%s is more wounded."
+			}
+			t.Obj().Game.Events.Message(fmt.Sprintf(msg, t.Obj().Spec.Name))
+		},
+		OnTick: hpdecay,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Game.Events.Message(fmt.Sprintf("%s is healed from wounds.", t.Obj().Spec.Name))
+		},
+	}
 	AEStun = ActiveEffect{
 		OnBegin: func(e *ActiveEffect, t Ticker, _ int) {
 			t.Obj().Sheet.SetStun(getstunlevel(e.Counter))
@@ -197,6 +215,7 @@ var (
 	}
 )
 
+// An actor's stun level depends on how many turns of stun they've accumulated.
 func getstunlevel(cstun int) StunLevel {
 	switch {
 	case cstun < 0:
@@ -206,6 +225,14 @@ func getstunlevel(cstun int) StunLevel {
 	default:
 		return MoreStunned
 	}
+}
+
+// Hurt a poisoned / cut actor.
+func hpdecay(e *ActiveEffect, t Ticker, _ int) bool {
+	dmg := math.Max(20*e.Counter/100, 1)
+	t.Obj().Sheet.Hurt(dmg)
+	e.Counter -= dmg
+	return e.Counter <= 0
 }
 
 // We expect a speed 2 actor to fully recover in 100 turns.

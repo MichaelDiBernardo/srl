@@ -108,8 +108,8 @@ func TestHit(t *testing.T) {
 	}
 }
 
-func TestHitPoison(t *testing.T) {
-	testMonSpec := &Spec{
+func makeTestHitterSpec(atk Effects) *Spec {
+	return &Spec{
 		Family:  FamActor,
 		Genus:   GenMonster,
 		Species: SpecOrc,
@@ -120,12 +120,15 @@ func TestHitPoison(t *testing.T) {
 				critdivmod: 0,
 				maxhp:      20,
 				damroll:    NewDice(1, 5),
-				atkeffects: NewEffects(map[Effect]int{BrandPoison: 1}),
+				atkeffects: atk,
 			}),
 			Ticker: NewActorTicker,
 		},
 	}
+}
 
+func TestHitPoison(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{BrandPoison: 1}))
 	g := newTestGame()
 	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
 	// Roll 5 damage, 2 of which is poison.
@@ -140,23 +143,7 @@ func TestHitPoison(t *testing.T) {
 }
 
 func TestHitStun(t *testing.T) {
-	testMonSpec := &Spec{
-		Family:  FamActor,
-		Genus:   GenMonster,
-		Species: SpecOrc,
-		Name:    "ORC",
-		Traits: &Traits{
-			Fighter: NewActorFighter,
-			Sheet: NewMonsterSheet(&MonsterSheet{
-				critdivmod: 0,
-				maxhp:      20,
-				damroll:    NewDice(1, 5),
-				atkeffects: NewEffects(map[Effect]int{EffectStun: 1}),
-			}),
-			Ticker: NewActorTicker,
-		},
-	}
-
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectStun: 1}))
 	g := newTestGame()
 	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
 	// Roll 5 damage, and make sure to win stun skillroll (10 vs 0 on d10s.)
@@ -167,6 +154,22 @@ func TestHitStun(t *testing.T) {
 
 	if stun := defender.Ticker.Counter(EffectStun); stun != 5 {
 		t.Errorf(`Stun counter %d; want 5`, stun)
+	}
+}
+
+func TestHitCut(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectCut: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 2 crits, do 4 damage (2 + 1 + 1), roll 1 on the crit check to force
+	// cut.
+	FixRandomDie([]int{20, 1, 2, 1, 1, 1})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if cut := defender.Ticker.Counter(EffectCut); cut != 2 {
+		t.Errorf(`Cut counter %d; want 2`, cut)
 	}
 }
 

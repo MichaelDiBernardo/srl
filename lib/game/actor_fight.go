@@ -64,6 +64,10 @@ func hit(attacker Fighter, defender Fighter) {
 			if won {
 				defender.Obj().Ticker.AddEffect(EffectStun, dmg)
 			}
+		case EffectCut:
+			if crits > DieRoll(1, 2) {
+				defender.Obj().Ticker.AddEffect(EffectCut, dmg/2)
+			}
 		}
 	}
 	defender.Obj().Sheet.Hurt(dmg)

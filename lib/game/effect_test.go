@@ -296,3 +296,33 @@ func TestActivePoison(t *testing.T) {
 		t.Errorf(`Poison counter at %d, want 0`, left)
 	}
 }
+
+func TestActiveCut(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+	hpstart := obj.Sheet.HP()
+
+	obj.Ticker.AddEffect(EffectCut, 10)
+
+	obj.Ticker.Tick(0)
+	if lost := hpstart - obj.Sheet.HP(); lost != 2 {
+		t.Errorf(`Ticking cut counter inflicted %d, want %d`, lost, 2)
+	}
+
+	obj.Ticker.Tick(0)
+	if lost := hpstart - obj.Sheet.HP(); lost != 3 {
+		t.Errorf(`Ticking cut counter twice inflicted %d, want %d`, lost, 3)
+	}
+
+	for i := 0; i < 7; i++ {
+		obj.Ticker.Tick(0)
+	}
+
+	if lost := hpstart - obj.Sheet.HP(); lost != 10 {
+		t.Errorf(`Ticking cut counter to end inflicted %d, want %d`, lost, 10)
+	}
+	if left := obj.Ticker.Counter(EffectCut); left != 0 {
+		t.Errorf(`Poison counter at %d, want 0`, left)
+	}
+}

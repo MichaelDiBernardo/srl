@@ -15,6 +15,7 @@ const (
 	EffectBaseRegen // Regen that is applied every tick to every actor.
 	EffectStun
 	EffectPoison
+	EffectCut
 
 	// Resists
 	ResistFire
@@ -44,6 +45,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectBaseRegen: {Type: EffectTypeStatus},
 	EffectStun:      {Type: EffectTypeStatus, ResistedBy: ResistStun},
 	EffectPoison:    {Type: EffectTypeStatus, ResistedBy: ResistPoison},
+	EffectCut:       {Type: EffectTypeStatus},
 
 	ResistFire:   {Type: EffectTypeResist},
 	ResistElec:   {Type: EffectTypeResist},
@@ -57,4 +59,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectBaseRegen: AEBaseRegen,
 	EffectPoison:    AEPoison,
 	EffectStun:      AEStun,
+	EffectCut:       AECut,
 }

@@ -1,5 +1,8 @@
 NEXT:
-- tests for stun, poison activeeffect
+- [x] inflict cut in melee [x] test
+- [x] cut activeeffect [x] test
+- [ ] display on HUD, possibly fix problem of too many lights
+
 
 - Monsters have multiple abilities.
     - Abilities need:
