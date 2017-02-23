@@ -3,7 +3,8 @@ package game
 // Does all of the required upkeep to an actor before they take their turn.
 type Ticker interface {
 	Objgetter
-	// Notify the actor that 'delay' time has passed.
+	// Notify the actor that 'delay' time has passed. This must be called
+	// exactly once per actor turn, before the actor acts.
 	Tick(delay int)
 	AddEffect(e Effect, counter int)
 	// What is the counter remaining for the current effect?

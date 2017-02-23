@@ -183,14 +183,12 @@ var (
 	}
 	// Actor is stunned.
 	AEStun = ActiveEffect{
+		OnBegin: func(e *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetStun(getstunlevel(e.Counter))
+		},
 		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
 			e.Counter -= 1
-			cstun, sheet := e.Counter, t.Obj().Sheet
-			if (0 < cstun) && (cstun < 50) {
-				sheet.SetStun(Stunned)
-			} else {
-				sheet.SetStun(MoreStunned)
-			}
+			t.Obj().Sheet.SetStun(getstunlevel(e.Counter))
 			return e.Counter <= 0
 		},
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
@@ -198,6 +196,17 @@ var (
 		},
 	}
 )
+
+func getstunlevel(cstun int) StunLevel {
+	switch {
+	case cstun < 0:
+		return NotStunned
+	case (0 < cstun) && (cstun < 50):
+		return Stunned
+	default:
+		return MoreStunned
+	}
+}
 
 // We expect a speed 2 actor to fully recover in 100 turns.
 const RegenPeriod = 100

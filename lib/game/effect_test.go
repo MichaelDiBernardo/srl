@@ -143,3 +143,126 @@ func TestResistDmg(t *testing.T) {
 func restoreEffectsDeps() {
 	EffectsSpecs = oldEffectsSpecs
 }
+
+func TestRegen0(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+	})
+	// The regen period should heal 0 HP.
+	delay := GetDelay(2) * RegenPeriod
+	obj.Ticker.Tick(delay)
+
+	if hp := obj.Sheet.HP(); hp != 0 {
+		t.Errorf(`Regen healed %d, want 0`, hp)
+	}
+}
+
+func TestRegen1(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		regen: 1,
+	})
+	// Half the regen period should heal 50% HP
+	delay := GetDelay(2) * RegenPeriod / 2
+	obj.Ticker.Tick(delay)
+
+	if hp := obj.Sheet.HP(); hp != 10 {
+		t.Errorf(`Regen healed %d, want 10`, hp)
+	}
+}
+
+func TestRegen2(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		regen: 2,
+	})
+	// Quarter the regen period should heal 50% HP
+	delay := GetDelay(2) * RegenPeriod / 4
+	obj.Ticker.Tick(delay)
+
+	if hp := obj.Sheet.HP(); hp != 10 {
+		t.Errorf(`Regen healed %d, want 10`, hp)
+	}
+}
+
+func TestRegenAcrossLevels(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 1}},
+		hp:    0,
+		regen: 1,
+	})
+	// If we regen a long time on one floor, and then a shorter time on the
+	// next, it should be the same as if we'd regened everything on the same
+	// floor. (We're talking about floors here because the total delay counter
+	// resets on every floor. This is simulating what happens when you take
+	// your first turn on the next floor, but we use large delays to make the
+	// intent of the math easier to understand.
+	obj.Ticker.Tick(GetDelay(2) * RegenPeriod / 2)
+	obj.Ticker.Tick(GetDelay(2) * RegenPeriod / 4)
+
+	if hp := obj.Sheet.HP(); hp != 15 {
+		t.Errorf(`Regen healed %d, want 15`, hp)
+	}
+}
+
+func TestStun(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectStun, 10)
+	if lvl := obj.Sheet.Stun(); lvl != Stunned {
+		t.Errorf(`Stunlevel was %v, want %v`, lvl, Stunned)
+	}
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != -2 {
+			t.Errorf(`Skill %v had mod %d after stun, want -2`, skill, s)
+		}
+	}
+
+	obj.Ticker.AddEffect(EffectStun, 40)
+	if lvl := obj.Sheet.Stun(); lvl != MoreStunned {
+		t.Errorf(`Stunlevel was %v, want %v`, lvl, MoreStunned)
+	}
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != -4 {
+			t.Errorf(`Skill %v had mod %d after stun, want -4`, skill, s)
+		}
+	}
+
+	// The value of 'delay' doesn't matter at all here, what matters is that a
+	// turn has passed. This should reduce the stun penalty to -2.
+	obj.Ticker.Tick(0)
+	if lvl := obj.Sheet.Stun(); lvl != Stunned {
+		t.Errorf(`Stunlevel was %v, want %v`, lvl, Stunned)
+	}
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != -2 {
+			t.Errorf(`Skill %v had mod %d after stun, want -2`, skill, s)
+		}
+	}
+
+	for i := 0; i < 49; i++ {
+		obj.Ticker.Tick(0)
+	}
+	if lvl := obj.Sheet.Stun(); lvl != NotStunned {
+		t.Errorf(`Stunlevel was %v, want %v`, lvl, NotStunned)
+	}
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != 0 {
+			t.Errorf(`Skill %v had mod %d after stun, want 0`, skill, s)
+		}
+	}
+}

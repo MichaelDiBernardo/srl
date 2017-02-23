@@ -133,7 +133,6 @@ func (l *Level) Evolve() {
 	// Advance schedule until we find the player.
 	for {
 		actor := l.scheduler.Next()
-		// TODO: This may need to be done on _every_ actor for each turn taken.
 		actor.Ticker.Tick(l.scheduler.delay)
 
 		if ai := actor.AI; ai != nil {
