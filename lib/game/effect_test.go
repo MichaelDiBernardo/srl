@@ -217,7 +217,7 @@ func TestRegenAcrossLevels(t *testing.T) {
 	}
 }
 
-func TestStun(t *testing.T) {
+func TestActiveStun(t *testing.T) {
 	g := newTestGame()
 	obj := g.Player
 	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
@@ -264,5 +264,35 @@ func TestStun(t *testing.T) {
 		if s := obj.Sheet.SkillMod(skill); s != 0 {
 			t.Errorf(`Skill %v had mod %d after stun, want 0`, skill, s)
 		}
+	}
+}
+
+func TestActivePoison(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+	hpstart := obj.Sheet.HP()
+
+	obj.Ticker.AddEffect(EffectPoison, 10)
+
+	obj.Ticker.Tick(0)
+	if lost := hpstart - obj.Sheet.HP(); lost != 2 {
+		t.Errorf(`Ticking poison counter inflicted %d, want %d`, lost, 2)
+	}
+
+	obj.Ticker.Tick(0)
+	if lost := hpstart - obj.Sheet.HP(); lost != 3 {
+		t.Errorf(`Ticking poison counter twice inflicted %d, want %d`, lost, 3)
+	}
+
+	for i := 0; i < 7; i++ {
+		obj.Ticker.Tick(0)
+	}
+
+	if lost := hpstart - obj.Sheet.HP(); lost != 10 {
+		t.Errorf(`Ticking poison counter to end inflicted %d, want %d`, lost, 10)
+	}
+	if left := obj.Ticker.Counter(EffectPoison); left != 0 {
+		t.Errorf(`Poison counter at %d, want 0`, left)
 	}
 }
