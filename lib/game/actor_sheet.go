@@ -67,6 +67,9 @@ type Sheet interface {
 	// in this module.
 	SetStun(lvl StunLevel)
 
+	Blind() bool
+	SetBlind(blind bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -90,7 +93,9 @@ type PlayerSheet struct {
 	hp    int
 	mp    int
 	regen int
+
 	stun  StunLevel
+	blind bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -166,6 +171,9 @@ func (p *PlayerSheet) StatMod(stat StatName) int {
 }
 
 func (p *PlayerSheet) Skill(skill SkillName) int {
+	if skill == Evasion && p.blind {
+		return dumpsterEvasion
+	}
 	return p.skills.skill(skill)
 }
 
@@ -218,6 +226,9 @@ func (p *PlayerSheet) Regen() int {
 }
 
 func (p *PlayerSheet) Sight() int {
+	if p.blind {
+		return 1
+	}
 	return p.sight
 }
 
@@ -238,8 +249,16 @@ func (p *PlayerSheet) SetStun(level StunLevel) {
 	p.stun = level
 }
 
+func (p *PlayerSheet) SetBlind(b bool) {
+	p.blind = b
+}
+
+func (p *PlayerSheet) Blind() bool {
+	return p.blind
+}
+
 func (p *PlayerSheet) Attack() Attack {
-	melee := p.obj.Equipper.Body().Melee() + p.skills.skill(Melee)
+	melee := p.obj.Equipper.Body().Melee() + p.Skill(Melee)
 
 	weap := p.weapon()
 	equip := weap.Equipment
@@ -282,7 +301,10 @@ func (p *PlayerSheet) fist() *Obj {
 
 func (p *PlayerSheet) Defense() Defense {
 	body := p.obj.Equipper.Body()
-	evasion := body.Evasion() + p.skills.skill(Evasion)
+	evasion := body.Evasion() + p.Skill(Evasion)
+	if p.blind {
+		evasion = -5
+	}
 	dice := body.ProtDice()
 	effects := body.ArmorEffects()
 
@@ -314,7 +336,9 @@ type MonsterSheet struct {
 	maxmp int
 
 	regen int
+
 	stun  StunLevel
+	blind bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -387,6 +411,9 @@ func (m *MonsterSheet) StatMod(stat StatName) int {
 }
 
 func (m *MonsterSheet) Skill(skill SkillName) int {
+	if skill == Evasion && m.blind {
+		return dumpsterEvasion
+	}
 	return m.skills.skill(skill)
 }
 
@@ -439,6 +466,9 @@ func (m *MonsterSheet) Regen() int {
 }
 
 func (m *MonsterSheet) Sight() int {
+	if m.blind {
+		return 1
+	}
 	return m.sight
 }
 
@@ -459,9 +489,17 @@ func (m *MonsterSheet) SetStun(level StunLevel) {
 	m.stun = level
 }
 
+func (m *MonsterSheet) SetBlind(b bool) {
+	m.blind = b
+}
+
+func (m *MonsterSheet) Blind() bool {
+	return m.blind
+}
+
 func (m *MonsterSheet) Attack() Attack {
 	return Attack{
-		Melee:   m.skills.skill(Melee),
+		Melee:   m.Skill(Melee),
 		Damroll: m.damroll,
 		CritDiv: m.critdivmod + BaseCritDiv,
 		Effects: m.atkeffects,
@@ -470,7 +508,7 @@ func (m *MonsterSheet) Attack() Attack {
 
 func (m *MonsterSheet) Defense() Defense {
 	return Defense{
-		Evasion:  m.skills.skill(Evasion),
+		Evasion:  m.Skill(Evasion),
 		ProtDice: []Dice{m.protroll},
 		Effects:  m.defeffects,
 	}
@@ -701,3 +739,6 @@ const (
 
 // The base divisor to use for crits.
 const BaseCritDiv = 7
+
+// This is what evasion should be when things are horribly wrong.
+const dumpsterEvasion = -5

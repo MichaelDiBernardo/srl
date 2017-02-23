@@ -165,7 +165,7 @@ func (m *mapPanel) Render(g *game.Game) {
 
 			var gl glyph
 
-			if tile.Visible && tile.Actor != nil {
+			if tile.Actor != nil && (tile.Visible || tile.Actor.IsPlayer()) {
 				gl = actorGlyphs[tile.Actor.Spec.Species]
 			} else if !tile.Items.Empty() {
 				item, stack := tile.Items.Top(), tile.Items.Len() > 1

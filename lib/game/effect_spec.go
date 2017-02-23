@@ -16,6 +16,7 @@ const (
 	EffectStun
 	EffectPoison
 	EffectCut
+	EffectBlind
 
 	// Resists
 	ResistFire
@@ -23,6 +24,7 @@ const (
 	ResistIce
 	ResistStun
 	ResistPoison
+	ResistBlind
 
 	// Sentinel
 	NumEffects
@@ -46,6 +48,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectStun:      {Type: EffectTypeStatus, ResistedBy: ResistStun},
 	EffectPoison:    {Type: EffectTypeStatus, ResistedBy: ResistPoison},
 	EffectCut:       {Type: EffectTypeStatus},
+	EffectBlind:     {Type: EffectTypeStatus, ResistedBy: ResistBlind},
 
 	ResistFire:   {Type: EffectTypeResist},
 	ResistElec:   {Type: EffectTypeResist},
@@ -60,4 +63,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectPoison:    AEPoison,
 	EffectStun:      AEStun,
 	EffectCut:       AECut,
+	EffectBlind:     AEBlind,
 }

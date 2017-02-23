@@ -64,6 +64,14 @@ func hit(attacker Fighter, defender Fighter) {
 			if won {
 				defender.Obj().Ticker.AddEffect(EffectStun, dmg)
 			}
+		case EffectBlind:
+			score := 10
+			difficulty := defender.Obj().Sheet.Skill(Chi)
+			resists := resistmod(def.Effects.Resists(effect))
+			won, _ := skillcheck(score, difficulty+resists, attacker.Obj(), defender.Obj())
+			if won {
+				defender.Obj().Ticker.AddEffect(EffectBlind, DieRoll(5, 4))
+			}
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
 				defender.Obj().Ticker.AddEffect(EffectCut, dmg/2)
