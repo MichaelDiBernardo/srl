@@ -25,7 +25,7 @@ func TestSkillCheckLost(t *testing.T) {
 	FixRandomDie([]int{4, 7})
 	defer RestoreRandom()
 
-	won, by := skillcheck(1, 2, challenger, nil)
+	won, by := skillcheck(1, 2, 0, challenger, nil)
 
 	if won {
 		t.Error(`skillcheck(): won is true, want false`)
@@ -42,7 +42,7 @@ func TestSkillCheckWon(t *testing.T) {
 	FixRandomDie([]int{3, 1})
 	defer RestoreRandom()
 
-	won, by := skillcheck(2, 1, challenger, nil)
+	won, by := skillcheck(2, 1, 0, challenger, nil)
 
 	if !won {
 		t.Error(`skillcheck(): won is false, want true`)
@@ -59,12 +59,47 @@ func TestSkillCheckTie(t *testing.T) {
 	FixRandomDie([]int{1, 1})
 	defer RestoreRandom()
 
-	won, by := skillcheck(1, 1, challenger, nil)
+	won, by := skillcheck(1, 1, 0, challenger, nil)
 
 	if won {
 		t.Error(`skillcheck(): won is true, want false`)
 	}
 	if by != 0 {
 		t.Errorf(`skillcheck(): by is %d, want 0`, by)
+	}
+}
+
+func TestSkillCheckResistsAdd10(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+
+	FixRandomDie([]int{10, 1, 10, 1, 10, 1})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 1, 1, challenger, nil)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -1 {
+		t.Errorf(`skillcheck(): by is %d, want -1`, by)
+	}
+
+	won, by = skillcheck(1, 1, 2, challenger, nil)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -11 {
+		t.Errorf(`skillcheck(): by is %d, want -1`, by)
+	}
+
+	won, by = skillcheck(1, 1, -1, challenger, nil)
+
+	if !won {
+		t.Error(`skillcheck(): won is false, want true`)
+	}
+	if by != 19 {
+		t.Errorf(`skillcheck(): by is %d, want 19`, by)
 	}
 }

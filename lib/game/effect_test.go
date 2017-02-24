@@ -326,3 +326,21 @@ func TestActiveCut(t *testing.T) {
 		t.Errorf(`Poison counter at %d, want 0`, left)
 	}
 }
+
+func TestActiveBlind(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectBlind, 1)
+
+	if !obj.Sheet.Blind() {
+		t.Error(`obj.Sheet.Blind() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Blind() {
+		t.Error(`obj.Sheet.Blind() was true, want false`)
+	}
+}

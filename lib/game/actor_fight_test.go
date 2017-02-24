@@ -173,6 +173,22 @@ func TestHitCut(t *testing.T) {
 	}
 }
 
+func TestHitBlind(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectBlind: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, and make sure to win skillroll (10 vs 0 on d10s. We then
+	// roll 15 blind turns (3 * 5).)
+	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3, 3})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if blind := defender.Ticker.Counter(EffectBlind); blind != 15 {
+		t.Errorf(`Blind counter %d; want 15`, blind)
+	}
+}
+
 // Test raw damage due to brands.
 type applyBrandTest struct {
 	// Inputs

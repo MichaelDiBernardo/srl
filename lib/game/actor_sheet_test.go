@@ -249,3 +249,32 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 		},
 	})
 }
+
+func TestPlayerBlind(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	sheet := NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait:  Trait{obj: obj},
+		blind:  true,
+		skills: &skills{skills: skilllist{Melee: 10, Evasion: 10, Shooting: 10}},
+	})
+	obj.Sheet = sheet
+
+	for _, skill := range []SkillName{Melee, Evasion, Shooting} {
+		if sk := sheet.Skill(skill); sk != 5 {
+			t.Errorf(`Skill %v was %d, want 5`, skill, sk)
+		}
+	}
+
+	if s := sheet.Sight(); s != 0 {
+		t.Errorf(`sheet.Sight() was %d, want 0`, s)
+	}
+
+	if m := sheet.Attack().Melee; m != 5 {
+		t.Errorf(`atk.Melee = %d, want 5`, m)
+	}
+
+	if e := sheet.Defense().Evasion; e != 5 {
+		t.Errorf(`def.Evasion = %d, want 5`, e)
+	}
+}

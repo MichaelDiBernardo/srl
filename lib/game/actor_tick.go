@@ -29,10 +29,6 @@ func NewActorTicker(obj *Obj) Ticker {
 }
 
 func (t *ActorTicker) Tick(delay int) {
-	// Non-time-related things.
-	if seer := t.obj.Senser; seer != nil {
-		seer.CalcFields()
-	}
 	// Time-related things.
 	if delay < t.last {
 		// We've been placed into a new level.
@@ -54,6 +50,13 @@ func (t *ActorTicker) Tick(delay int) {
 	// Remove any effects that are no longer active.
 	for _, e := range ended {
 		delete(t.Effects, e)
+	}
+
+	// Non-time-related things. This is placed after effects-handling so that
+	// we get the most up-to-date field calculation (effects can alter sight,
+	// like blindness or see-invis.)
+	if seer := t.obj.Senser; seer != nil {
+		seer.CalcFields()
 	}
 
 	t.last = delay

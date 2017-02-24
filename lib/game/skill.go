@@ -8,8 +8,11 @@ package game
 // door.) Returns won=true if the check succeeded, false otherise. 'by' is the
 // residual amount that the check won or lost by. The challenger must roll a
 // total score higher than 'difficulty'; a tie results in a loss.
-func skillcheck(skill, difficulty int, challenger, defender *Obj) (won bool, by int) {
-	by = (skill + DieRoll(1, 10)) - (difficulty + DieRoll(1, 10))
+func skillcheck(skill, difficulty int, resists int, challenger, defender *Obj) (won bool, by int) {
+	s := skill + DieRoll(1, 10)
+	d := difficulty + resistmod(resists) + DieRoll(1, 10)
+
+	by = s - d
 	won = by > 0
 	return won, by
 }

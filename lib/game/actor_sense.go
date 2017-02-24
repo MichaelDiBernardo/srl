@@ -48,9 +48,6 @@ func (a *ActorSenser) CalcFields() {
 	radius := math.Max(sightrad, scentrad)
 	field := a.field(radius)
 
-	// TODO: Figure out if this is generated empty when sightrad is 0, and if
-	// it is, figure out why we're still seeing visibility artefacts when fov
-	// is empty.
 	a.fov = trimfield(field, sightrad, radius)
 
 	if !obj.IsPlayer() {
@@ -195,12 +192,12 @@ func trimfield(field Field, r int, max int) []math.Point {
 	if r == max {
 		return field
 	}
-	i := 0
+
+	trimmed := Field{}
 	for _, p := range field {
-		i++
-		if math.ChebyDist(math.Origin, p) > r {
-			break
+		if math.ChebyDist(math.Origin, p) <= r {
+			trimmed = append(trimmed, p)
 		}
 	}
-	return field[:i]
+	return trimmed
 }

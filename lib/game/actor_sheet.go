@@ -171,10 +171,11 @@ func (p *PlayerSheet) StatMod(stat StatName) int {
 }
 
 func (p *PlayerSheet) Skill(skill SkillName) int {
-	if skill == Evasion && p.blind {
-		return dumpsterEvasion
+	s := p.skills.skill(skill)
+	if p.blind {
+		s = blindpenalty(skill, s)
 	}
-	return p.skills.skill(skill)
+	return s
 }
 
 func (p *PlayerSheet) SetSkill(skill SkillName, amt int) {
@@ -227,7 +228,7 @@ func (p *PlayerSheet) Regen() int {
 
 func (p *PlayerSheet) Sight() int {
 	if p.blind {
-		return 1
+		return 0
 	}
 	return p.sight
 }
@@ -258,7 +259,13 @@ func (p *PlayerSheet) Blind() bool {
 }
 
 func (p *PlayerSheet) Attack() Attack {
-	melee := p.obj.Equipper.Body().Melee() + p.Skill(Melee)
+	// We use skills.skill instead of Skill because Skill already applies the
+	// blind penalty. We need to avoid it so we can apply the penalty to the
+	// entire quantity.
+	melee := p.obj.Equipper.Body().Melee() + p.skills.skill(Melee)
+	if p.blind {
+		melee = blindpenalty(Melee, melee)
+	}
 
 	weap := p.weapon()
 	equip := weap.Equipment
@@ -301,9 +308,12 @@ func (p *PlayerSheet) fist() *Obj {
 
 func (p *PlayerSheet) Defense() Defense {
 	body := p.obj.Equipper.Body()
-	evasion := body.Evasion() + p.Skill(Evasion)
+	// We use skills.skill instead of Skill because Skill already applies the
+	// blind penalty. We need to avoid it so we can apply the penalty to the
+	// entire quantity.
+	evasion := body.Evasion() + p.skills.skill(Evasion)
 	if p.blind {
-		evasion = -5
+		evasion = blindpenalty(Evasion, evasion)
 	}
 	dice := body.ProtDice()
 	effects := body.ArmorEffects()
@@ -411,10 +421,11 @@ func (m *MonsterSheet) StatMod(stat StatName) int {
 }
 
 func (m *MonsterSheet) Skill(skill SkillName) int {
-	if skill == Evasion && m.blind {
-		return dumpsterEvasion
+	s := m.skills.skill(skill)
+	if m.blind {
+		s = blindpenalty(skill, s)
 	}
-	return m.skills.skill(skill)
+	return s
 }
 
 func (m *MonsterSheet) SetSkill(skill SkillName, amt int) {
@@ -467,7 +478,7 @@ func (m *MonsterSheet) Regen() int {
 
 func (m *MonsterSheet) Sight() int {
 	if m.blind {
-		return 1
+		return 0
 	}
 	return m.sight
 }
@@ -723,6 +734,13 @@ func checkDeath(s Sheet) {
 
 	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
 	game.Kill(obj)
+}
+
+func blindpenalty(skill SkillName, score int) int {
+	if skill == Melee || skill == Evasion || skill == Shooting {
+		return score / 2
+	}
+	return score
 }
 
 type StunLevel uint

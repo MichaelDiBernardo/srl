@@ -73,7 +73,7 @@ func (p *ActorMover) Move(dir math.Point) error {
 
 	moved := obj.Level.Place(obj, endpos)
 	if moved {
-		if items := endtile.Items; !items.Empty() && obj.IsPlayer() {
+		if items := endtile.Items; !items.Empty() && obj.IsPlayer() && !obj.Sheet.Blind() {
 			var msg string
 			topname, n := items.Top().Spec.Name, items.Len()
 			if n == 1 {

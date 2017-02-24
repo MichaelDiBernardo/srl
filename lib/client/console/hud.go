@@ -156,16 +156,22 @@ func (m *mapPanel) Render(g *game.Game) {
 			}
 
 			tile := level.At(cur)
+			hasactor := tile.Actor != nil
+			isplayer := hasactor && tile.Actor.IsPlayer()
 			drawpos := cur.Add(maptrans)
 
-			if !tile.Seen {
+			// When you're blind, you may be walking on unseen tiles. So, we
+			// always want to show the player, even if the tile is unseen.
+			if !tile.Seen && !isplayer {
 				m.display.SetCell(drawpos.X, drawpos.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
 				continue
 			}
 
 			var gl glyph
 
-			if tile.Actor != nil && (tile.Visible || tile.Actor.IsPlayer()) {
+			// If you're blind (see above), you may be on an unseen and/or
+			// not-visible tile, but we still want to draw the player glyph.
+			if hasactor && (tile.Visible || isplayer) {
 				gl = actorGlyphs[tile.Actor.Spec.Species]
 			} else if !tile.Items.Empty() {
 				item, stack := tile.Items.Top(), tile.Items.Len() > 1
