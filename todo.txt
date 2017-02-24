@@ -1,14 +1,4 @@
 NEXT:
-- Need to be able to stop player from losing turns when actions are cancellations or mistakes.
-    - Moving into the wall 
-    - Trying to use a menu but cancelling out or doing something impossible.
-    - Trying to invoke a menu that doesn't even let you.
-    - Maybe trickle a 'turn used' event all the way up to the controller
-      (either by flipping a bit in Game or by passing a bool all the way up),
-      and then if the bit is flipped force the game to evolve in Handle
-    
-
-Then:
 - [ ] inflict confuse in melee [ ] test
 - [ ] activeeffect [ ] test
 - [ ] confusion sheet changes [ ] test

@@ -10,10 +10,12 @@ type Equipper interface {
 	TryEquip()
 	// Bring up the remover screen if anything on body can be removed.
 	TryRemove()
-	// Equip the item at index 'index' in inventory.
-	Equip(index int)
-	// Remove the item equipped in the given slot.
-	Remove(slot Slot)
+	// Equip the item at index 'index' in inventory. Return true if a turn
+	// should pass.
+	Equip(index int) bool
+	// Remove the item equipped in the given slot. Return true if a turn should
+	// pass.
+	Remove(slot Slot) bool
 	// Get the underlying entity's Body.
 	Body() *Body
 }
@@ -48,7 +50,7 @@ func (a *ActorEquipper) TryRemove() {
 	}
 }
 
-func (a *ActorEquipper) Equip(index int) {
+func (a *ActorEquipper) Equip(index int) bool {
 	a.obj.Game.SwitchMode(ModeHud)
 	inv := a.obj.Packer.Inventory()
 
@@ -56,35 +58,37 @@ func (a *ActorEquipper) Equip(index int) {
 
 	// Bounds-check the index the player requested.
 	if equip == nil {
-		return
+		return false
 	}
 
 	if equip.Spec.Genus != GenEquipment {
 		a.obj.Game.Events.Message(fmt.Sprintf("Cannot equip %v.", equip.Spec.Name))
-		return
+		return false
 	}
 	equip = inv.Take(index)
 
 	if swapped := a.body.Wear(equip); swapped != nil {
 		a.obj.Packer.Inventory().Add(swapped)
 	}
+	return true
 }
 
-func (a *ActorEquipper) Remove(slot Slot) {
+func (a *ActorEquipper) Remove(slot Slot) bool {
 	a.obj.Game.SwitchMode(ModeHud)
 
 	removed := a.body.Remove(slot)
 	if removed == nil {
-		return
+		return false
 	}
 
 	if added := a.obj.Packer.Inventory().Add(removed); added {
-		return
+		return true
 	}
 
 	// No room for unequipped item in inventory; drop it.
 	a.obj.Tile.Items.Add(removed)
 	a.obj.Game.Events.Message(fmt.Sprintf("No room in pack! Dropped %v.", removed.Spec.Name))
+	return true
 }
 
 func (a *ActorEquipper) Body() *Body {

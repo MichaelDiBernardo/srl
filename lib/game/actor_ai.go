@@ -260,7 +260,7 @@ func (s *smaiStateWandering) Act(me *SMAI) smaiTransition {
 	}
 
 	dir := nextpos.Sub(mypos)
-	err := me.obj.Mover.Move(dir)
+	_, err := me.obj.Mover.Move(dir)
 
 	if err == ErrMoveBlocked {
 		s.turnsBlocked++
@@ -343,7 +343,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		// Try to move. If this doesn't work because we can see the character
 		// but the best direction moves us into a wall, we'll just use scent
 		// instead. However, that won't count towards the # of turns unseen.
-		err := obj.Mover.Move(dir)
+		_, err := obj.Mover.Move(dir)
 
 		if err != ErrMoveBlocked {
 			return smaiNoTransition
@@ -375,7 +375,7 @@ func (s *smaiStateChasing) Act(me *SMAI) smaiTransition {
 		log.Printf("id%d. I smell player at %v. I'm at %v moving %v", obj.id, maxloc, pos, dir)
 	}
 
-	if err := obj.Mover.Move(dir); err != nil {
+	if _, err := obj.Mover.Move(dir); err != nil {
 		log.Printf("id%d. I couldn't move %v: %v", obj.id, dir, err)
 	}
 	return smaiNoTransition
@@ -417,9 +417,9 @@ func (s *smaiStateFleeing) Act(me *SMAI) smaiTransition {
 
 	// Move.
 	dir := nextpos.Sub(mypos)
-	err := me.obj.Mover.Move(dir)
+	ok, _ := me.obj.Mover.Move(dir)
 
-	if err == ErrMoveBlocked {
+	if !ok {
 		s.turnsBlocked++
 	} else {
 		s.turnsBlocked = 0
@@ -427,7 +427,7 @@ func (s *smaiStateFleeing) Act(me *SMAI) smaiTransition {
 	}
 
 	// If we're blocked, try a different direction.
-	if s.turnsBlocked > 3 {
+	if s.turnsBlocked > 5 {
 		s.findsafety(me)
 	}
 
@@ -508,7 +508,7 @@ func (s *smaiStateGoingHome) Act(me *SMAI) smaiTransition {
 	}
 
 	dir := nextpos.Sub(mypos)
-	err := me.obj.Mover.Move(dir)
+	_, err := me.obj.Mover.Move(dir)
 
 	if err == nil {
 		s.path = s.path[1:]

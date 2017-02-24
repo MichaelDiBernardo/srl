@@ -9,7 +9,7 @@ import (
 // A thing that can move given a specific direction.
 type Mover interface {
 	Objgetter
-	Move(dir math.Point) error
+	Move(dir math.Point) (bool, error)
 	Ascend() bool
 	Descend() bool
 }
@@ -34,13 +34,18 @@ var (
 	ErrMoveOpenedDoor  = errors.New("MoveOpenedDoor")
 )
 
-// Try to move the actor. Return err describing what happened if the move
-// fails.
-func (p *ActorMover) Move(dir math.Point) error {
+// Try to move the actor. Return err describing what happened if the actor
+// could not physically move on the map; there may have been another event that
+// had to happen instead that still requires a turn to pass (e.g. a door was
+// opened, an attack was initiated.) If a turn should pass, the boolean return
+// value from this function will be true. This idea of a 'turn passing' is in
+// the context of the player's turn -- calling code can decide whether or not a
+// monster's turn should be over, regardless of this value.
+func (p *ActorMover) Move(dir math.Point) (bool, error) {
 	if dist := math.ChebyDist(math.Origin, dir); dist > 1 {
-		return ErrMoveTooFar
+		return false, ErrMoveTooFar
 	} else if dist == 0 {
-		return ErrMove0Dir
+		return false, ErrMove0Dir
 	}
 
 	obj := p.obj
@@ -48,27 +53,27 @@ func (p *ActorMover) Move(dir math.Point) error {
 	endpos := beginpos.Add(dir)
 
 	if !endpos.In(obj.Level) {
-		return ErrMoveOutOfBounds
+		return false, ErrMoveOutOfBounds
 	}
 
 	endtile := obj.Level.At(endpos)
 	if other := endtile.Actor; other != nil {
 		if opposing := obj.IsPlayer() != other.IsPlayer(); opposing {
 			p.obj.Fighter.Hit(other.Fighter)
-			return ErrMoveHit
+			return true, ErrMoveHit
 		} else {
 			// Traveling monsters should swap with one another, but it's kind
 			// of a pain.
 			if OneIn(2) {
 				obj.Level.SwapActors(obj, other)
-				return nil
+				return true, nil
 			}
-			return ErrMoveSwapFailed
+			return true, ErrMoveSwapFailed
 		}
 	}
 	if endtile.Feature == FeatClosedDoor {
 		endtile.Feature = FeatOpenDoor
-		return ErrMoveOpenedDoor
+		return true, ErrMoveOpenedDoor
 	}
 
 	moved := obj.Level.Place(obj, endpos)
@@ -83,9 +88,9 @@ func (p *ActorMover) Move(dir math.Point) error {
 			}
 			obj.Game.Events.Message(msg)
 		}
-		return nil
+		return true, nil
 	}
-	return ErrMoveBlocked
+	return false, ErrMoveBlocked
 }
 
 // Try to go up stairs. If the current tile is not an upstair, return false.

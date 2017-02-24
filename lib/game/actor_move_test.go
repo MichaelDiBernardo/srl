@@ -12,7 +12,7 @@ func TestOkMove(t *testing.T) {
 	startpos := math.Pt(1, 1)
 	g.Level.Place(obj, startpos)
 
-	if err := obj.Mover.Move(math.Pt(1, 0)); err != nil {
+	if _, err := obj.Mover.Move(math.Pt(1, 0)); err != nil {
 		t.Errorf(`Move( (1, 0)) = %v, want true`, err)
 	}
 
@@ -40,7 +40,7 @@ func TestMonsterSwapWorks(t *testing.T) {
 	FixRandomSource([]int{0})
 	defer RestoreRandom()
 
-	if err := a1.Mover.Move(math.Pt(1, 0)); err != nil {
+	if _, err := a1.Mover.Move(math.Pt(1, 0)); err != nil {
 		t.Errorf(`a1.Move( (1, 0)) = %v, want nil`, err)
 	}
 
@@ -60,7 +60,7 @@ func TestMonsterSwapFails(t *testing.T) {
 	FixRandomSource([]int{1})
 	defer RestoreRandom()
 
-	if err := a1.Mover.Move(math.Pt(1, 0)); err != ErrMoveSwapFailed {
+	if _, err := a1.Mover.Move(math.Pt(1, 0)); err != ErrMoveSwapFailed {
 		t.Errorf(`a1.Move( (1, 0)) = %v, want %v`, err, ErrMoveSwapFailed)
 	}
 
@@ -78,7 +78,7 @@ func TestMoveOpensClosedDoor(t *testing.T) {
 	g.Level.Place(obj, startpos)
 	g.Level.At(doorpos).Feature = FeatClosedDoor
 
-	if err := obj.Mover.Move(math.Pt(0, 1)); err != ErrMoveOpenedDoor {
+	if _, err := obj.Mover.Move(math.Pt(0, 1)); err != ErrMoveOpenedDoor {
 		t.Errorf(`Move into closed door was %v, want %v`, err, ErrMoveOpenedDoor)
 	}
 

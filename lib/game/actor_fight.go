@@ -86,6 +86,10 @@ func hit(attacker Fighter, defender Fighter) {
 // brands. Poison damage is separated out because it is applied as
 // damage-over-time, instead of being immediately inflicted on the target.
 func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int, verb string) {
+	if basedmg == 0 {
+		return 0, 0, "hits"
+	}
+
 	brands := atk.Brands()
 	fixverb := false
 	branddmg, poisondmg, verb = 0, 0, "hits"

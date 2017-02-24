@@ -250,7 +250,7 @@ var (
 // An actor's stun level depends on how many turns of stun they've accumulated.
 func getstunlevel(cstun int) StunLevel {
 	switch {
-	case cstun < 0:
+	case cstun <= 0:
 		return NotStunned
 	case (0 < cstun) && (cstun < 50):
 		return Stunned

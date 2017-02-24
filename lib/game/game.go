@@ -39,7 +39,11 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 
 // Handle a command from the client, and then evolve the world.
 func (g *Game) Handle(c Command) {
-	controllers[g.mode](g, c)
+	evolve := controllers[g.mode](g, c)
+	if evolve {
+		g.Level.Evolve()
+		g.Turns++
+	}
 }
 
 func (g *Game) SwitchMode(m Mode) {
@@ -90,9 +94,15 @@ type AscendCommand struct{}
 
 type DescendCommand struct{}
 
+// A controller is a function that handles 'command' using 'game', and returns
+// true if a turn should pass due to the player's action. (Some player commands
+// might result in no time passing, like cancelling out of a menu or trying to
+// move through a wall.
+type controller func(*Game, Command) bool
+
 // Controller functions that take commands for each given mode and run them on
 // the game.
-var controllers = map[Mode]func(*Game, Command){
+var controllers = map[Mode]controller{
 	ModeHud:       hudController,
 	ModeInventory: inventoryController,
 	ModePickup:    pickupController,
@@ -104,14 +114,14 @@ var controllers = map[Mode]func(*Game, Command){
 }
 
 // Do stuff when player is actually playing the game.
-func hudController(g *Game, com Command) {
+func hudController(g *Game, com Command) bool {
 	evolve := false
 	switch c := com.(type) {
 	case MoveCommand:
-		g.Player.Mover.Move(c.Dir)
-		evolve = true
+		ok, _ := g.Player.Mover.Move(c.Dir)
+		evolve = ok
 	case TryPickupCommand:
-		g.Player.Packer.TryPickup()
+		evolve = g.Player.Packer.TryPickup()
 	case TryDropCommand:
 		g.Player.Packer.TryDrop()
 	case TryEquipCommand:
@@ -122,57 +132,65 @@ func hudController(g *Game, com Command) {
 		g.Player.User.TryUse()
 	case AscendCommand:
 		g.Player.Mover.Ascend()
+		evolve = true
 	case DescendCommand:
 		g.Player.Mover.Descend()
+		evolve = true
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}
-	if evolve {
-		g.Level.Evolve()
-		g.Turns++
-	}
+	return evolve
 }
 
 // Do stuff when player is looking at inventory.
-func inventoryController(g *Game, com Command) {
+func inventoryController(g *Game, com Command) bool {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}
+	return false
 }
 
 // Do stuff when player is looking at ground.
-func pickupController(g *Game, com Command) {
+func pickupController(g *Game, com Command) bool {
+	evolve := false
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
-		g.Player.Packer.Pickup(c.Option)
+		evolve = g.Player.Packer.Pickup(c.Option)
 	}
+	return evolve
 }
 
 // Do stuff when player is looking at equipment.
-func equipController(g *Game, com Command) {
+func equipController(g *Game, com Command) bool {
+	evolve := false
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
-		g.Player.Equipper.Equip(c.Option)
+		evolve = g.Player.Equipper.Equip(c.Option)
 	}
+	return evolve
 }
 
 // Do stuff when player is using an item.
-func useController(g *Game, com Command) {
+func useController(g *Game, com Command) bool {
+	evolve := false
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
-		g.Player.User.Use(c.Option)
+		evolve = g.Player.User.Use(c.Option)
 	}
+	return evolve
 }
 
 // Do stuff when player is looking at body.
-func removeController(g *Game, com Command) {
+func removeController(g *Game, com Command) bool {
+	evolve := false
+
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
@@ -180,26 +198,31 @@ func removeController(g *Game, com Command) {
 		// Will probably need to be changed to a SlotCommand or
 		// something if slots become complicated enough that
 		// type-converting them from ints isn't enough.
-		g.Player.Equipper.Remove(Slot(c.Option))
+		evolve = g.Player.Equipper.Remove(Slot(c.Option))
 	}
+	return evolve
 }
 
 // Do stuff when player is trying to drop stuff.
-func dropController(g *Game, com Command) {
+func dropController(g *Game, com Command) bool {
+	evolve := false
+
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	case MenuCommand:
-		g.Player.Packer.Drop(c.Option)
+		evolve = g.Player.Packer.Drop(c.Option)
 	}
+	return evolve
 }
 
 // Do stuff when player is looking at character sheet.
-func sheetController(g *Game, com Command) {
+func sheetController(g *Game, com Command) bool {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}
+	return false
 }
 
 // Events are complex objects (unlike commands); you have to type-assert them

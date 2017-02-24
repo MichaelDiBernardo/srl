@@ -9,8 +9,9 @@ type User interface {
 	Objgetter
 	// Bring up the 'use' screen if anything in inventory can be used.
 	TryUse()
-	// Use the item at index 'index' in inventory.
-	Use(index int)
+	// Use the item at index 'index' in inventory. Return true if a turn should
+	// pass.
+	Use(index int) bool
 }
 
 type ActorUser struct {
@@ -29,7 +30,7 @@ func (a *ActorUser) TryUse() {
 	}
 }
 
-func (a *ActorUser) Use(index int) {
+func (a *ActorUser) Use(index int) bool {
 	a.obj.Game.SwitchMode(ModeHud)
 	inv := a.obj.Packer.Inventory()
 
@@ -37,14 +38,15 @@ func (a *ActorUser) Use(index int) {
 
 	// Bounds-check the index the player requested.
 	if item == nil {
-		return
+		return false
 	}
 
 	if item.Spec.Genus != GenConsumable {
 		a.obj.Game.Events.Message(fmt.Sprintf("Cannot use %v.", item.Spec.Name))
-		return
+		return false
 	}
 
 	item = inv.Take(index)
 	item.Consumable.Consume(a)
+	return true
 }
