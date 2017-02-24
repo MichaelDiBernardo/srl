@@ -73,6 +73,9 @@ type Sheet interface {
 	Slow() bool
 	SetSlow(slow bool)
 
+	Confused() bool
+	SetConfused(conf bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -97,9 +100,10 @@ type PlayerSheet struct {
 	mp    int
 	regen int
 
-	stun  StunLevel
-	blind bool
-	slow  bool
+	stun     StunLevel
+	blind    bool
+	slow     bool
+	confused bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -273,6 +277,15 @@ func (p *PlayerSheet) Slow() bool {
 	return p.slow
 }
 
+func (p *PlayerSheet) SetConfused(conf bool) {
+	changeconf(p, conf)
+	p.confused = conf
+}
+
+func (p *PlayerSheet) Confused() bool {
+	return p.confused
+}
+
 func (p *PlayerSheet) Attack() Attack {
 	// We use skills.skill instead of Skill because Skill already applies the
 	// blind penalty. We need to avoid it so we can apply the penalty to the
@@ -362,9 +375,10 @@ type MonsterSheet struct {
 
 	regen int
 
-	stun  StunLevel
-	blind bool
-	slow  bool
+	stun     StunLevel
+	blind    bool
+	slow     bool
+	confused bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -533,6 +547,15 @@ func (m *MonsterSheet) SetSlow(s bool) {
 
 func (m *MonsterSheet) Slow() bool {
 	return m.slow
+}
+
+func (m *MonsterSheet) SetConfused(conf bool) {
+	changeconf(m, conf)
+	m.confused = conf
+}
+
+func (m *MonsterSheet) Confused() bool {
+	return m.confused
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -749,6 +772,17 @@ func changestun(s Sheet, newstun StunLevel) {
 		}
 	}
 	s.Obj().Game.Events.Message(msg)
+}
+
+func changeconf(s Sheet, newc bool) {
+	oldc := s.Confused()
+	if oldc == newc {
+		return
+	} else if oldc == true {
+		modMndSkills(s, 5)
+	} else {
+		modMndSkills(s, -5)
+	}
 }
 
 func checkDeath(s Sheet) {

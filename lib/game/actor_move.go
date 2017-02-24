@@ -42,6 +42,7 @@ var (
 // the context of the player's turn -- calling code can decide whether or not a
 // monster's turn should be over, regardless of this value.
 func (p *ActorMover) Move(dir math.Point) (bool, error) {
+	// Validate weirdness.
 	if dist := math.ChebyDist(math.Origin, dir); dist > 1 {
 		return false, ErrMoveTooFar
 	} else if dist == 0 {
@@ -49,11 +50,18 @@ func (p *ActorMover) Move(dir math.Point) (bool, error) {
 	}
 
 	obj := p.obj
+	conf := obj.Sheet.Confused()
+
+	if conf && OneIn(2) {
+		dir = confusedir(dir)
+		obj.Game.Events.Message(fmt.Sprintf("%v moves the wrong way.", obj.Spec.Name))
+	}
+
 	beginpos := obj.Pos()
 	endpos := beginpos.Add(dir)
 
 	if !endpos.In(obj.Level) {
-		return false, ErrMoveOutOfBounds
+		return conf || false, ErrMoveOutOfBounds
 	}
 
 	endtile := obj.Level.At(endpos)
@@ -90,7 +98,12 @@ func (p *ActorMover) Move(dir math.Point) (bool, error) {
 		}
 		return true, nil
 	}
-	return false, ErrMoveBlocked
+
+	if obj.IsPlayer() {
+		obj.Game.Events.Message(fmt.Sprintf("%v can't go that way.", obj.Spec.Name))
+	}
+
+	return conf || false, ErrMoveBlocked
 }
 
 // Try to go up stairs. If the current tile is not an upstair, return false.
@@ -109,4 +122,20 @@ func (p *ActorMover) Descend() bool {
 	}
 	p.obj.Game.ChangeFloor(-1)
 	return true
+}
+
+// Randomizes a direction.
+func confusedir(_ math.Point) math.Point {
+	// TODO: Maybe make this less random, and actually dependent on the given
+	// point like in Sil's confuse_dir.
+
+	var x, y int
+
+	for {
+		x, y = RandInt(-1, 2), RandInt(-1, 2)
+		if !(x == 0 && y == 0) {
+			break
+		}
+	}
+	return math.Pt(x, y)
 }

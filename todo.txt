@@ -1,13 +1,17 @@
 NEXT:
-- [ ] inflict confuse in melee [ ] test
-- [ ] activeeffect [ ] test
-- [ ] confusion sheet changes [ ] test
+- [x] inflict confuse in melee [ ] test
+- [x] activeeffect [ ] test
+- [x] confusion sheet changes [ ] test
       - (-5) mod to all mnd skills
-- [ ] confusion moving/attacking changes
+- [x] confusion moving/attacking changes [ ] test
         - same as erratic, 25% of the time just pick a random dir
         - If moving and blocked as the player while confused, you should lose your turn
 
 - [ ] display all relevant effects on HUD, fix problem of too many lights
+
+- should implement Rest() on actor_move, and if confused and resting 25% of the
+  time should move you randomly. Need to decide if move(0,0) means rest or if
+  there should be explicit verb.
 
 
 - Monsters have multiple abilities.

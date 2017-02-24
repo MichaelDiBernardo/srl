@@ -216,13 +216,10 @@ var (
 	AEBlind = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
 			t.Obj().Sheet.SetBlind(true)
-			msg := fmt.Sprintf("%s is blinded!", t.Obj().Spec.Name)
+			msg := fmt.Sprintf("%s is blinded.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
-		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
-			e.Counter -= 1
-			return e.Counter <= 0
-		},
+		OnTick: basictick,
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Sheet.SetBlind(false)
 			msg := fmt.Sprintf("%s can see again.", t.Obj().Spec.Name)
@@ -235,13 +232,23 @@ var (
 			msg := fmt.Sprintf("%s is slowed.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
-		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
-			e.Counter -= 1
-			return e.Counter <= 0
-		},
+		OnTick: basictick,
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Sheet.SetSlow(false)
 			msg := fmt.Sprintf("%s speeds up again.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
+	AEConfuse = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetConfused(true)
+			msg := fmt.Sprintf("%s is confused.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetConfused(false)
+			msg := fmt.Sprintf("%s recovers from confusion.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
@@ -264,6 +271,11 @@ func hpdecay(e *ActiveEffect, t Ticker, _ int) bool {
 	dmg := math.Max(20*e.Counter/100, 1)
 	t.Obj().Sheet.Hurt(dmg)
 	e.Counter -= dmg
+	return e.Counter <= 0
+}
+
+func basictick(e *ActiveEffect, t Ticker, _ int) bool {
+	e.Counter -= 1
 	return e.Counter <= 0
 }
 

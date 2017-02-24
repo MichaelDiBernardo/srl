@@ -72,6 +72,17 @@ func hit(attacker Fighter, defender Fighter) {
 			if won {
 				defender.Obj().Ticker.AddEffect(EffectBlind, DieRoll(5, 4))
 			}
+		case EffectConfuse:
+			// TODO: Eventually remove this check and instead use a Cruel-Blow
+			// style check, cruel blow should be the only ability that gives
+			// confusion melee anyways.
+			score := 10
+			difficulty := defender.Obj().Sheet.Skill(Chi)
+			resists := resistmod(def.Effects.Resists(effect))
+			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
+			if won {
+				defender.Obj().Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
+			}
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
 				defender.Obj().Ticker.AddEffect(EffectCut, dmg/2)

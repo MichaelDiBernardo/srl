@@ -18,6 +18,7 @@ const (
 	EffectCut
 	EffectBlind
 	EffectSlow
+	EffectConfuse
 
 	// Resists
 	ResistFire
@@ -27,6 +28,7 @@ const (
 	ResistPoison
 	ResistBlind
 	ResistSlow
+	ResistConfuse
 
 	// Sentinel
 	NumEffects
@@ -52,14 +54,16 @@ var EffectsSpecs = EffectsSpec{
 	EffectCut:       {Type: EffectTypeStatus},
 	EffectBlind:     {Type: EffectTypeStatus, ResistedBy: ResistBlind},
 	EffectSlow:      {Type: EffectTypeStatus, ResistedBy: ResistSlow},
+	EffectConfuse:   {Type: EffectTypeStatus, ResistedBy: ResistConfuse},
 
-	ResistFire:   {Type: EffectTypeResist},
-	ResistElec:   {Type: EffectTypeResist},
-	ResistIce:    {Type: EffectTypeResist},
-	ResistStun:   {Type: EffectTypeResist},
-	ResistPoison: {Type: EffectTypeResist},
-	ResistBlind:  {Type: EffectTypeResist},
-	ResistSlow:   {Type: EffectTypeResist},
+	ResistFire:    {Type: EffectTypeResist},
+	ResistElec:    {Type: EffectTypeResist},
+	ResistIce:     {Type: EffectTypeResist},
+	ResistStun:    {Type: EffectTypeResist},
+	ResistPoison:  {Type: EffectTypeResist},
+	ResistBlind:   {Type: EffectTypeResist},
+	ResistSlow:    {Type: EffectTypeResist},
+	ResistConfuse: {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.
@@ -70,4 +74,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectCut:       AECut,
 	EffectBlind:     AEBlind,
 	EffectSlow:      AESlow,
+	EffectConfuse:   AEConfuse,
 }
