@@ -344,3 +344,21 @@ func TestActiveBlind(t *testing.T) {
 		t.Error(`obj.Sheet.Blind() was true, want false`)
 	}
 }
+
+func TestActiveSlow(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectSlow, 1)
+
+	if !obj.Sheet.Slow() {
+		t.Error(`obj.Sheet.Slow() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Slow() {
+		t.Error(`obj.Sheet.Slow() was true, want false`)
+	}
+}

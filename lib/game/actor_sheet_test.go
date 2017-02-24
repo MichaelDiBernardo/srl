@@ -278,3 +278,46 @@ func TestPlayerBlind(t *testing.T) {
 		t.Errorf(`def.Evasion = %d, want 5`, e)
 	}
 }
+
+func TestPlayerSlow(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	sheet := NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		slow:  true,
+		speed: 2,
+	})
+	obj.Sheet = sheet
+
+	if s := sheet.Speed(); s != 1 {
+		t.Errorf(`sheet.Speed() was %d, want 1`, s)
+	}
+
+	sheet.speed = 1
+
+	if s := sheet.Speed(); s != 1 {
+		t.Errorf(`sheet.Speed() was %d, want 1`, s)
+	}
+}
+
+func TestMonsterSlow(t *testing.T) {
+	g := newTestGame()
+	obj := g.NewObj(&Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: SpecOrc,
+		Name:    "ORC",
+		Traits:  &Traits{Sheet: NewMonsterSheet(&MonsterSheet{speed: 2, slow: true})},
+	})
+	sheet := obj.Sheet.(*MonsterSheet)
+
+	if s := sheet.Speed(); s != 1 {
+		t.Errorf(`sheet.Speed() was %d, want 1`, s)
+	}
+
+	sheet.speed = 1
+
+	if s := sheet.Speed(); s != 1 {
+		t.Errorf(`sheet.Speed() was %d, want 1`, s)
+	}
+}

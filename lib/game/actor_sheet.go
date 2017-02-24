@@ -70,6 +70,9 @@ type Sheet interface {
 	Blind() bool
 	SetBlind(blind bool)
 
+	Slow() bool
+	SetSlow(slow bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -96,6 +99,7 @@ type PlayerSheet struct {
 
 	stun  StunLevel
 	blind bool
+	slow  bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -195,6 +199,9 @@ func (p *PlayerSheet) ChangeSkillMod(skill SkillName, diff int) {
 }
 
 func (p *PlayerSheet) Speed() int {
+	if p.slow {
+		return slowpenalty(p.speed)
+	}
 	return p.speed
 }
 
@@ -256,6 +263,14 @@ func (p *PlayerSheet) SetBlind(b bool) {
 
 func (p *PlayerSheet) Blind() bool {
 	return p.blind
+}
+
+func (p *PlayerSheet) SetSlow(s bool) {
+	p.slow = s
+}
+
+func (p *PlayerSheet) Slow() bool {
+	return p.slow
 }
 
 func (p *PlayerSheet) Attack() Attack {
@@ -349,6 +364,7 @@ type MonsterSheet struct {
 
 	stun  StunLevel
 	blind bool
+	slow  bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -445,6 +461,9 @@ func (m *MonsterSheet) ChangeSkillMod(skill SkillName, diff int) {
 }
 
 func (m *MonsterSheet) Speed() int {
+	if m.Slow() {
+		return slowpenalty(m.speed)
+	}
 	return m.speed
 }
 
@@ -506,6 +525,14 @@ func (m *MonsterSheet) SetBlind(b bool) {
 
 func (m *MonsterSheet) Blind() bool {
 	return m.blind
+}
+
+func (m *MonsterSheet) SetSlow(s bool) {
+	m.slow = s
+}
+
+func (m *MonsterSheet) Slow() bool {
+	return m.slow
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -741,6 +768,10 @@ func blindpenalty(skill SkillName, score int) int {
 		return score / 2
 	}
 	return score
+}
+
+func slowpenalty(spd int) int {
+	return math.Max(spd-1, 1)
 }
 
 type StunLevel uint

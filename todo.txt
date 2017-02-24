@@ -1,5 +1,23 @@
 NEXT:
-- [ ] display on HUD, possibly fix problem of too many lights
+- Need to be able to stop player from losing turns when actions are cancellations or mistakes.
+    - Moving into the wall 
+    - Trying to use a menu but cancelling out or doing something impossible.
+    - Trying to invoke a menu that doesn't even let you.
+    - Maybe trickle a 'turn used' event all the way up to the controller
+      (either by flipping a bit in Game or by passing a bool all the way up),
+      and then if the bit is flipped force the game to evolve in Handle
+    
+
+Then:
+- [ ] inflict confuse in melee [ ] test
+- [ ] activeeffect [ ] test
+- [ ] confusion sheet changes [ ] test
+      - (-5) mod to all mnd skills
+- [ ] confusion moving/attacking changes
+        - same as erratic, 25% of the time just pick a random dir
+        - If moving and blocked as the player while confused, you should lose your turn
+
+- [ ] display all relevant effects on HUD, fix problem of too many lights
 
 
 - Monsters have multiple abilities.

@@ -229,6 +229,22 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AESlow = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetSlow(true)
+			msg := fmt.Sprintf("%s is slowed.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: func(e *ActiveEffect, t Ticker, _ int) bool {
+			e.Counter -= 1
+			return e.Counter <= 0
+		},
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetSlow(false)
+			msg := fmt.Sprintf("%s speeds up again.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.
