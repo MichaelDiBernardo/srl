@@ -321,3 +321,26 @@ func TestMonsterSlow(t *testing.T) {
 		t.Errorf(`sheet.Speed() was %d, want 1`, s)
 	}
 }
+
+func TestPlayerConfuse(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	sheet := NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+	})
+	obj.Sheet = sheet
+
+	sheet.SetConfused(true)
+	for i := Chi; i < NumSkills; i++ {
+		if mod := sheet.SkillMod(i); mod != -5 {
+			t.Errorf(`Skillmod %v was %d, want -5`, i, mod)
+		}
+	}
+
+	sheet.SetConfused(false)
+	for i := Chi; i < NumSkills; i++ {
+		if mod := sheet.SkillMod(i); mod != 0 {
+			t.Errorf(`Skillmod %v was %d, want 0`, i, mod)
+		}
+	}
+}

@@ -362,3 +362,21 @@ func TestActiveSlow(t *testing.T) {
 		t.Error(`obj.Sheet.Slow() was true, want false`)
 	}
 }
+
+func TestActiveConfuse(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectConfuse, 1)
+
+	if !obj.Sheet.Confused() {
+		t.Error(`obj.Sheet.Confused() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Confused() {
+		t.Error(`obj.Sheet.Confused() was true, want false`)
+	}
+}

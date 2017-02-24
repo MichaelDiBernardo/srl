@@ -189,6 +189,22 @@ func TestHitBlind(t *testing.T) {
 	}
 }
 
+func TestHitConfuse(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectConfuse: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, and make sure to win skillroll (10 vs 0 on d10s. We then
+	// roll 15 confusion turns (3 * 5).)
+	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3, 3})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if conf := defender.Ticker.Counter(EffectConfuse); conf != 15 {
+		t.Errorf(`Conf counter %d; want 15`, conf)
+	}
+}
+
 // Test raw damage due to brands.
 type applyBrandTest struct {
 	// Inputs
