@@ -380,3 +380,21 @@ func TestActiveConfuse(t *testing.T) {
 		t.Error(`obj.Sheet.Confused() was true, want false`)
 	}
 }
+
+func TestActiveFear(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectFear, 1)
+
+	if !obj.Sheet.Afraid() {
+		t.Error(`obj.Sheet.Afraid() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Afraid() {
+		t.Error(`obj.Sheet.Afraid() was true, want false`)
+	}
+}

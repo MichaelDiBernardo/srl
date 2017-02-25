@@ -76,6 +76,9 @@ type Sheet interface {
 	Confused() bool
 	SetConfused(conf bool)
 
+	Afraid() bool
+	SetAfraid(fear bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -103,6 +106,7 @@ type PlayerSheet struct {
 	stun     StunLevel
 	blind    bool
 	slow     bool
+	afraid   bool
 	confused bool
 }
 
@@ -277,6 +281,14 @@ func (p *PlayerSheet) Slow() bool {
 	return p.slow
 }
 
+func (p *PlayerSheet) SetAfraid(fear bool) {
+	p.afraid = fear
+}
+
+func (p *PlayerSheet) Afraid() bool {
+	return p.afraid
+}
+
 func (p *PlayerSheet) SetConfused(conf bool) {
 	changeconf(p, conf)
 	p.confused = conf
@@ -379,6 +391,7 @@ type MonsterSheet struct {
 	blind    bool
 	slow     bool
 	confused bool
+	afraid   bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -531,6 +544,14 @@ func (m *MonsterSheet) Stun() StunLevel {
 func (m *MonsterSheet) SetStun(level StunLevel) {
 	changestun(m, level)
 	m.stun = level
+}
+
+func (m *MonsterSheet) SetAfraid(fear bool) {
+	m.afraid = fear
+}
+
+func (m *MonsterSheet) Afraid() bool {
+	return m.afraid
 }
 
 func (m *MonsterSheet) SetBlind(b bool) {

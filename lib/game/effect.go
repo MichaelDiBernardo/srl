@@ -252,6 +252,19 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AEFear = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetAfraid(true)
+			msg := fmt.Sprintf("%s is scared.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetAfraid(false)
+			msg := fmt.Sprintf("%s recovers from fear.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.

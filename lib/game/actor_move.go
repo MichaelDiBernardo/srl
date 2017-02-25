@@ -29,6 +29,7 @@ var (
 	ErrMove0Dir        = errors.New("Move0Dir")
 	ErrMoveTooFar      = errors.New("MoveTooFar")
 	ErrMoveHit         = errors.New("MoveHit")
+	ErrTooScaredToHit  = errors.New("TooScaredToHit")
 	ErrMoveBlocked     = errors.New("MoveBlocked")
 	ErrMoveOutOfBounds = errors.New("MoveOutOfBounds")
 	ErrMoveSwapFailed  = errors.New("MoveSwapFailed")
@@ -77,6 +78,11 @@ func (p *ActorMover) Move(dir math.Point) (bool, error) {
 	endtile := obj.Level.At(endpos)
 	if other := endtile.Actor; other != nil {
 		if opposing := obj.IsPlayer() != other.IsPlayer(); opposing {
+			if obj.Sheet.Afraid() {
+				msg := fmt.Sprintf("%s is too afraid to attack %s!", obj.Spec.Name, other.Spec.Name)
+				obj.Game.Events.Message(msg)
+				return false, ErrTooScaredToHit
+			}
 			p.obj.Fighter.Hit(other.Fighter)
 			return true, ErrMoveHit
 		} else {

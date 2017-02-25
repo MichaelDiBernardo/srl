@@ -1,10 +1,13 @@
 NEXT:
-Afraid:
-- [ ] sheet changes [ ] test
-- [ ] activeeffect [ ] test
-
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-
+- Paralyzed:
+    - [ ] melee effect  [ ] test
+    - [ ] sheet changes [ ] test
+      - should have both Para and CanAct, where CanAct is a predicate. 
+    - [ ] activeeffect  [ ] test
+    - If hit, 1 in 2 chance to break para [ ] test
+    - in the game loop that calls Evolve, it should check after every exit from
+      Evolve() if the player can act. If they can't, continue.
 
 
 - Monsters have multiple abilities.

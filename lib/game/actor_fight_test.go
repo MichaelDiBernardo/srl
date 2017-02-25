@@ -59,6 +59,26 @@ func TestMonsterMonsterCollisionsHit(t *testing.T) {
 	}
 }
 
+func TestCantHitWhenAfraid(t *testing.T) {
+	g := newTestGame()
+	monster := g.NewObj(atActorSpec)
+
+	g.Player.Sheet.SetAfraid(true)
+
+	g.Level.Place(g.Player, math.Pt(1, 1))
+	g.Level.Place(monster, math.Pt(1, 2))
+
+	ok, err := g.Player.Mover.Move(math.Pt(0, 1))
+
+	if ok {
+		t.Error(`Attacking while afraid used a turn.`)
+	}
+
+	if err != ErrTooScaredToHit {
+		t.Errorf(`Attacking while afraid gave error %v, want %v`, err, ErrTooScaredToHit)
+	}
+}
+
 type hitTest struct {
 	rolls    []int
 	wanthp   int
