@@ -10,6 +10,7 @@ import (
 type Mover interface {
 	Objgetter
 	Move(dir math.Point) (bool, error)
+	Rest()
 	Ascend() bool
 	Descend() bool
 }
@@ -42,19 +43,28 @@ var (
 // the context of the player's turn -- calling code can decide whether or not a
 // monster's turn should be over, regardless of this value.
 func (p *ActorMover) Move(dir math.Point) (bool, error) {
-	// Validate weirdness.
-	if dist := math.ChebyDist(math.Origin, dir); dist > 1 {
-		return false, ErrMoveTooFar
-	} else if dist == 0 {
-		return false, ErrMove0Dir
-	}
-
 	obj := p.obj
 	conf := obj.Sheet.Confused()
 
-	if conf && OneIn(2) {
-		dir = confusedir(dir)
-		obj.Game.Events.Message(fmt.Sprintf("%v moves the wrong way.", obj.Spec.Name))
+	// Validate weirdness.
+	// Rest() may tell Move() to move 0,0 if the actor is confused, so that's
+	// why we check 'conf' in the second clause.
+	if math.ChebyDist(math.Origin, dir) > 1 {
+		return false, ErrMoveTooFar
+	} else if dir == math.Origin && !conf {
+		return false, ErrMove0Dir
+	}
+
+	if conf {
+		if OneIn(2) {
+			dir = confusedir(dir)
+			obj.Game.Events.Message(fmt.Sprintf("%v moves the wrong way.", obj.Spec.Name))
+		} else if dir == math.Origin {
+			// We're confused and we tried to pass a turn, but we didn't have a
+			// direction chosen for us. This consumes a turn, but we're still
+			// not going to move anywhere.
+			return true, ErrMove0Dir
+		}
 	}
 
 	beginpos := obj.Pos()
@@ -104,6 +114,14 @@ func (p *ActorMover) Move(dir math.Point) (bool, error) {
 	}
 
 	return conf || false, ErrMoveBlocked
+}
+
+// Rest a turn. If p is confused, there is still a chance that it will attempt
+// to move. Calling this should always consume a turn.
+func (p *ActorMover) Rest() {
+	if p.Obj().Sheet.Confused() {
+		p.Move(math.Pt(0, 0))
+	}
 }
 
 // Try to go up stairs. If the current tile is not an upstair, return false.

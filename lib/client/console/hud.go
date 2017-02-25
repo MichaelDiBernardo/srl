@@ -67,6 +67,7 @@ var hudKeymap = map[rune]game.Command{
 	'u': game.MoveCommand{Dir: math.Pt(1, -1)},
 	'b': game.MoveCommand{Dir: math.Pt(-1, 1)},
 	'n': game.MoveCommand{Dir: math.Pt(1, 1)},
+	'z': game.RestCommand{},
 	'q': game.QuitCommand{},
 	',': game.TryPickupCommand{},
 	'd': game.TryDropCommand{},

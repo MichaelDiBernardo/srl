@@ -76,6 +76,8 @@ type QuitCommand struct{}
 
 type MoveCommand struct{ Dir math.Point }
 
+type RestCommand struct{}
+
 type TryPickupCommand struct{}
 
 type TryDropCommand struct{}
@@ -120,6 +122,9 @@ func hudController(g *Game, com Command) bool {
 	case MoveCommand:
 		ok, _ := g.Player.Mover.Move(c.Dir)
 		evolve = ok
+	case RestCommand:
+		g.Player.Mover.Rest()
+		evolve = true
 	case TryPickupCommand:
 		evolve = g.Player.Packer.TryPickup()
 	case TryDropCommand:

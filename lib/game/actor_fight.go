@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 )
 
 // Anything that fights in melee.
@@ -104,7 +103,6 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 	brands := atk.Brands()
 	fixverb := false
 	branddmg, poisondmg, verb = 0, 0, "hits"
-	log.Printf("applybrand: %d %v vs %v", basedmg, atk, def)
 
 	for brand, info := range brands {
 		raw := DieRoll(1, basedmg)
@@ -112,9 +110,7 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 
 		if brand == BrandPoison {
 			poisondmg += resisted
-			log.Printf("\tDid raw:%d resisted:%d poison", raw, resisted)
 		} else {
-			log.Printf("\tDid raw:%d resisted:%d for brand %v", raw, resisted, brand)
 			branddmg += resisted
 		}
 
@@ -135,6 +131,5 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 			verb = newverb
 		}
 	}
-	log.Printf("\tReturning branddmg:%d poisondmg:%d verb:%s", branddmg, poisondmg, verb)
 	return branddmg, poisondmg, verb
 }

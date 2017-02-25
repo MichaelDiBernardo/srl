@@ -1,7 +1,7 @@
 NEXT:
-- should implement Rest() on actor_move, and if confused and resting 25% of the
-  time should move you randomly. Need to decide if move(0,0) means rest or if
-  there should be explicit verb.
+Afraid:
+- [ ] sheet changes [ ] test
+- [ ] activeeffect [ ] test
 
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 
