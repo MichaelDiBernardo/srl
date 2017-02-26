@@ -21,6 +21,7 @@ const (
 	EffectConfuse
 	EffectFear
 	EffectPara
+	EffectSilence
 
 	// Resists
 	ResistFire
@@ -33,6 +34,7 @@ const (
 	ResistConfuse
 	ResistFear
 	ResistPara
+	ResistSilence
 
 	// Sentinel
 	NumEffects
@@ -61,6 +63,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectConfuse:   {Type: EffectTypeStatus, ResistedBy: ResistConfuse},
 	EffectFear:      {Type: EffectTypeStatus, ResistedBy: ResistFear},
 	EffectPara:      {Type: EffectTypeStatus, ResistedBy: ResistPara},
+	EffectSilence:   {Type: EffectTypeStatus, ResistedBy: ResistSilence},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},
@@ -85,4 +88,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectConfuse:   AEConfuse,
 	EffectFear:      AEFear,
 	EffectPara:      AEPara,
+	EffectSilence:   AESilence,
 }

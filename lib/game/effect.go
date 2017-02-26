@@ -278,6 +278,19 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AESilence = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetSilenced(true)
+			msg := fmt.Sprintf("%s is silenced.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetSilenced(false)
+			msg := fmt.Sprintf("%s can speak again.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.

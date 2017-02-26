@@ -416,3 +416,21 @@ func TestActivePara(t *testing.T) {
 		t.Error(`obj.Sheet.Paralyzed() was true, want false`)
 	}
 }
+
+func TestActiveSilence(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectSilence, 1)
+
+	if !obj.Sheet.Silenced() {
+		t.Error(`obj.Sheet.Silenced() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Silenced() {
+		t.Error(`obj.Sheet.Silenced() was true, want false`)
+	}
+}
