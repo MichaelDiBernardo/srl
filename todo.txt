@@ -1,14 +1,15 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-- Cursed:
-    #- [ ] melee effect  [ ] test
-    - [x] sheet changes [x] test
-        - Just a flag
-    - [x] Skillcheck changes [x] test
-        - double-roll and take worst if cursed
-    - [x] Melee changes   [x] test
-        - double-roll and take worst if cursed
-    - [x] activeeffect  [ ] test
+- Stone:
+    - [x] melee effect  [ ] test
+    - [ ] sheet changes [ ] test
+        - We need to implement critical resistance
+        - regen should stop
+        - can't swap with a statue
+        x petrified flag
+        x CanAct should check petrified flag
+        x defense should return static -5,8d4 with a massive crit resistance (+10 or something)
+    - [ ] activeeffect  [ ] test
 
 - Monsters have multiple abilities.
     - Abilities need:

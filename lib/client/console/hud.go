@@ -176,6 +176,9 @@ func (m *mapPanel) Render(g *game.Game) {
 			// not-visible tile, but we still want to draw the player glyph.
 			if hasactor && (tile.Visible || isplayer) {
 				gl = actorGlyphs[tile.Actor.Spec.Species]
+				if tile.Actor.Sheet.Petrified() {
+					gl.Fg = termbox.ColorBlack | termbox.AttrBold
+				}
 			} else if !tile.Items.Empty() {
 				item, stack := tile.Items.Top(), tile.Items.Len() > 1
 				gl = itemGlyphs[item.Spec.Species]

@@ -278,6 +278,19 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AEPetrify = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetPetrified(true)
+			msg := fmt.Sprintf("%s is turned to stone.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetPetrified(false)
+			msg := fmt.Sprintf("%s is no longer a statue.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
 	AESilence = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
 			t.Obj().Sheet.SetSilenced(true)

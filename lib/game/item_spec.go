@@ -27,7 +27,7 @@ var Items = []*Spec{
 				Evasion: 1,
 				Weight:  2,
 				Slot:    SlotHand,
-				Effects: NewEffects(map[Effect]int{EffectPara: 1}),
+				Effects: NewEffects(map[Effect]int{EffectPetrify: 1}),
 			}),
 		},
 	},

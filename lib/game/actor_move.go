@@ -88,7 +88,7 @@ func (p *ActorMover) Move(dir math.Point) (bool, error) {
 		} else {
 			// Traveling monsters should swap with one another, but it's kind
 			// of a pain.
-			if OneIn(2) {
+			if !other.Sheet.Petrified() && OneIn(2) {
 				obj.Level.SwapActors(obj, other)
 				return true, nil
 			}

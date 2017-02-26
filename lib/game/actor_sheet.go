@@ -87,6 +87,9 @@ type Sheet interface {
 	Paralyzed() bool
 	SetParalyzed(para bool)
 
+	Petrified() bool
+	SetPetrified(para bool)
+
 	Silenced() bool
 	SetSilenced(sil bool)
 
@@ -125,15 +128,16 @@ type PlayerSheet struct {
 	mp    int
 	regen int
 
-	stun     StunLevel
-	blind    bool
-	slow     bool
-	afraid   bool
-	confused bool
-	para     bool
-	silence  bool
-	cursed   bool
-	blessed  bool
+	stun      StunLevel
+	blind     bool
+	slow      bool
+	afraid    bool
+	confused  bool
+	para      bool
+	silence   bool
+	cursed    bool
+	blessed   bool
+	petrified bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -275,6 +279,9 @@ func (p *PlayerSheet) MaxMP() int {
 }
 
 func (p *PlayerSheet) Regen() int {
+	if p.Petrified() {
+		return 0
+	}
 	return p.regen
 }
 
@@ -351,6 +358,14 @@ func (p *PlayerSheet) Silenced() bool {
 	return p.silence
 }
 
+func (p *PlayerSheet) SetPetrified(pet bool) {
+	p.petrified = pet
+}
+
+func (p *PlayerSheet) Petrified() bool {
+	return p.petrified
+}
+
 func (p *PlayerSheet) SetCursed(c bool) {
 	p.cursed = c
 }
@@ -368,7 +383,7 @@ func (p *PlayerSheet) Blessed() bool {
 }
 
 func (p *PlayerSheet) CanAct() bool {
-	return !(p.Paralyzed() && !p.Dead())
+	return canact(p)
 }
 
 func (p *PlayerSheet) Attack() Attack {
@@ -432,7 +447,12 @@ func (p *PlayerSheet) Defense() Defense {
 		evasion = parapenalty(Evasion, evasion)
 	}
 
-	dice := body.ProtDice()
+	var dice []Dice
+	if p.Petrified() {
+		dice = []Dice{NewDice(8, 4)}
+	} else {
+		dice = body.ProtDice()
+	}
 	effects := body.ArmorEffects()
 
 	return Defense{
@@ -464,15 +484,16 @@ type MonsterSheet struct {
 
 	regen int
 
-	stun     StunLevel
-	blind    bool
-	slow     bool
-	confused bool
-	afraid   bool
-	para     bool
-	silence  bool
-	cursed   bool
-	blessed  bool
+	stun      StunLevel
+	blind     bool
+	slow      bool
+	confused  bool
+	afraid    bool
+	para      bool
+	silence   bool
+	cursed    bool
+	blessed   bool
+	petrified bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -611,6 +632,9 @@ func (m *MonsterSheet) MaxMP() int {
 }
 
 func (m *MonsterSheet) Regen() int {
+	if m.Petrified() {
+		return 0
+	}
 	return m.regen
 }
 
@@ -662,6 +686,14 @@ func (m *MonsterSheet) Silenced() bool {
 	return m.silence
 }
 
+func (m *MonsterSheet) SetPetrified(p bool) {
+	m.petrified = p
+}
+
+func (m *MonsterSheet) Petrified() bool {
+	return m.petrified
+}
+
 func (m *MonsterSheet) SetSlow(s bool) {
 	m.slow = s
 }
@@ -704,7 +736,7 @@ func (p *MonsterSheet) Blessed() bool {
 }
 
 func (m *MonsterSheet) CanAct() bool {
-	return !(m.Paralyzed() && !m.Dead())
+	return canact(m)
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -717,9 +749,15 @@ func (m *MonsterSheet) Attack() Attack {
 }
 
 func (m *MonsterSheet) Defense() Defense {
+	var dice []Dice
+	if m.Petrified() {
+		dice = []Dice{NewDice(8, 4)}
+	} else {
+		dice = []Dice{m.protroll}
+	}
 	return Defense{
 		Evasion:  m.Skill(Evasion),
-		ProtDice: []Dice{m.protroll},
+		ProtDice: dice,
 		Effects:  m.defeffects,
 	}
 }
@@ -950,6 +988,10 @@ func checkDeath(s Sheet) {
 
 	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
 	game.Kill(obj)
+}
+
+func canact(s Sheet) bool {
+	return !((s.Paralyzed() || s.Petrified()) && !s.Dead())
 }
 
 func blindpenalty(skill SkillName, score int) int {

@@ -96,14 +96,26 @@ func hit(attacker Fighter, defender Fighter) {
 			if defender.Obj().Sheet.Paralyzed() {
 				checkpara(defender)
 				break
-			} else {
 			}
+
 			score := 10
 			difficulty := defender.Obj().Sheet.Skill(Chi)
 			resists := resistmod(def.Effects.Resists(effect))
 			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
 			if won {
 				defender.Obj().Ticker.AddEffect(EffectPara, DieRoll(4, 4))
+			}
+		case EffectPetrify:
+			// Don't let the effect accumulate.
+			if defender.Obj().Sheet.Petrified() {
+				break
+			}
+			score := 10
+			difficulty := defender.Obj().Sheet.Skill(Chi)
+			resists := resistmod(def.Effects.Resists(effect))
+			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
+			if won {
+				defender.Obj().Ticker.AddEffect(EffectPetrify, DieRoll(4, 4))
 			}
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
