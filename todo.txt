@@ -1,9 +1,14 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-- Silenced:
+- Cursed:
     #- [ ] melee effect  [ ] test
-    - [ ] sheet changes [ ] test
-    - [ ] activeeffect  [ ] test
+    - [x] sheet changes [ ] test
+        - Just a flag
+    - [x] Skillcheck changes [ ] test
+        - double-roll and take worst if cursed
+    - [x] Melee changes   [ ] test
+        - double-roll and take worst if cursed
+    - [x] activeeffect  [ ] test
 
 - Monsters have multiple abilities.
     - Abilities need:

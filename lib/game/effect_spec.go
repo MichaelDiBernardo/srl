@@ -22,6 +22,7 @@ const (
 	EffectFear
 	EffectPara
 	EffectSilence
+	EffectCurse
 
 	// Resists
 	ResistFire
@@ -35,6 +36,7 @@ const (
 	ResistFear
 	ResistPara
 	ResistSilence
+	ResistCurse
 
 	// Sentinel
 	NumEffects
@@ -64,6 +66,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectFear:      {Type: EffectTypeStatus, ResistedBy: ResistFear},
 	EffectPara:      {Type: EffectTypeStatus, ResistedBy: ResistPara},
 	EffectSilence:   {Type: EffectTypeStatus, ResistedBy: ResistSilence},
+	EffectCurse:     {Type: EffectTypeStatus, ResistedBy: ResistCurse},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},
@@ -75,6 +78,7 @@ var EffectsSpecs = EffectsSpec{
 	ResistConfuse: {Type: EffectTypeResist},
 	ResistFear:    {Type: EffectTypeResist},
 	ResistPara:    {Type: EffectTypeResist},
+	ResistCurse:   {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.
@@ -89,4 +93,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectFear:      AEFear,
 	EffectPara:      AEPara,
 	EffectSilence:   AESilence,
+	EffectCurse:     AECurse,
 }

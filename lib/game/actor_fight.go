@@ -28,7 +28,11 @@ func (f *ActorFighter) Hit(other Fighter) {
 
 func hit(attacker Fighter, defender Fighter) {
 	atk, def := attacker.Obj().Sheet.Attack(), defender.Obj().Sheet.Defense()
-	residual := DieRoll(1, 20) + atk.Melee - DieRoll(1, 20) + def.Evasion
+
+	atkroll := combatroll(attacker.Obj()) + atk.Melee
+	defroll := combatroll(defender.Obj()) + def.Evasion
+	residual := atkroll - defroll
+
 	aname, dname := attacker.Obj().Spec.Name, defender.Obj().Spec.Name
 
 	if residual <= 0 {

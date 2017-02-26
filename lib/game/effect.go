@@ -291,6 +291,19 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AECurse = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			t.Obj().Sheet.SetCursed(true)
+			msg := fmt.Sprintf("%s is cursed.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetCursed(false)
+			msg := fmt.Sprintf("%s is no longer cursed.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.

@@ -88,6 +88,9 @@ type Sheet interface {
 	Silenced() bool
 	SetSilenced(sil bool)
 
+	Cursed() bool
+	SetCursed(c bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -123,6 +126,7 @@ type PlayerSheet struct {
 	confused bool
 	para     bool
 	silence  bool
+	cursed   bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -336,6 +340,14 @@ func (p *PlayerSheet) Silenced() bool {
 	return p.silence
 }
 
+func (p *PlayerSheet) SetCursed(c bool) {
+	p.cursed = c
+}
+
+func (p *PlayerSheet) Cursed() bool {
+	return p.cursed
+}
+
 func (p *PlayerSheet) CanAct() bool {
 	return !(p.Paralyzed() && !p.Dead())
 }
@@ -440,6 +452,7 @@ type MonsterSheet struct {
 	afraid   bool
 	para     bool
 	silence  bool
+	cursed   bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -648,6 +661,14 @@ func (m *MonsterSheet) SetParalyzed(b bool) {
 
 func (m *MonsterSheet) Paralyzed() bool {
 	return m.para
+}
+
+func (p *MonsterSheet) SetCursed(c bool) {
+	p.cursed = c
+}
+
+func (p *MonsterSheet) Cursed() bool {
+	return p.cursed
 }
 
 func (m *MonsterSheet) CanAct() bool {

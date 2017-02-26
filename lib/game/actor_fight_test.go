@@ -201,7 +201,9 @@ func TestHitPara(t *testing.T) {
 	// roll 12 blind turns (3 * 4).)
 	// We'll hit a second time, this time hitting for 1 damage. We fix the die
 	// so that it breaks the defender out of para.
-	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3 /* second attack */, 7, 1, 1, 1})
+	// We use 2 as our secondn attack roll because the defender will already be
+	// at -5 due to being paralyzed.
+	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3 /* second attack */, 2, 1, 1, 1})
 	defer RestoreRandom()
 
 	attacker.Fighter.Hit(defender.Fighter)
