@@ -51,6 +51,10 @@ func hit(attacker Fighter, defender Fighter) {
 	msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
 	attacker.Obj().Game.Events.Message(msg)
 
+	if dmg <= 0 {
+		return
+	}
+
 	for effect, _ := range atk.Effects {
 		switch effect {
 		case BrandPoison:
@@ -82,12 +86,28 @@ func hit(attacker Fighter, defender Fighter) {
 			if won {
 				defender.Obj().Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
 			}
+		case EffectPara:
+			// Don't let the effect accumulate; also, give the defender a
+			// chance to break out when they are hurt.
+			if defender.Obj().Sheet.Paralyzed() {
+				checkpara(defender)
+				break
+			} else {
+			}
+			score := 10
+			difficulty := defender.Obj().Sheet.Skill(Chi)
+			resists := resistmod(def.Effects.Resists(effect))
+			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
+			if won {
+				defender.Obj().Ticker.AddEffect(EffectPara, DieRoll(4, 4))
+			}
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
 				defender.Obj().Ticker.AddEffect(EffectCut, dmg/2)
 			}
 		}
 	}
+
 	defender.Obj().Sheet.Hurt(dmg)
 }
 
@@ -132,4 +152,20 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 		}
 	}
 	return branddmg, poisondmg, verb
+}
+
+func checkpara(defender Fighter) {
+	obj := defender.Obj()
+	sheet := obj.Sheet
+	if !sheet.Paralyzed() {
+		return
+	}
+
+	if OneIn(2) {
+		msg := fmt.Sprintf("%s breaks out of paralysis!", obj.Spec.Name)
+		obj.Game.Events.Message(msg)
+
+		sheet.SetParalyzed(false)
+		obj.Ticker.RemoveEffect(EffectPara)
+	}
 }

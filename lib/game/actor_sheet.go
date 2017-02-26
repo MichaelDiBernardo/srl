@@ -44,6 +44,9 @@ type Sheet interface {
 	// Get this actor's maximum HP.
 	MaxHP() int
 
+	// Does this actor still have > 0 HP?
+	Dead() bool
+
 	// Remove 'dmg' hitpoints. Will kill the actor if HP falls <= 0.
 	Hurt(dmg int)
 	// Heal 'amt' hp; actor's hp will not exceed maxhp.
@@ -79,6 +82,9 @@ type Sheet interface {
 	Afraid() bool
 	SetAfraid(fear bool)
 
+	Paralyzed() bool
+	SetParalyzed(para bool)
+
 	// Sight radius.
 	Sight() int
 
@@ -88,6 +94,10 @@ type Sheet interface {
 	// 3: Fast (1.5x normal)
 	// 4: Very fast (2.x normal)
 	Speed() int
+
+	// Can this actor do stuff right now. This is false if they are paralyzed,
+	// asleep, etc.
+	CanAct() bool
 }
 
 // Sheet used for player, which has a lot of derived attributes.
@@ -108,6 +118,7 @@ type PlayerSheet struct {
 	slow     bool
 	afraid   bool
 	confused bool
+	para     bool
 }
 
 func NewPlayerSheet(obj *Obj) Sheet {
@@ -187,6 +198,9 @@ func (p *PlayerSheet) Skill(skill SkillName) int {
 	if p.blind {
 		s = blindpenalty(skill, s)
 	}
+	if !p.CanAct() {
+		s = parapenalty(skill, s)
+	}
 	return s
 }
 
@@ -211,6 +225,10 @@ func (p *PlayerSheet) Speed() int {
 		return slowpenalty(p.speed)
 	}
 	return p.speed
+}
+
+func (p *PlayerSheet) Dead() bool {
+	return p.HP() <= 0
 }
 
 func (p *PlayerSheet) HP() int {
@@ -298,6 +316,18 @@ func (p *PlayerSheet) Confused() bool {
 	return p.confused
 }
 
+func (p *PlayerSheet) SetParalyzed(b bool) {
+	p.para = b
+}
+
+func (p *PlayerSheet) Paralyzed() bool {
+	return p.para
+}
+
+func (p *PlayerSheet) CanAct() bool {
+	return !(p.Paralyzed() && !p.Dead())
+}
+
 func (p *PlayerSheet) Attack() Attack {
 	// We use skills.skill instead of Skill because Skill already applies the
 	// blind penalty. We need to avoid it so we can apply the penalty to the
@@ -355,6 +385,10 @@ func (p *PlayerSheet) Defense() Defense {
 	if p.blind {
 		evasion = blindpenalty(Evasion, evasion)
 	}
+	if !p.CanAct() {
+		evasion = parapenalty(Evasion, evasion)
+	}
+
 	dice := body.ProtDice()
 	effects := body.ArmorEffects()
 
@@ -392,6 +426,7 @@ type MonsterSheet struct {
 	slow     bool
 	confused bool
 	afraid   bool
+	para     bool
 
 	// Basically weapon weight.
 	critdivmod int
@@ -468,6 +503,9 @@ func (m *MonsterSheet) Skill(skill SkillName) int {
 	if m.blind {
 		s = blindpenalty(skill, s)
 	}
+	if !m.CanAct() {
+		s = parapenalty(skill, s)
+	}
 	return s
 }
 
@@ -492,6 +530,10 @@ func (m *MonsterSheet) Speed() int {
 		return slowpenalty(m.speed)
 	}
 	return m.speed
+}
+
+func (m *MonsterSheet) Dead() bool {
+	return m.HP() <= 0
 }
 
 func (m *MonsterSheet) HP() int {
@@ -577,6 +619,18 @@ func (m *MonsterSheet) SetConfused(conf bool) {
 
 func (m *MonsterSheet) Confused() bool {
 	return m.confused
+}
+
+func (m *MonsterSheet) SetParalyzed(b bool) {
+	m.para = b
+}
+
+func (m *MonsterSheet) Paralyzed() bool {
+	return m.para
+}
+
+func (m *MonsterSheet) CanAct() bool {
+	return !(m.Paralyzed() && !m.Dead())
 }
 
 func (m *MonsterSheet) Attack() Attack {
@@ -807,7 +861,7 @@ func changeconf(s Sheet, newc bool) {
 }
 
 func checkDeath(s Sheet) {
-	if s.HP() > 0 {
+	if !s.Dead() {
 		return
 	}
 
@@ -821,6 +875,13 @@ func checkDeath(s Sheet) {
 func blindpenalty(skill SkillName, score int) int {
 	if skill == Melee || skill == Evasion || skill == Shooting {
 		return score / 2
+	}
+	return score
+}
+
+func parapenalty(skill SkillName, score int) int {
+	if skill == Evasion {
+		return -5
 	}
 	return score
 }
@@ -843,6 +904,3 @@ const (
 
 // The base divisor to use for crits.
 const BaseCritDiv = 7
-
-// This is what evasion should be when things are horribly wrong.
-const dumpsterEvasion = -5

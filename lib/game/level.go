@@ -135,7 +135,7 @@ func (l *Level) Evolve() {
 		actor := l.scheduler.Next()
 		actor.Ticker.Tick(l.scheduler.delay)
 
-		if ai := actor.AI; ai != nil {
+		if ai := actor.AI; ai != nil && actor.Sheet.CanAct() {
 			ai.Act()
 		}
 		if actor.IsPlayer() {

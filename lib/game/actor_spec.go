@@ -72,7 +72,7 @@ var Monsters = []*Spec{
 				damroll:  NewDice(2, 7),
 				protroll: NewDice(1, 4),
 
-				atkeffects: NewEffects(map[Effect]int{EffectConfuse: 1}),
+				atkeffects: NewEffects(map[Effect]int{}),
 			}),
 		},
 	},
@@ -82,7 +82,7 @@ var Monsters = []*Spec{
 		Species: SpecAnt,
 		Name:    "DRAGON",
 		Gen: Gen{
-			Floors:    []int{1},
+			Floors:    []int{10},
 			GroupSize: 1,
 		},
 		Traits: &Traits{

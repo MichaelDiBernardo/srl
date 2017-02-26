@@ -41,8 +41,15 @@ func (g *Game) NewObj(spec *Spec) *Obj {
 func (g *Game) Handle(c Command) {
 	evolve := controllers[g.mode](g, c)
 	if evolve {
-		g.Level.Evolve()
-		g.Turns++
+		for {
+			g.Level.Evolve()
+			g.Turns++
+			// If player is para/stone/whatever, keep evolving the game because
+			// they can't do anything right now.
+			if g.Player.Sheet.CanAct() {
+				break
+			}
+		}
 	}
 }
 

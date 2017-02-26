@@ -6,7 +6,13 @@ type Ticker interface {
 	// Notify the actor that 'delay' time has passed. This must be called
 	// exactly once per actor turn, before the actor acts.
 	Tick(delay int)
+	// Add an active effect to this actor for a duration of 'counter'. It is up
+	// to the corresponding ActiveEffect to decide how to interpret the units
+	// of counter (may be in delay, may be in turns, etc.)
 	AddEffect(e Effect, counter int)
+	// Forcibly remove an activeeffect, if it exists. Returns 'true' if there
+	// was a nonzero counter to remove.
+	RemoveEffect(e Effect) bool
 	// What is the counter remaining for the current effect?
 	Counter(e Effect) int
 }
@@ -73,6 +79,16 @@ func (t *ActorTicker) AddEffect(e Effect, counter int) {
 		ae.Counter += counter
 	}
 	ae.OnBegin(ae, t, prev)
+}
+
+func (t *ActorTicker) RemoveEffect(e Effect) bool {
+	ae := t.Effects[e]
+	if ae == nil {
+		return false
+	}
+	ae.OnEnd(ae, t)
+	delete(t.Effects, e)
+	return true
 }
 
 func (t *ActorTicker) Counter(e Effect) int {
