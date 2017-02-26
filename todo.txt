@@ -64,6 +64,8 @@ Stuff:
 - regen SP
 
 Bugs:
+- When Con is boosted or drained, current HP needs to scale up or down
+  accordingly.
 
 HAX:
 - items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???

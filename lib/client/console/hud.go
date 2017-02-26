@@ -121,6 +121,7 @@ var itemGlyphs = map[game.Species]glyph{
 	game.SpecLeatherArmor: glyph{Ch: '[', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
 	game.SpecCure:         glyph{Ch: '!', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 	game.SpecStim:         glyph{Ch: '!', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
+	game.SpecHyper:        glyph{Ch: '!', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
 }
 
 // Glyphs used to render tiles.

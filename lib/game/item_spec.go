@@ -5,8 +5,9 @@ const (
 	SpecSword        = "sword"
 	SpecLeatherArmor = "leatherarmor"
 
-	SpecCure = "cure"
-	SpecStim = "stim"
+	SpecCure  = "cure"
+	SpecStim  = "stim"
+	SpecHyper = "hyper"
 )
 
 var Items = []*Spec{
@@ -74,6 +75,19 @@ var Items = []*Spec{
 		},
 		Traits: &Traits{
 			Consumable: NewConsumable(stimfunc),
+		},
+	},
+	&Spec{
+		Family:  FamItem,
+		Genus:   GenConsumable,
+		Species: SpecHyper,
+		Name:    "HYPER",
+		Gen: Gen{
+			Floors:    []int{1},
+			GroupSize: 1,
+		},
+		Traits: &Traits{
+			Consumable: NewConsumable(hyperfunc),
 		},
 	},
 }

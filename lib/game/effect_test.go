@@ -476,3 +476,27 @@ func TestActiveStim(t *testing.T) {
 		}
 	}
 }
+
+func TestActiveHyper(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	// Stimming twice should still only give one buff.
+	obj.Ticker.AddEffect(EffectHyper, 1)
+	obj.Ticker.AddEffect(EffectHyper, 1)
+
+	for stat := Str; stat < NumStats; stat++ {
+		if s := obj.Sheet.StatMod(stat); s != 2 {
+			t.Errorf(`Stat %v had mod %d after stat, want 2`, stat, s)
+		}
+	}
+
+	obj.Ticker.Tick(0)
+	obj.Ticker.Tick(0)
+	for stat := Str; stat < NumStats; stat++ {
+		if s := obj.Sheet.StatMod(stat); s != 0 {
+			t.Errorf(`Stat %v had mod %d after stat, want 0`, stat, s)
+		}
+	}
+}

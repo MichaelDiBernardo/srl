@@ -64,3 +64,8 @@ func stimfunc(user User) {
 	u.Sheet.Hurt(DieRoll(4, 4))
 	u.Ticker.AddEffect(EffectStim, DieRoll(20, 4))
 }
+
+func hyperfunc(user User) {
+	u := user.Obj()
+	u.Ticker.AddEffect(EffectHyper, DieRoll(20, 4))
+}

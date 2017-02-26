@@ -25,6 +25,7 @@ const (
 	EffectCurse
 	EffectBless
 	EffectStim
+	EffectHyper
 
 	// Resists
 	ResistFire
@@ -71,6 +72,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectCurse:     {Type: EffectTypeStatus, ResistedBy: ResistCurse},
 	EffectBless:     {Type: EffectTypeStatus},
 	EffectStim:      {Type: EffectTypeStatus},
+	EffectHyper:     {Type: EffectTypeStatus},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},
@@ -99,4 +101,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectSilence:   AESilence,
 	EffectCurse:     AECurse,
 	EffectStim:      AEStim,
+	EffectHyper:     AEHyper,
 }

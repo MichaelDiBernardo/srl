@@ -19,6 +19,8 @@ type Sheet interface {
 	UnmodStat(stat StatName) int
 	// Get the mod for statistic 'stat'.
 	StatMod(stat StatName) int
+	// Change the mod for 'stat' by 'diff'.
+	ChangeStatMod(stat StatName, diff int)
 
 	// Get the total value for skill 'skill', including mods.
 	Skill(skill SkillName) int
@@ -204,6 +206,10 @@ func (p *PlayerSheet) UnmodStat(stat StatName) int {
 
 func (p *PlayerSheet) StatMod(stat StatName) int {
 	return p.stats.mod(stat)
+}
+
+func (p *PlayerSheet) ChangeStatMod(stat StatName, diff int) {
+	p.stats.changemod(stat, diff)
 }
 
 func (p *PlayerSheet) Skill(skill SkillName) int {
@@ -538,6 +544,10 @@ func (m *MonsterSheet) StatMod(stat StatName) int {
 	return m.stats.mod(stat)
 }
 
+func (m *MonsterSheet) ChangeStatMod(stat StatName, diff int) {
+	m.stats.changemod(stat, diff)
+}
+
 func (m *MonsterSheet) Skill(skill SkillName) int {
 	s := m.skills.skill(skill)
 	if m.blind {
@@ -729,6 +739,12 @@ func modMndSkills(s Sheet, diff int) {
 func modAllSkills(s Sheet, diff int) {
 	modAgiSkills(s, diff)
 	modMndSkills(s, diff)
+}
+
+func modAllStats(s Sheet, diff int) {
+	for stat := Str; stat < NumStats; stat++ {
+		s.ChangeStatMod(stat, diff)
+	}
 }
 
 // Maintains stats and modifications for a sheet.

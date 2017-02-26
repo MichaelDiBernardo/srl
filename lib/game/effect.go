@@ -319,6 +319,21 @@ var (
 			modAllSkills(t.Obj().Sheet, -2)
 		},
 	}
+	AEHyper = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			msg := fmt.Sprintf("%s is supercharged!", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			if prev == 0 {
+				modAllStats(t.Obj().Sheet, 2)
+			}
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s feels the supercharge wear off.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			modAllStats(t.Obj().Sheet, -2)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.
