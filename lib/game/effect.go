@@ -304,6 +304,19 @@ var (
 			t.Obj().Game.Events.Message(msg)
 		},
 	}
+	AEStim = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+			msg := fmt.Sprintf("%s feels a rush!", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			modAllSkills(t.Obj().Sheet, 2)
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s feels the rush wear off.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			modAllSkills(t.Obj().Sheet, -2)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.

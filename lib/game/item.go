@@ -57,3 +57,10 @@ func curefunc(user User) {
 	u.Sheet.Heal(40)
 	u.Game.Events.Message(fmt.Sprintf("%s recovers.", u.Spec.Name))
 }
+
+func stimfunc(user User) {
+	u := user.Obj()
+	u.Game.Events.Message(fmt.Sprintf("%s is wracked with pain.", u.Spec.Name))
+	u.Sheet.Hurt(DieRoll(4, 4))
+	u.Ticker.AddEffect(EffectStim, DieRoll(20, 4))
+}

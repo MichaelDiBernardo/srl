@@ -452,3 +452,24 @@ func TestActiveCursed(t *testing.T) {
 		t.Error(`obj.Sheet.Cursed() was true, want false`)
 	}
 }
+
+func TestActiveStim(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectStim, 1)
+
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != 2 {
+			t.Errorf(`Skill %v had mod %d after stim, want 2`, skill, s)
+		}
+	}
+
+	obj.Ticker.Tick(0)
+	for skill := Melee; skill < NumSkills; skill++ {
+		if s := obj.Sheet.SkillMod(skill); s != 0 {
+			t.Errorf(`Skill %v had mod %d after stun, want 0`, skill, s)
+		}
+	}
+}
