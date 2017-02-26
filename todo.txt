@@ -1,16 +1,9 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-- Paralyzed:
-    - [x] melee effect  [ ] test
-    - [x] sheet changes [ ] test
-        - evasion should be set to -5
-      - should have both Para and CanAct, where CanAct is a predicate. 
-    - [x] activeeffect  [ ] test
-    - [x] If hurt, 1 in 2 chance to break para [ ] test
-    - [x] in the game loop that calls Evolve, it should check after every exit from
-      Evolve() if the player can act. If they can't, continue.
-    - Figure out why para isn't triggering on hit as often as it should?
-
+- Silenced:
+    #- [ ] melee effect  [ ] test
+    - [ ] sheet changes [ ] test
+    - [ ] activeeffect  [ ] test
 
 - Monsters have multiple abilities.
     - Abilities need:

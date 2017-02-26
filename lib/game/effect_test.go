@@ -398,3 +398,21 @@ func TestActiveFear(t *testing.T) {
 		t.Error(`obj.Sheet.Afraid() was true, want false`)
 	}
 }
+
+func TestActivePara(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectPara, 1)
+
+	if !obj.Sheet.Paralyzed() {
+		t.Error(`obj.Sheet.Paralyzed() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Paralyzed() {
+		t.Error(`obj.Sheet.Paralyzed() was true, want false`)
+	}
+}

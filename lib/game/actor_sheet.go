@@ -316,8 +316,8 @@ func (p *PlayerSheet) Confused() bool {
 	return p.confused
 }
 
-func (p *PlayerSheet) SetParalyzed(b bool) {
-	p.para = b
+func (p *PlayerSheet) SetParalyzed(para bool) {
+	p.para = para
 }
 
 func (p *PlayerSheet) Paralyzed() bool {

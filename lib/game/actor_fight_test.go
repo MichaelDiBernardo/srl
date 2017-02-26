@@ -193,6 +193,33 @@ func TestHitCut(t *testing.T) {
 	}
 }
 
+func TestHitPara(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectPara: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, and make sure to win skillroll (10 vs 0 on d10s. We then
+	// roll 12 blind turns (3 * 4).)
+	// We'll hit a second time, this time hitting for 1 damage. We fix the die
+	// so that it breaks the defender out of para.
+	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3 /* second attack */, 7, 1, 1, 1})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if para := defender.Ticker.Counter(EffectPara); para != 12 {
+		t.Errorf(`Para counter %d; want 12`, para)
+	}
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if para := defender.Ticker.Counter(EffectPara); para != 0 {
+		t.Errorf(`Para counter %d; want 0`, para)
+	}
+	if defender.Sheet.Paralyzed() {
+		t.Error(`defender.Sheet.Paralyzed() was true, want false`)
+	}
+}
+
 func TestHitBlind(t *testing.T) {
 	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectBlind: 1}))
 	g := newTestGame()

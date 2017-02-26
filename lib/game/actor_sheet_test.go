@@ -344,3 +344,24 @@ func TestPlayerConfuse(t *testing.T) {
 		}
 	}
 }
+
+func TestPlayerPara(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	sheet := NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}, hp: 10})
+	obj.Sheet = sheet
+
+	sheet.SetParalyzed(true)
+
+	if ev := sheet.Skill(Evasion); ev != -5 {
+		t.Errorf(`Para evasion %d, want -5`, ev)
+	}
+
+	if ev := sheet.Defense().Evasion; ev != -5 {
+		t.Errorf(`Para Defense().Evasion %d, want -5`, ev)
+	}
+
+	if sheet.CanAct() {
+		t.Error(`Para CanAct() was true, want false`)
+	}
+}
