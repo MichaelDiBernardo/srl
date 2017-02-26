@@ -2,11 +2,11 @@ NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 - Cursed:
     #- [ ] melee effect  [ ] test
-    - [x] sheet changes [ ] test
+    - [x] sheet changes [x] test
         - Just a flag
-    - [x] Skillcheck changes [ ] test
+    - [x] Skillcheck changes [x] test
         - double-roll and take worst if cursed
-    - [x] Melee changes   [ ] test
+    - [x] Melee changes   [x] test
         - double-roll and take worst if cursed
     - [x] activeeffect  [ ] test
 

@@ -434,3 +434,21 @@ func TestActiveSilence(t *testing.T) {
 		t.Error(`obj.Sheet.Silenced() was true, want false`)
 	}
 }
+
+func TestActiveCursed(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectCurse, 1)
+
+	if !obj.Sheet.Cursed() {
+		t.Error(`obj.Sheet.Cursed() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Cursed() {
+		t.Error(`obj.Sheet.Cursed() was true, want false`)
+	}
+}

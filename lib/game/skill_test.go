@@ -18,7 +18,7 @@ var stActorSpec = &Spec{
 	},
 }
 
-func TestSkillCheckLost(t *testing.T) {
+func TestSkillcheckLost(t *testing.T) {
 	g := newTestGame()
 	challenger := g.NewObj(stActorSpec)
 
@@ -35,7 +35,7 @@ func TestSkillCheckLost(t *testing.T) {
 	}
 }
 
-func TestSkillCheckWon(t *testing.T) {
+func TestSkillcheckWon(t *testing.T) {
 	g := newTestGame()
 	challenger := g.NewObj(stActorSpec)
 
@@ -52,7 +52,7 @@ func TestSkillCheckWon(t *testing.T) {
 	}
 }
 
-func TestSkillCheckTie(t *testing.T) {
+func TestSkillcheckTie(t *testing.T) {
 	g := newTestGame()
 	challenger := g.NewObj(stActorSpec)
 
@@ -69,7 +69,7 @@ func TestSkillCheckTie(t *testing.T) {
 	}
 }
 
-func TestSkillCheckResistsAdd10(t *testing.T) {
+func TestSkillcheckResistsAdd10(t *testing.T) {
 	g := newTestGame()
 	challenger := g.NewObj(stActorSpec)
 
@@ -102,4 +102,58 @@ func TestSkillCheckResistsAdd10(t *testing.T) {
 	if by != 19 {
 		t.Errorf(`skillcheck(): by is %d, want 19`, by)
 	}
+}
+
+func TestSkillcheckChallengerCursed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	challenger.Sheet.SetCursed(true)
+
+	// Should pick the 4 over the 5.
+	FixRandomDie([]int{4, 5, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, nil)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
+func TestSkillcheckDefenderCursed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	defender := g.NewObj(stActorSpec)
+	defender.Sheet.SetCursed(true)
+
+	// Should pick the 7 over the 9.
+	FixRandomDie([]int{4, 9, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, defender)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
+func TestCombatrollRollerCursed(t *testing.T) {
+	g := newTestGame()
+	dude := g.NewObj(stActorSpec)
+	dude.Sheet.SetCursed(true)
+
+	// Should pick the 4 over the 9.
+	FixRandomDie([]int{9, 4})
+	defer RestoreRandom()
+
+	if roll := combatroll(dude); roll != 4 {
+		t.Errorf(`combatroll() was %d, want 4`, roll)
+	}
+
 }
