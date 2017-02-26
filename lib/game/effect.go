@@ -305,10 +305,12 @@ var (
 		},
 	}
 	AEStim = ActiveEffect{
-		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
 			msg := fmt.Sprintf("%s feels a rush!", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
-			modAllSkills(t.Obj().Sheet, 2)
+			if prev == 0 {
+				modAllSkills(t.Obj().Sheet, 2)
+			}
 		},
 		OnTick: basictick,
 		OnEnd: func(_ *ActiveEffect, t Ticker) {

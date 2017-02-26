@@ -458,6 +458,8 @@ func TestActiveStim(t *testing.T) {
 	obj := g.Player
 	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
 
+	// Stimming twice should still only give one buff.
+	obj.Ticker.AddEffect(EffectStim, 1)
 	obj.Ticker.AddEffect(EffectStim, 1)
 
 	for skill := Melee; skill < NumSkills; skill++ {
@@ -466,6 +468,7 @@ func TestActiveStim(t *testing.T) {
 		}
 	}
 
+	obj.Ticker.Tick(0)
 	obj.Ticker.Tick(0)
 	for skill := Melee; skill < NumSkills; skill++ {
 		if s := obj.Sheet.SkillMod(skill); s != 0 {
