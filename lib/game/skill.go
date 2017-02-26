@@ -41,7 +41,8 @@ func sroll(roller *Obj, sides int) int {
 	roll := DieRoll(1, sides)
 
 	hassheet := roller != nil && roller.Sheet != nil
-	blessed, cursed := hassheet && false, hassheet && roller.Sheet.Cursed()
+	blessed := hassheet && roller.Sheet.Blessed()
+	cursed := hassheet && roller.Sheet.Cursed()
 
 	if blessed == cursed {
 		return roll

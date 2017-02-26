@@ -23,6 +23,7 @@ const (
 	EffectPara
 	EffectSilence
 	EffectCurse
+	EffectBless
 
 	// Resists
 	ResistFire
@@ -67,6 +68,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectPara:      {Type: EffectTypeStatus, ResistedBy: ResistPara},
 	EffectSilence:   {Type: EffectTypeStatus, ResistedBy: ResistSilence},
 	EffectCurse:     {Type: EffectTypeStatus, ResistedBy: ResistCurse},
+	EffectBless:     {Type: EffectTypeStatus},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},

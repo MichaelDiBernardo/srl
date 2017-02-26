@@ -143,6 +143,85 @@ func TestSkillcheckDefenderCursed(t *testing.T) {
 	}
 }
 
+func TestSkillcheckDefenderBlessedAndCursed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	defender := g.NewObj(stActorSpec)
+	defender.Sheet.SetCursed(true)
+	defender.Sheet.SetBlessed(true)
+
+	FixRandomDie([]int{4, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, defender)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
+func TestSkillcheckChallengerBlessed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	challenger.Sheet.SetBlessed(true)
+
+	// Should pick the 4 over the 2.
+	FixRandomDie([]int{4, 2, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, nil)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
+func TestSkillcheckDefenderBlessed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	defender := g.NewObj(stActorSpec)
+	defender.Sheet.SetBlessed(true)
+
+	// Should pick the 7 over the 5.
+	FixRandomDie([]int{4, 5, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, defender)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
+func TestSkillcheckDefenderCursedAndBlessed(t *testing.T) {
+	g := newTestGame()
+	challenger := g.NewObj(stActorSpec)
+	defender := g.NewObj(stActorSpec)
+	defender.Sheet.SetBlessed(true)
+	defender.Sheet.SetCursed(true)
+
+	FixRandomDie([]int{4, 7})
+	defer RestoreRandom()
+
+	won, by := skillcheck(1, 2, 0, challenger, defender)
+
+	if won {
+		t.Error(`skillcheck(): won is true, want false`)
+	}
+	if by != -4 {
+		t.Errorf(`skillcheck(): by is %d, want -4`, by)
+	}
+}
+
 func TestCombatrollRollerCursed(t *testing.T) {
 	g := newTestGame()
 	dude := g.NewObj(stActorSpec)
@@ -155,5 +234,32 @@ func TestCombatrollRollerCursed(t *testing.T) {
 	if roll := combatroll(dude); roll != 4 {
 		t.Errorf(`combatroll() was %d, want 4`, roll)
 	}
+}
 
+func TestCombatrollRollerBlessed(t *testing.T) {
+	g := newTestGame()
+	dude := g.NewObj(stActorSpec)
+	dude.Sheet.SetBlessed(true)
+
+	// Should pick the 9 over the 4.
+	FixRandomDie([]int{4, 9})
+	defer RestoreRandom()
+
+	if roll := combatroll(dude); roll != 9 {
+		t.Errorf(`combatroll() was %d, want 9`, roll)
+	}
+}
+
+func TestCombatrollRollerBlessedAndCursed(t *testing.T) {
+	g := newTestGame()
+	dude := g.NewObj(stActorSpec)
+	dude.Sheet.SetBlessed(true)
+	dude.Sheet.SetCursed(true)
+
+	FixRandomDie([]int{9})
+	defer RestoreRandom()
+
+	if roll := combatroll(dude); roll != 9 {
+		t.Errorf(`combatroll() was %d, want 9`, roll)
+	}
 }
