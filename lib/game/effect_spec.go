@@ -27,6 +27,7 @@ const (
 	EffectBless
 	EffectStim
 	EffectHyper
+	EffectVamp
 
 	// Resists
 	ResistFire
@@ -43,6 +44,7 @@ const (
 	ResistCurse
 	ResistPetrify
 	ResistCrit
+	ResistVamp
 
 	// Sentinel
 	NumEffects
@@ -77,6 +79,7 @@ var EffectsSpecs = EffectsSpec{
 	EffectBless:     {Type: EffectTypeStatus},
 	EffectStim:      {Type: EffectTypeStatus},
 	EffectHyper:     {Type: EffectTypeStatus},
+	EffectVamp:      {Type: EffectTypeStatus, ResistedBy: ResistVamp},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},
@@ -91,6 +94,7 @@ var EffectsSpecs = EffectsSpec{
 	ResistCurse:   {Type: EffectTypeResist},
 	ResistPetrify: {Type: EffectTypeResist},
 	ResistCrit:    {Type: EffectTypeResist},
+	ResistVamp:    {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.

@@ -61,6 +61,11 @@ type Sheet interface {
 	// Get this actor's current MP.
 	MaxMP() int
 
+	// Remove 'amt' mp. Will clamp MP to 0.
+	HurtMP(amt int)
+	// Add 'amt' mp; actor's mp will not exceed maxmp.
+	HealMP(amt int)
+
 	// Regen factor. Normal healing is 1; 2 is twice as fast, etc.
 	// 0 means no regen.
 	Regen() int
@@ -146,7 +151,7 @@ func NewPlayerSheet(obj *Obj) Sheet {
 		stats: &stats{
 			stats: statlist{
 				Str: 2,
-				Agi: 4,
+				Agi: 5,
 				Vit: 4,
 				Mnd: 3,
 			},
@@ -298,6 +303,14 @@ func (p *PlayerSheet) Hurt(dmg int) {
 
 func (p *PlayerSheet) Heal(amt int) {
 	heal(p, amt)
+}
+
+func (p *PlayerSheet) HurtMP(amt int) {
+	hurtmp(p, amt)
+}
+
+func (p *PlayerSheet) HealMP(amt int) {
+	healmp(p, amt)
 }
 
 func (p *PlayerSheet) Stun() StunLevel {
@@ -656,6 +669,14 @@ func (m *MonsterSheet) Heal(amt int) {
 	heal(m, amt)
 }
 
+func (m *MonsterSheet) HurtMP(amt int) {
+	hurtmp(m, amt)
+}
+
+func (m *MonsterSheet) HealMP(amt int) {
+	healmp(m, amt)
+}
+
 func (m *MonsterSheet) Stun() StunLevel {
 	return m.stun
 }
@@ -942,6 +963,15 @@ func heal(s Sheet, amt int) {
 
 func hurt(s Sheet, dmg int) {
 	s.setHP(s.HP() - dmg)
+	checkDeath(s)
+}
+
+func healmp(s Sheet, amt int) {
+	s.setMP(math.Min(s.MP()+amt, s.MaxMP()))
+}
+
+func hurtmp(s Sheet, amt int) {
+	s.setMP(math.Min(s.MP()-amt, 0))
 	checkDeath(s)
 }
 

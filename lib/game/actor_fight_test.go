@@ -139,7 +139,9 @@ func makeTestHitterSpec(atk Effects) *Spec {
 			Sheet: NewMonsterSheet(&MonsterSheet{
 				critdivmod: 0,
 				maxhp:      20,
+				maxmp:      10,
 				damroll:    NewDice(1, 5),
+				speed:      1,
 				atkeffects: atk,
 			}),
 			Ticker: NewActorTicker,
@@ -176,6 +178,33 @@ func TestHitCritResist(t *testing.T) {
 	attacker.Fighter.Hit(defender.Fighter)
 	if hp, want := defender.Sheet.HP(), 17; hp != want {
 		t.Errorf(`Defender has %d hp; want %d.`, hp, want)
+	}
+}
+
+func TestHitVamp(t *testing.T) {
+	g := newTestGame()
+	spec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectVamp: 1}))
+	attacker, defender := g.NewObj(spec), g.NewObj(spec)
+	attacker.Sheet.setHP(1)
+	attacker.Sheet.setMP(1)
+
+	// We're gonna kill an actor here (actors were harmed in the making of this
+	// test), so let's place them to keep stuff from crashing when we try to
+	// remove the dead one on death.
+	g.Level.Place(attacker, math.Pt(1, 1))
+	g.Level.Place(defender, math.Pt(2, 1))
+
+	// Hit for a bazillion damage so we can guarantee the target is dead.
+	FixRandomDie([]int{4, 3, 300})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+	if hp, want := attacker.Sheet.HP(), 6; hp != want {
+		t.Errorf(`Attacker has %d hp; want %d.`, hp, want)
+	}
+
+	if mp, want := attacker.Sheet.MP(), 3; mp != want {
+		t.Errorf(`Attacker has %d mp; want %d.`, mp, want)
 	}
 }
 

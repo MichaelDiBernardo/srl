@@ -1,15 +1,28 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 
-- Stone:
-    - [x] melee effect  [x] test
-    - [x] sheet changes [x] test
-        x regen should stop
-        x can't swap with a statue
-        x petrified flag
-        x CanAct should check petrified flag
-        x defense should return static -5,8d4 with a massive crit resistance (+10 or something)
-    - [ ] activeeffect  [ ] test
+"Corrosion" effect, acid brand
+
+- [ ] Sheet changes [ ] test
+    - Corrosion level stacks on each successful application
+    - Defense should have another collection of dice for corrosion
+    - subtract the corrosion roll from the protroll, capped at 0
+- [ ] Activeffect [ ] test
+    - The counter here counts how many turns you've been out of los
+    - Every onbegin, add to corrosion level
+    - every onend, set corrosion to 0
+    - every tick, check FOV for opponent
+        - If you're player, that's a monster. If you're a monster, that's the
+          player.
+    - Every turn you don't find them, -- counter
+    - Every turn you do find them, hard-set counter to 5
+    - When counter reaches 0, the effect is cleared.
+- [ ] Hud changes
+    - Put corr under DEF 
+- [ ] Melee acid brand [ ] test
+- [ ] Melee shatter effect [ ] test
+    - Skillcheck should be the same as the stun score, 10 for difficulty?
+- in either case, the effect should be applied even if you do 0 dmg.
 
 - Monsters have multiple abilities.
     - Abilities need:

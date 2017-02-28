@@ -27,17 +27,18 @@ func (f *ActorFighter) Hit(other Fighter) {
 }
 
 func hit(attacker Fighter, defender Fighter) {
-	atk, def := attacker.Obj().Sheet.Attack(), defender.Obj().Sheet.Defense()
+	a, d := attacker.Obj(), defender.Obj()
+	atk, def := a.Sheet.Attack(), d.Sheet.Defense()
 
 	atkroll := combatroll(attacker.Obj()) + atk.Melee
 	defroll := combatroll(defender.Obj()) + def.Evasion
 	residual := atkroll - defroll
 
-	aname, dname := attacker.Obj().Spec.Name, defender.Obj().Spec.Name
+	aname, dname := a.Spec.Name, d.Spec.Name
 
 	if residual <= 0 {
 		msg := fmt.Sprintf("%v missed %v.", aname, dname)
-		attacker.Obj().Game.Events.Message(msg)
+		a.Game.Events.Message(msg)
 		return
 	}
 
@@ -53,7 +54,7 @@ func hit(attacker Fighter, defender Fighter) {
 		critstr = fmt.Sprintf(" %dx critical!", crits)
 	}
 	msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
-	attacker.Obj().Game.Events.Message(msg)
+	a.Game.Events.Message(msg)
 
 	if dmg <= 0 {
 		return
@@ -62,53 +63,61 @@ func hit(attacker Fighter, defender Fighter) {
 	for effect, _ := range atk.Effects {
 		switch effect {
 		case BrandPoison:
-			defender.Obj().Ticker.AddEffect(EffectPoison, poisondmg)
+			d.Ticker.AddEffect(EffectPoison, poisondmg)
 		case EffectStun:
-			score := atk.CritDiv - BaseCritDiv + attacker.Obj().Sheet.Stat(Str)
-			difficulty := defender.Obj().Sheet.Skill(Chi)
+			score := atk.CritDiv - BaseCritDiv + a.Sheet.Stat(Str)
+			difficulty := d.Sheet.Skill(Chi)
 			resists := def.Effects.Resists(effect)
-			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
+			won, _ := skillcheck(score, difficulty, resists, a, d)
 			if won {
-				defender.Obj().Ticker.AddEffect(EffectStun, dmg)
+				d.Ticker.AddEffect(EffectStun, dmg)
 			}
 		case EffectBlind:
-			if savingthrow(defender.Obj(), def.Effects, effect) {
-				defender.Obj().Ticker.AddEffect(EffectBlind, DieRoll(5, 4))
+			if savingthrow(d, def.Effects, effect) {
+				d.Ticker.AddEffect(EffectBlind, DieRoll(5, 4))
 			}
 		case EffectConfuse:
 			// TODO: Eventually remove this check and instead use a Cruel-Blow
 			// style check, cruel blow should be the only ability that gives
 			// confusion melee anyways.
-			if savingthrow(defender.Obj(), def.Effects, effect) {
-				defender.Obj().Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
+			if savingthrow(d, def.Effects, effect) {
+				d.Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
 			}
 		case EffectPara:
 			// Don't let the effect accumulate; also, give the defender a
 			// chance to break out when they are hurt.
-			if defender.Obj().Sheet.Paralyzed() {
+			if d.Sheet.Paralyzed() {
 				checkpara(defender)
 				break
 			}
 
-			if savingthrow(defender.Obj(), def.Effects, effect) {
-				defender.Obj().Ticker.AddEffect(EffectPara, DieRoll(4, 4))
+			if savingthrow(d, def.Effects, effect) {
+				d.Ticker.AddEffect(EffectPara, DieRoll(4, 4))
 			}
 		case EffectPetrify:
 			// Don't let the effect accumulate.
-			if defender.Obj().Sheet.Petrified() {
+			if d.Sheet.Petrified() {
 				break
 			}
-			if savingthrow(defender.Obj(), def.Effects, effect) {
-				defender.Obj().Ticker.AddEffect(EffectPetrify, DieRoll(4, 4))
+			if savingthrow(d, def.Effects, effect) {
+				d.Ticker.AddEffect(EffectPetrify, DieRoll(4, 4))
 			}
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
-				defender.Obj().Ticker.AddEffect(EffectCut, dmg/2)
+				d.Ticker.AddEffect(EffectCut, dmg/2)
 			}
 		}
 	}
 
-	defender.Obj().Sheet.Hurt(dmg)
+	d.Sheet.Hurt(dmg)
+
+	// Have to handle this outside the effect loop above because we need the
+	// damage to be applied to the target first to determine if they're dead.
+	if d.Sheet.Dead() &&
+		atk.Effects.Has(EffectVamp) > 0 &&
+		def.Effects.Resists(EffectVamp) <= 0 {
+		vamp(a, d)
+	}
 }
 
 // Given the base physical damage done by an attack, and the atk and def
@@ -168,4 +177,11 @@ func checkpara(defender Fighter) {
 		sheet.SetParalyzed(false)
 		obj.Ticker.RemoveEffect(EffectPara)
 	}
+}
+
+func vamp(attacker, defender *Obj) {
+	a, d := attacker.Sheet, defender.Sheet
+	vhp, vmp := d.MaxHP()/4, d.MaxMP()/4
+	a.Heal(vhp)
+	a.HealMP(vmp)
 }
