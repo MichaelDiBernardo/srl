@@ -41,7 +41,7 @@ func hit(attacker Fighter, defender Fighter) {
 		return
 	}
 
-	crits := residual / atk.CritDiv
+	crits := residual / (atk.CritDiv + def.Effects.Has(ResistCrit))
 	// Calculate raw phys damage.
 	dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
 	// Figure out how much branded damage we did.

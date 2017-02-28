@@ -448,12 +448,15 @@ func (p *PlayerSheet) Defense() Defense {
 	}
 
 	var dice []Dice
+	effects := body.ArmorEffects()
+
 	if p.Petrified() {
 		dice = []Dice{petrifyProt}
+		cr := NewEffects(map[Effect]int{ResistCrit: petrifyCritResist})
+		effects = effects.Merge(cr)
 	} else {
 		dice = body.ProtDice()
 	}
-	effects := body.ArmorEffects()
 
 	return Defense{
 		Evasion:  evasion,
@@ -750,15 +753,18 @@ func (m *MonsterSheet) Attack() Attack {
 
 func (m *MonsterSheet) Defense() Defense {
 	var dice []Dice
+	defeffects := m.defeffects
 	if m.Petrified() {
 		dice = []Dice{petrifyProt}
+		cr := NewEffects(map[Effect]int{ResistCrit: petrifyCritResist})
+		defeffects = defeffects.Merge(cr)
 	} else {
 		dice = []Dice{m.protroll}
 	}
 	return Defense{
 		Evasion:  m.Skill(Evasion),
 		ProtDice: dice,
-		Effects:  m.defeffects,
+		Effects:  defeffects,
 	}
 }
 
@@ -1026,8 +1032,9 @@ const (
 
 // The base divisor to use for crits.
 const (
-	BaseCritDiv     = 7
-	dumpsterEvasion = -5
+	BaseCritDiv       = 7
+	dumpsterEvasion   = -5
+	petrifyCritResist = 100
 )
 
 var petrifyProt = NewDice(8, 4)

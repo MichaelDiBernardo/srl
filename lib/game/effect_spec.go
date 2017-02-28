@@ -42,6 +42,7 @@ const (
 	ResistSilence
 	ResistCurse
 	ResistPetrify
+	ResistCrit
 
 	// Sentinel
 	NumEffects
@@ -89,6 +90,7 @@ var EffectsSpecs = EffectsSpec{
 	ResistPara:    {Type: EffectTypeResist},
 	ResistCurse:   {Type: EffectTypeResist},
 	ResistPetrify: {Type: EffectTypeResist},
+	ResistCrit:    {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.

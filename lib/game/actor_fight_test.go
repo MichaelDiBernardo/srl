@@ -147,6 +147,38 @@ func makeTestHitterSpec(atk Effects) *Spec {
 	}
 }
 
+func TestHitCritResist(t *testing.T) {
+	testMonSpec := &Spec{
+		Family:  FamActor,
+		Genus:   GenMonster,
+		Species: SpecOrc,
+		Name:    "ORC",
+		Traits: &Traits{
+			Fighter: NewActorFighter,
+			Sheet: NewMonsterSheet(&MonsterSheet{
+				critdivmod: 0,
+				maxhp:      20,
+				damroll:    NewDice(1, 5),
+				defeffects: NewEffects(map[Effect]int{ResistCrit: 1}),
+			}),
+		},
+	}
+
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+
+	// Roll a residual of 7, which should normally result in 1 crit. but in In
+	// this case, though, the divisor should be 8 (7 + 1 crit resist). This
+	// should result in a 1d5 damroll, which we fix at 3 dmg.
+	FixRandomDie([]int{10, 3, 3})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+	if hp, want := defender.Sheet.HP(), 17; hp != want {
+		t.Errorf(`Defender has %d hp; want %d.`, hp, want)
+	}
+}
+
 func TestHitPoison(t *testing.T) {
 	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{BrandPoison: 1}))
 	g := newTestGame()

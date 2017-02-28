@@ -385,6 +385,9 @@ func TestPlayerPetrify(t *testing.T) {
 	if prot := sheet.Defense().ProtDice; len(prot) != 1 && prot[0] != petrifyProt {
 		t.Errorf(`Petrify Defense().ProtDice was %v, want %v`, prot, []Dice{petrifyProt})
 	}
+	if cr := sheet.Defense().Effects.Has(ResistCrit); cr != petrifyCritResist {
+		t.Errorf(`Petrify Defense().Effects[ResistCrit] was %d, want %d`, cr, petrifyCritResist)
+	}
 
 	if regen := sheet.Regen(); regen != 0 {
 		t.Errorf(`Petrify Regen() was %d, want 0`, regen)
