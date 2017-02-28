@@ -449,7 +449,7 @@ func (p *PlayerSheet) Defense() Defense {
 
 	var dice []Dice
 	if p.Petrified() {
-		dice = []Dice{NewDice(8, 4)}
+		dice = []Dice{petrifyProt}
 	} else {
 		dice = body.ProtDice()
 	}
@@ -751,7 +751,7 @@ func (m *MonsterSheet) Attack() Attack {
 func (m *MonsterSheet) Defense() Defense {
 	var dice []Dice
 	if m.Petrified() {
-		dice = []Dice{NewDice(8, 4)}
+		dice = []Dice{petrifyProt}
 	} else {
 		dice = []Dice{m.protroll}
 	}
@@ -974,7 +974,7 @@ func changeconf(s Sheet, newc bool) {
 	} else if oldc == true {
 		modMndSkills(s, 5)
 	} else {
-		modMndSkills(s, -5)
+		modMndSkills(s, dumpsterEvasion)
 	}
 }
 
@@ -1003,7 +1003,7 @@ func blindpenalty(skill SkillName, score int) int {
 
 func parapenalty(skill SkillName, score int) int {
 	if skill == Evasion {
-		return -5
+		return dumpsterEvasion
 	}
 	return score
 }
@@ -1025,4 +1025,9 @@ const (
 )
 
 // The base divisor to use for crits.
-const BaseCritDiv = 7
+const (
+	BaseCritDiv     = 7
+	dumpsterEvasion = -5
+)
+
+var petrifyProt = NewDice(8, 4)

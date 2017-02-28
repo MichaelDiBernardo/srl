@@ -500,3 +500,21 @@ func TestActiveHyper(t *testing.T) {
 		}
 	}
 }
+
+func TestActivePetrify(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectPetrify, 1)
+
+	if !obj.Sheet.Petrified() {
+		t.Error(`obj.Sheet.Petrified() was false, want true`)
+	}
+
+	obj.Ticker.Tick(0)
+
+	if obj.Sheet.Petrified() {
+		t.Error(`obj.Sheet.Petrified() was true, want false`)
+	}
+}

@@ -353,15 +353,44 @@ func TestPlayerPara(t *testing.T) {
 
 	sheet.SetParalyzed(true)
 
-	if ev := sheet.Skill(Evasion); ev != -5 {
-		t.Errorf(`Para evasion %d, want -5`, ev)
+	if ev := sheet.Skill(Evasion); ev != dumpsterEvasion {
+		t.Errorf(`Para evasion %d, want %d`, ev, dumpsterEvasion)
 	}
 
-	if ev := sheet.Defense().Evasion; ev != -5 {
-		t.Errorf(`Para Defense().Evasion %d, want -5`, ev)
+	if ev := sheet.Defense().Evasion; ev != dumpsterEvasion {
+		t.Errorf(`Para Defense().Evasion %d, want %d`, ev, dumpsterEvasion)
 	}
 
 	if sheet.CanAct() {
 		t.Error(`Para CanAct() was true, want false`)
+	}
+}
+
+func TestPlayerPetrify(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	sheet := NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}, hp: 10})
+	obj.Sheet = sheet
+
+	sheet.SetPetrified(true)
+
+	if ev := sheet.Skill(Evasion); ev != dumpsterEvasion {
+		t.Errorf(`Petrify evasion %d, want %d`, ev, dumpsterEvasion)
+	}
+
+	if ev := sheet.Defense().Evasion; ev != dumpsterEvasion {
+		t.Errorf(`Petrify Defense().Evasion %d, want %d`, ev, dumpsterEvasion)
+	}
+
+	if prot := sheet.Defense().ProtDice; len(prot) != 1 && prot[0] != petrifyProt {
+		t.Errorf(`Petrify Defense().ProtDice was %v, want %v`, prot, []Dice{petrifyProt})
+	}
+
+	if regen := sheet.Regen(); regen != 0 {
+		t.Errorf(`Petrify Regen() was %d, want 0`, regen)
+	}
+
+	if sheet.CanAct() {
+		t.Error(`Petrify CanAct() was true, want false`)
 	}
 }

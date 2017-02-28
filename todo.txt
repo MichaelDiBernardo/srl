@@ -1,11 +1,13 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
+- We need to implement critical resistance
+x defense should return static -5,8d4 with a massive crit resistance (+10 or something)
+
 - Stone:
-    - [x] melee effect  [ ] test
-    - [ ] sheet changes [ ] test
-        - We need to implement critical resistance
-        - regen should stop
-        - can't swap with a statue
+    - [x] melee effect  [x] test
+    - [ ] sheet changes [x] test
+        x regen should stop
+        x can't swap with a statue
         x petrified flag
         x CanAct should check petrified flag
         x defense should return static -5,8d4 with a massive crit resistance (+10 or something)

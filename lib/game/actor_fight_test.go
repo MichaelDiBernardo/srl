@@ -198,10 +198,10 @@ func TestHitPara(t *testing.T) {
 	g := newTestGame()
 	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
 	// Roll 5 damage, and make sure to win skillroll (10 vs 0 on d10s. We then
-	// roll 12 blind turns (3 * 4).)
+	// roll 12 para turns (3 * 4).)
 	// We'll hit a second time, this time hitting for 1 damage. We fix the die
 	// so that it breaks the defender out of para.
-	// We use 2 as our secondn attack roll because the defender will already be
+	// We use 2 as our second attack roll because the defender will already be
 	// at -5 due to being paralyzed.
 	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3 /* second attack */, 2, 1, 1, 1})
 	defer RestoreRandom()
@@ -251,6 +251,22 @@ func TestHitConfuse(t *testing.T) {
 
 	if conf := defender.Ticker.Counter(EffectConfuse); conf != 15 {
 		t.Errorf(`Conf counter %d; want 15`, conf)
+	}
+}
+
+func TestHitPetrify(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectPetrify: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, and make sure to win skillroll (10 vs 0 on d10s. We then
+	// roll 12 petrify turns (3 * 4).)
+	FixRandomDie([]int{7, 1, 5, 10, 0, 3, 3, 3, 3})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if petr := defender.Ticker.Counter(EffectPetrify); petr != 12 {
+		t.Errorf(`Petrify counter %d; want 12`, petr)
 	}
 }
 

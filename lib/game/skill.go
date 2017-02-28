@@ -21,6 +21,16 @@ func skillcheck(skill, difficulty int, resists int, challenger, defender *Obj) (
 	return won, by
 }
 
+// Used when an actor is resisting an external effect that doesn't really have
+// a direct actor behind it. This always checks will vs difficulty 10.
+func savingthrow(defender *Obj, defeffects Effects, effect Effect) bool {
+	score := 10
+	difficulty := defender.Sheet.Skill(Chi)
+	resists := resistmod(defeffects.Resists(effect))
+	won, _ := skillcheck(score, difficulty, resists, nil, defender)
+	return won
+}
+
 // Depending on the blessed/cursed status flags on 'roller.Sheet', this will
 // roll a d10 up to twice and take the best if blessed, and the worst if
 // cursed. Setting both flags to true has the same effect as setting both to

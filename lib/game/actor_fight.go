@@ -72,22 +72,14 @@ func hit(attacker Fighter, defender Fighter) {
 				defender.Obj().Ticker.AddEffect(EffectStun, dmg)
 			}
 		case EffectBlind:
-			score := 10
-			difficulty := defender.Obj().Sheet.Skill(Chi)
-			resists := resistmod(def.Effects.Resists(effect))
-			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
-			if won {
+			if savingthrow(defender.Obj(), def.Effects, effect) {
 				defender.Obj().Ticker.AddEffect(EffectBlind, DieRoll(5, 4))
 			}
 		case EffectConfuse:
 			// TODO: Eventually remove this check and instead use a Cruel-Blow
 			// style check, cruel blow should be the only ability that gives
 			// confusion melee anyways.
-			score := 10
-			difficulty := defender.Obj().Sheet.Skill(Chi)
-			resists := resistmod(def.Effects.Resists(effect))
-			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
-			if won {
+			if savingthrow(defender.Obj(), def.Effects, effect) {
 				defender.Obj().Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
 			}
 		case EffectPara:
@@ -98,11 +90,7 @@ func hit(attacker Fighter, defender Fighter) {
 				break
 			}
 
-			score := 10
-			difficulty := defender.Obj().Sheet.Skill(Chi)
-			resists := resistmod(def.Effects.Resists(effect))
-			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
-			if won {
+			if savingthrow(defender.Obj(), def.Effects, effect) {
 				defender.Obj().Ticker.AddEffect(EffectPara, DieRoll(4, 4))
 			}
 		case EffectPetrify:
@@ -110,11 +98,7 @@ func hit(attacker Fighter, defender Fighter) {
 			if defender.Obj().Sheet.Petrified() {
 				break
 			}
-			score := 10
-			difficulty := defender.Obj().Sheet.Skill(Chi)
-			resists := resistmod(def.Effects.Resists(effect))
-			won, _ := skillcheck(score, difficulty, resists, attacker.Obj(), defender.Obj())
-			if won {
+			if savingthrow(defender.Obj(), def.Effects, effect) {
 				defender.Obj().Ticker.AddEffect(EffectPetrify, DieRoll(4, 4))
 			}
 		case EffectCut:

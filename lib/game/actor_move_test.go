@@ -69,6 +69,23 @@ func TestMonsterSwapFails(t *testing.T) {
 	}
 }
 
+func TestCantSwapWithPetrifiedTarget(t *testing.T) {
+	g := newTestGame()
+	a1, a2 := g.NewObj(atActorSpec), g.NewObj(atActorSpec)
+	a2.Sheet.SetPetrified(true)
+
+	g.Level.Place(a1, math.Pt(1, 1))
+	g.Level.Place(a2, math.Pt(2, 1))
+
+	if _, err := a1.Mover.Move(math.Pt(1, 0)); err != ErrMoveSwapFailed {
+		t.Errorf(`a1.Move( (1, 0)) = %v, want %v`, err, ErrMoveSwapFailed)
+	}
+
+	if a1.Pos() != math.Pt(1, 1) && a2.Pos() != math.Pt(2, 1) {
+		t.Error(`Monsters swapped!`)
+	}
+}
+
 func TestMoveOpensClosedDoor(t *testing.T) {
 	g := newTestGame()
 	obj := g.NewObj(atActorSpec)
