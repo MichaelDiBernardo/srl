@@ -38,6 +38,7 @@ var defDescTests = []defDescTest{
 	{def: Defense{ProtDice: []Dice{NewDice(1, 3), NewDice(2, 4)}}, want: "[+0,3-11]"},
 	{def: Defense{Evasion: 1, ProtDice: []Dice{NewDice(1, 3)}}, want: "[+1,1-3]"},
 	{def: Defense{Evasion: -1, ProtDice: []Dice{NewDice(1, 3)}}, want: "[-1,1-3]"},
+	{def: Defense{ProtDice: []Dice{NewDice(1, 3), NewDice(2, 4)}, CorrDice: []Dice{NewDice(2, 4)}}, want: "[+0,0-9]"},
 }
 
 func TestDescribeDefense(t *testing.T) {

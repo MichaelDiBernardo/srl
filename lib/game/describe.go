@@ -33,8 +33,8 @@ func (def Defense) Describe() string {
 			high += dice.Dice * dice.Sides
 		}
 		for _, dice := range def.CorrDice {
-			low -= dice.Dice
-			high -= dice.Dice * dice.Sides
+			low -= dice.Dice * dice.Sides
+			high -= dice.Dice
 		}
 		prot = "," + fmt.Sprintf("%d-%d", math.Max(low, 0), math.Max(high, 0))
 	}

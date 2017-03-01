@@ -178,6 +178,21 @@ func testDefEq(t *testing.T, def Defense, want Defense) {
 			t.Errorf(`def.ProtDice was %+v, want %+v`, def.ProtDice, want.ProtDice)
 		}
 	}
+	if l, w := len(def.CorrDice), len(want.CorrDice); l != w {
+		t.Errorf(`len(def.CorrDice) was %d, want %d`, l, w)
+	}
+	// This is good enough for the cases we have.
+	for _, wd := range want.CorrDice {
+		found := false
+		for _, ad := range def.CorrDice {
+			if ad == wd {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf(`def.CorrDice was %+v, want %+v`, def.CorrDice, want.CorrDice)
+		}
+	}
 }
 
 func TestPlayerDefenseNoArmorOrEvasion(t *testing.T) {
@@ -248,6 +263,16 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 			NewDice(1, 4),
 		},
 	})
+}
+
+func TestPlayerDefenseCorr(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+	obj.Sheet.SetCorrosion(2)
+
+	def := obj.Sheet.Defense()
+	testDefEq(t, def, Defense{Evasion: 0, CorrDice: []Dice{NewDice(2, 4)}})
 }
 
 func TestPlayerBlind(t *testing.T) {

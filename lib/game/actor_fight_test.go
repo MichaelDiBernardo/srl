@@ -223,6 +223,22 @@ func TestHitPoison(t *testing.T) {
 	}
 }
 
+func TestHitAcid(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{BrandAcid: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	// Roll 5 damage, then 1 for extra brand damage, then 1 for the OneIn
+	// check, then 5 turns of corr.
+	FixRandomDie([]int{7, 1, 5, 1, 1, 1, 1, 2, 1})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if corr := defender.Ticker.Counter(EffectShatter); corr != 5 {
+		t.Errorf(`Shatter counter %d; want 5`, corr)
+	}
+}
+
 func TestHitStun(t *testing.T) {
 	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectStun: 1}))
 	g := newTestGame()
@@ -235,6 +251,22 @@ func TestHitStun(t *testing.T) {
 
 	if stun := defender.Ticker.Counter(EffectStun); stun != 5 {
 		t.Errorf(`Stun counter %d; want 5`, stun)
+	}
+}
+
+func TestHitShatter(t *testing.T) {
+	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectShatter: 1}))
+	g := newTestGame()
+	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
+	attacker.Sheet.(*MonsterSheet).critdivmod = 10
+	// Roll 5 damage, and make sure to win shatter skillroll (10 vs 0 on d10s.)
+	FixRandomDie([]int{7, 1, 5, 10, 0, 1, 1, 1, 2})
+	defer RestoreRandom()
+
+	attacker.Fighter.Hit(defender.Fighter)
+
+	if corr := defender.Ticker.Counter(EffectShatter); corr != 5 {
+		t.Errorf(`Shatter counter %d; want 5`, corr)
 	}
 }
 

@@ -518,3 +518,28 @@ func TestActivePetrify(t *testing.T) {
 		t.Error(`obj.Sheet.Petrified() was true, want false`)
 	}
 }
+
+func TestActiveCorrode(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
+
+	obj.Ticker.AddEffect(EffectShatter, 1)
+
+	if corr, want := obj.Sheet.Corrosion(), 1; corr != want {
+		t.Error(`obj.Sheet.Corrosion() was %d, want %d`, corr, want)
+	}
+
+	obj.Ticker.AddEffect(EffectShatter, 1)
+
+	if corr, want := obj.Sheet.Corrosion(), 2; corr != want {
+		t.Error(`obj.Sheet.Corrosion() was %d, want %d`, corr, want)
+	}
+
+	obj.Ticker.Tick(0)
+	obj.Ticker.Tick(0)
+
+	if corr := obj.Sheet.Corrosion(); corr > 0 {
+		t.Errorf(`obj.Sheet.Corrosion() was %d, want 0`, corr)
+	}
+}
