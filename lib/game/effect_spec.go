@@ -10,6 +10,7 @@ const (
 	BrandElec
 	BrandIce
 	BrandPoison
+	BrandAcid
 
 	// Effects
 	EffectBaseRegen // Regen that is applied every tick to every actor.
@@ -28,6 +29,7 @@ const (
 	EffectStim
 	EffectHyper
 	EffectVamp
+	EffectShatter
 
 	// Resists
 	ResistFire
@@ -45,6 +47,7 @@ const (
 	ResistPetrify
 	ResistCrit
 	ResistVamp
+	ResistAcid
 
 	// Sentinel
 	NumEffects
@@ -63,6 +66,7 @@ var EffectsSpecs = EffectsSpec{
 	BrandElec:   {Type: EffectTypeBrand, ResistedBy: ResistElec, Verb: "shocks"},
 	BrandIce:    {Type: EffectTypeBrand, ResistedBy: ResistIce, Verb: "freezes"},
 	BrandPoison: {Type: EffectTypeBrand, ResistedBy: ResistPoison, Verb: "poisons"},
+	BrandAcid:   {Type: EffectTypeBrand, ResistedBy: ResistAcid, Verb: "melts"},
 
 	EffectBaseRegen: {Type: EffectTypeStatus},
 	EffectStun:      {Type: EffectTypeStatus, ResistedBy: ResistStun},
@@ -80,10 +84,12 @@ var EffectsSpecs = EffectsSpec{
 	EffectStim:      {Type: EffectTypeStatus},
 	EffectHyper:     {Type: EffectTypeStatus},
 	EffectVamp:      {Type: EffectTypeStatus, ResistedBy: ResistVamp},
+	EffectShatter:   {Type: EffectTypeStatus},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},
 	ResistIce:     {Type: EffectTypeResist},
+	ResistAcid:    {Type: EffectTypeResist},
 	ResistStun:    {Type: EffectTypeResist},
 	ResistPoison:  {Type: EffectTypeResist},
 	ResistBlind:   {Type: EffectTypeResist},
@@ -113,4 +119,5 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectStim:      AEStim,
 	EffectHyper:     AEHyper,
 	EffectPetrify:   AEPetrify,
+	EffectShatter:   AECorrode,
 }

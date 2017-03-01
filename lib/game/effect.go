@@ -213,6 +213,27 @@ var (
 			t.Obj().Sheet.SetStun(NotStunned)
 		},
 	}
+	AECorrode = ActiveEffect{
+		OnBegin: func(e *ActiveEffect, t Ticker, prev int) {
+			sheet := t.Obj().Sheet
+			sheet.SetCorrosion(sheet.Corrosion() + 1)
+
+			var msg string
+			if prev == 0 {
+				msg = "%s armor is damaged."
+			} else {
+				msg = "%s armor is more damaged."
+			}
+			t.Obj().Game.Events.Message(fmt.Sprintf(msg, poss(t.Obj().Spec.Name)))
+		},
+		OnTick: basictick,
+		OnEnd: func(_ *ActiveEffect, t Ticker) {
+			t.Obj().Sheet.SetCorrosion(0)
+
+			msg := "%s armor is fixed."
+			t.Obj().Game.Events.Message(fmt.Sprintf(msg, poss(t.Obj().Spec.Name)))
+		},
+	}
 	AEBlind = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
 			t.Obj().Sheet.SetBlind(true)

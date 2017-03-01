@@ -3,26 +3,15 @@ NEXT:
 
 "Corrosion" effect, acid brand
 
-- [ ] Sheet changes [ ] test
+- [x] Sheet changes [ ] test
     - Corrosion level stacks on each successful application
     - Defense should have another collection of dice for corrosion
     - subtract the corrosion roll from the protroll, capped at 0
-- [ ] Activeffect [ ] test
-    - The counter here counts how many turns you've been out of los
-    - Every onbegin, add to corrosion level
-    - every onend, set corrosion to 0
-    - every tick, check FOV for opponent
-        - If you're player, that's a monster. If you're a monster, that's the
-          player.
-    - Every turn you don't find them, -- counter
-    - Every turn you do find them, hard-set counter to 5
-    - When counter reaches 0, the effect is cleared.
-- [ ] Hud changes
-    - Put corr under DEF 
-- [ ] Melee acid brand [ ] test
-- [ ] Melee shatter effect [ ] test
+- [x] Activeffect [ ] test
+- [x] Hud changes
+- [x] Melee acid brand [ ] test
+- [x] Melee shatter effect [ ] test
     - Skillcheck should be the same as the stun score, 10 for difficulty?
-- in either case, the effect should be applied even if you do 0 dmg.
 
 - Monsters have multiple abilities.
     - Abilities need:

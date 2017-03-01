@@ -64,6 +64,10 @@ func hit(attacker Fighter, defender Fighter) {
 		switch effect {
 		case BrandPoison:
 			d.Ticker.AddEffect(EffectPoison, poisondmg)
+		case BrandAcid:
+			if OneIn(def.Effects.Resists(effect) + 1) {
+				d.Ticker.AddEffect(EffectShatter, DieRoll(4, 4))
+			}
 		case EffectStun:
 			score := atk.CritDiv - BaseCritDiv + a.Sheet.Stat(Str)
 			difficulty := d.Sheet.Skill(Chi)
@@ -105,6 +109,12 @@ func hit(attacker Fighter, defender Fighter) {
 		case EffectCut:
 			if crits > DieRoll(1, 2) {
 				d.Ticker.AddEffect(EffectCut, dmg/2)
+			}
+		case EffectShatter:
+			score := atk.CritDiv - BaseCritDiv + a.Sheet.Stat(Str)
+			won, _ := skillcheck(score, 10, 0, a, d)
+			if won {
+				d.Ticker.AddEffect(EffectShatter, DieRoll(4, 4))
 			}
 		}
 	}

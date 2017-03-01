@@ -308,7 +308,12 @@ func (s *statusPanel) Render(g *game.Game) {
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d:%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+12, fmt.Sprintf("%-7s%8s", "DEF", sheet.Defense().Describe()), fg, bg)
+
+	def, defc := sheet.Defense(), fg
+	if len(def.CorrDice) > 0 {
+		defc = termbox.ColorRed
+	}
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+12, fmt.Sprintf("%-7s%8s", "DEF", def.Describe()), defc, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+14, fmt.Sprintf("%dF", g.Floor), fg, bg)
 

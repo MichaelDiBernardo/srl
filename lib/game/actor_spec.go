@@ -69,6 +69,8 @@ var Monsters = []*Spec{
 				maxhp:      20,
 				maxmp:      10,
 
+				atkeffects: NewEffects(map[Effect]int{BrandAcid: 1}),
+
 				damroll:  NewDice(2, 7),
 				protroll: NewDice(1, 4),
 			}),

@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
 func (species Species) Describe() string {
@@ -31,7 +32,11 @@ func (def Defense) Describe() string {
 			low += dice.Dice
 			high += dice.Dice * dice.Sides
 		}
-		prot = "," + fmt.Sprintf("%d-%d", low, high)
+		for _, dice := range def.CorrDice {
+			low -= dice.Dice
+			high -= dice.Dice * dice.Sides
+		}
+		prot = "," + fmt.Sprintf("%d-%d", math.Max(low, 0), math.Max(high, 0))
 	}
 	return "[" + evasion + prot + "]"
 }

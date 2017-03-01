@@ -105,6 +105,9 @@ type Sheet interface {
 	Blessed() bool
 	SetBlessed(c bool)
 
+	Corrosion() int
+	SetCorrosion(level int)
+
 	// Sight radius.
 	Sight() int
 
@@ -134,6 +137,7 @@ type PlayerSheet struct {
 	regen int
 
 	stun      StunLevel
+	corr      int
 	blind     bool
 	slow      bool
 	afraid    bool
@@ -152,7 +156,7 @@ func NewPlayerSheet(obj *Obj) Sheet {
 			stats: statlist{
 				Str: 2,
 				Agi: 5,
-				Vit: 4,
+				Vit: 20,
 				Mnd: 3,
 			},
 		},
@@ -395,6 +399,14 @@ func (p *PlayerSheet) Blessed() bool {
 	return p.blessed
 }
 
+func (p *PlayerSheet) Corrosion() int {
+	return p.corr
+}
+
+func (p *PlayerSheet) SetCorrosion(amt int) {
+	p.corr = amt
+}
+
 func (p *PlayerSheet) CanAct() bool {
 	return canact(p)
 }
@@ -471,9 +483,15 @@ func (p *PlayerSheet) Defense() Defense {
 		dice = body.ProtDice()
 	}
 
+	corrdice := []Dice{}
+	if corr := p.corr; corr > 0 {
+		corrdice = append(corrdice, NewDice(corr, 4))
+	}
+
 	return Defense{
 		Evasion:  evasion,
 		ProtDice: dice,
+		CorrDice: corrdice,
 		Effects:  effects,
 	}
 }
@@ -510,6 +528,7 @@ type MonsterSheet struct {
 	cursed    bool
 	blessed   bool
 	petrified bool
+	corr      int
 
 	// Basically weapon weight.
 	critdivmod int
@@ -759,6 +778,14 @@ func (p *MonsterSheet) Blessed() bool {
 	return p.blessed
 }
 
+func (m *MonsterSheet) Corrosion() int {
+	return m.corr
+}
+
+func (m *MonsterSheet) SetCorrosion(amt int) {
+	m.corr = amt
+}
+
 func (m *MonsterSheet) CanAct() bool {
 	return canact(m)
 }
@@ -782,9 +809,16 @@ func (m *MonsterSheet) Defense() Defense {
 	} else {
 		dice = []Dice{m.protroll}
 	}
+
+	corrdice := []Dice{}
+	if corr := m.corr; corr > 0 {
+		corrdice = append(corrdice, NewDice(corr, 4))
+	}
+
 	return Defense{
 		Evasion:  m.Skill(Evasion),
 		ProtDice: dice,
+		CorrDice: corrdice,
 		Effects:  defeffects,
 	}
 }
@@ -942,18 +976,23 @@ func (atk Attack) RollDamage(extradice int) int {
 type Defense struct {
 	Evasion  int
 	ProtDice []Dice
+	CorrDice []Dice
 	Effects  Effects
 }
 
+// Rolls protection dice - corrosion dice
 func (def Defense) RollProt() int {
-	dice := def.ProtDice
 	sum := 0
 
-	for _, d := range dice {
+	for _, d := range def.ProtDice {
 		sum += d.Roll()
 	}
 
-	return sum
+	for _, d := range def.CorrDice {
+		sum -= d.Roll()
+	}
+
+	return math.Max(sum, 0)
 }
 
 // Shared functions across sheets.
