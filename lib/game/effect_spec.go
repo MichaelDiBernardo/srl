@@ -12,6 +12,12 @@ const (
 	BrandPoison
 	BrandAcid
 
+	// Slays
+	SlayPearl
+	SlayHunter
+	SlayBattle
+	SlayDispel
+
 	// Effects
 	EffectBaseRegen // Regen that is applied every tick to every actor.
 	EffectStun
@@ -49,6 +55,12 @@ const (
 	ResistVamp
 	ResistAcid
 
+	// Flags
+	WeakPearl
+	WeakHunter
+	WeakBattle
+	WeakDispel
+
 	// Sentinel
 	NumEffects
 )
@@ -58,6 +70,8 @@ const (
 	EffectTypeBrand = iota
 	EffectTypeResist
 	EffectTypeStatus
+	EffectTypeSlay
+	EffectTypeFlag
 )
 
 // Mapping of effects to their types.
@@ -67,6 +81,11 @@ var EffectsSpecs = EffectsSpec{
 	BrandIce:    {Type: EffectTypeBrand, ResistedBy: ResistIce, Verb: "freezes"},
 	BrandPoison: {Type: EffectTypeBrand, ResistedBy: ResistPoison, Verb: "poisons"},
 	BrandAcid:   {Type: EffectTypeBrand, ResistedBy: ResistAcid, Verb: "melts"},
+
+	SlayPearl:  {Type: EffectTypeSlay, Slays: WeakPearl},
+	SlayHunter: {Type: EffectTypeSlay, Slays: WeakHunter},
+	SlayBattle: {Type: EffectTypeSlay, Slays: WeakBattle},
+	SlayDispel: {Type: EffectTypeSlay, Slays: WeakDispel},
 
 	EffectBaseRegen: {Type: EffectTypeStatus},
 	EffectStun:      {Type: EffectTypeStatus, ResistedBy: ResistStun},
@@ -85,6 +104,11 @@ var EffectsSpecs = EffectsSpec{
 	EffectHyper:     {Type: EffectTypeStatus},
 	EffectVamp:      {Type: EffectTypeStatus, ResistedBy: ResistVamp},
 	EffectShatter:   {Type: EffectTypeStatus},
+
+	WeakPearl:  {Type: EffectTypeFlag},
+	WeakHunter: {Type: EffectTypeFlag},
+	WeakBattle: {Type: EffectTypeFlag},
+	WeakDispel: {Type: EffectTypeFlag},
 
 	ResistFire:    {Type: EffectTypeResist},
 	ResistElec:    {Type: EffectTypeResist},

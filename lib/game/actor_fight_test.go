@@ -471,7 +471,7 @@ func TestApplyBrand(t *testing.T) {
 		func() {
 			FixRandomDie(test.rolls)
 			defer RestoreRandom()
-			if branddmg, _, verb := applybrands(10, test.atk, test.def); branddmg != test.branddmg || (test.verb != "" && verb != test.verb) {
+			if branddmg, _, verb := applybs(10, test.atk, test.def); branddmg != test.branddmg || (test.verb != "" && verb != test.verb) {
 				t.Errorf(`Test %d: got (%d, "%s") want (%d, "%s")`, i, branddmg, verb, test.branddmg, test.verb)
 			}
 		}()
@@ -482,13 +482,13 @@ func TestApplyBrandPoison(t *testing.T) {
 	FixRandomDie([]int{5, 5, 5, 5})
 	defer RestoreRandom()
 
-	if branddmg, poisondmg, _ := applybrands(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{})); branddmg != 0 || poisondmg != 5 {
+	if branddmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{})); branddmg != 0 || poisondmg != 5 {
 		t.Errorf(`applybrand poisondmg: got (%d, %d) want (0, 5)`, branddmg, poisondmg)
 	}
-	if branddmg, poisondmg, _ := applybrands(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{ResistPoison: 1})); branddmg != 0 || poisondmg != 2 {
+	if branddmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{ResistPoison: 1})); branddmg != 0 || poisondmg != 2 {
 		t.Errorf(`applybrand poisondmg: got (%d, %d) want (0, 2)`, branddmg, poisondmg)
 	}
-	if branddmg, poisondmg, _ := applybrands(10, NewEffects(map[Effect]int{BrandPoison: 1, BrandFire: 1}), NewEffects(map[Effect]int{})); branddmg != 5 || poisondmg != 5 {
+	if branddmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1, BrandFire: 1}), NewEffects(map[Effect]int{})); branddmg != 5 || poisondmg != 5 {
 		t.Errorf(`applybrand poisondmg: got (%d, %d) want (5, 5)`, branddmg, poisondmg)
 	}
 }

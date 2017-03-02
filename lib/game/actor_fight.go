@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // Anything that fights in melee.
@@ -46,8 +47,8 @@ func hit(attacker Fighter, defender Fighter) {
 	// Calculate raw phys damage.
 	dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
 	// Figure out how much branded damage we did.
-	branddmg, poisondmg, verb := applybrands(dmg, atk.Effects, def.Effects)
-	dmg += branddmg
+	xdmg, poisondmg, verb := applybs(dmg, atk.Effects, def.Effects)
+	dmg += xdmg
 
 	critstr := ""
 	if crits > 0 {
@@ -131,17 +132,28 @@ func hit(attacker Fighter, defender Fighter) {
 }
 
 // Given the base physical damage done by an attack, and the atk and def
-// effects, this figures out how much raw and poison damage should be done from
-// brands. Poison damage is separated out because it is applied as
+// effects, this figures out how much extra and poison damage should be done from
+// brands and slays. Poison damage is separated out because it is applied as
 // damage-over-time, instead of being immediately inflicted on the target.
-func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int, verb string) {
+func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int, verb string) {
 	if basedmg == 0 {
 		return 0, 0, "hits"
 	}
 
-	brands := atk.Brands()
+	slays, brands := atk.Slays(), atk.Brands()
 	fixverb := false
-	branddmg, poisondmg, verb = 0, 0, "hits"
+	xdmg, poisondmg, verb = 0, 0, "hits"
+
+	// We do slays first because brands should supercede slays when it comes to
+	// setting the verb.
+	log.Printf("Slays are %v, def is %v", slays, def)
+	for slay, _ := range slays {
+		if def.SlainBy(slay) <= 0 {
+			return
+		}
+		verb = "*hits*"
+		xdmg += DieRoll(1, basedmg)
+	}
 
 	for brand, info := range brands {
 		raw := DieRoll(1, basedmg)
@@ -150,7 +162,7 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 		if brand == BrandPoison {
 			poisondmg += resisted
 		} else {
-			branddmg += resisted
+			xdmg += resisted
 		}
 
 		newverb := info.Verb
@@ -170,7 +182,7 @@ func applybrands(basedmg int, atk Effects, def Effects) (branddmg, poisondmg int
 			verb = newverb
 		}
 	}
-	return branddmg, poisondmg, verb
+	return xdmg, poisondmg, verb
 }
 
 func checkpara(defender Fighter) {

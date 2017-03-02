@@ -222,6 +222,12 @@ func (p *PlayerSheet) StatMod(stat StatName) int {
 }
 
 func (p *PlayerSheet) ChangeStatMod(stat StatName, diff int) {
+	switch stat {
+	case Agi:
+		modAgiSkills(p, diff)
+	case Mnd:
+		modMndSkills(p, diff)
+	}
 	p.stats.changemod(stat, diff)
 }
 

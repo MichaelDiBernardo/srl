@@ -18,6 +18,7 @@ type EffectType uint
 type EffectSpec struct {
 	Type       EffectType
 	ResistedBy Effect
+	Slays      Effect
 	Verb       string
 }
 
@@ -79,6 +80,26 @@ func (effects Effects) Brands() Effects {
 		}
 	}
 	return brands
+}
+
+// Filters out slays.
+func (effects Effects) Slays() Effects {
+	slays := make(Effects)
+	for effect, info := range effects {
+		if info.Type == EffectTypeSlay {
+			slays[effect] = info
+		}
+	}
+	return slays
+}
+
+// Does our collection of effects contain a vulnerability to the slay 'effect'?
+func (effects Effects) SlainBy(effect Effect) int {
+	info := EffectsSpecs[effect]
+	if info == nil {
+		return 0
+	}
+	return effects.Has(info.Slays)
 }
 
 // Produces a new Effects that is the union of 'e1' and 'e2', accumulating the
