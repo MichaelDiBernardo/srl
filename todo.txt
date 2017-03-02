@@ -50,8 +50,8 @@ Then:
 - Monsters drop loot
 - Add a basic "you got to level 5 you win"
 - Unique items, monsters in gen.c
-- Consumables can have duration effects.
 - Monster capabilities: Can/can't open doors.
+- Equipment needs to be able to modify all skills, stats, etc.
 
 Stuff:
 - Consumables stack in inventories.
@@ -69,6 +69,7 @@ Stuff:
 Bugs:
 - When Con is boosted or drained, current HP needs to scale up or down
   accordingly.
+- Buff consumables shouldn't stack if you use them consecutively.
 
 HAX:
 - items aren't really using gameobj? They never get placed on a tile, just in an inventory in a tile. They could probably just be their own thing, and make *obj into *actor???
