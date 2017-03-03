@@ -278,7 +278,7 @@ func (p *PlayerSheet) setHP(hp int) {
 }
 
 func (p *PlayerSheet) MaxHP() int {
-	return 10 * (1 + p.stats.stat(Vit))
+	return 10 * (1 + math.Max(p.stats.stat(Vit), 1))
 }
 
 func (p *PlayerSheet) MP() int {
@@ -290,7 +290,7 @@ func (p *PlayerSheet) setMP(mp int) {
 }
 
 func (p *PlayerSheet) MaxMP() int {
-	return 10 * (1 + p.stats.stat(Mnd))
+	return 10 * (1 + math.Max(p.stats.stat(Mnd), 1))
 }
 
 func (p *PlayerSheet) Regen() int {
@@ -456,7 +456,7 @@ func (p *PlayerSheet) fist() *Obj {
 		Name:    "FIST",
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
-				Damroll: NewDice(1, p.stats.stat(Str)+1),
+				Damroll: NewDice(1, math.Max(1, p.stats.stat(Str)+1)),
 				Melee:   0,
 				Weight:  0,
 				Slot:    SlotHand,

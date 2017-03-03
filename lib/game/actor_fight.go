@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
-	"log"
 )
 
 // Anything that fights in melee.
@@ -117,6 +116,30 @@ func hit(attacker Fighter, defender Fighter) {
 			if won {
 				d.Ticker.AddEffect(EffectShatter, DieRoll(4, 4))
 			}
+		case EffectDrainStr:
+			r := def.Effects.Resists(effect)
+			won, _ := skillcheck(a.Sheet.Skill(Chi), d.Sheet.Skill(Chi), r, a, d)
+			if won {
+				d.Ticker.AddEffect(EffectDrainStr, 1)
+			}
+		case EffectDrainAgi:
+			r := def.Effects.Resists(effect)
+			won, _ := skillcheck(a.Sheet.Skill(Chi), d.Sheet.Skill(Chi), r, a, d)
+			if won {
+				d.Ticker.AddEffect(EffectDrainAgi, 1)
+			}
+		case EffectDrainVit:
+			r := def.Effects.Resists(effect)
+			won, _ := skillcheck(a.Sheet.Skill(Chi), d.Sheet.Skill(Chi), r, a, d)
+			if won {
+				d.Ticker.AddEffect(EffectDrainVit, 1)
+			}
+		case EffectDrainMnd:
+			r := def.Effects.Resists(effect)
+			won, _ := skillcheck(a.Sheet.Skill(Chi), d.Sheet.Skill(Chi), r, a, d)
+			if won {
+				d.Ticker.AddEffect(EffectDrainMnd, 1)
+			}
 		}
 	}
 
@@ -146,7 +169,6 @@ func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int, verb s
 
 	// We do slays first because brands should supercede slays when it comes to
 	// setting the verb.
-	log.Printf("Slays are %v, def is %v", slays, def)
 	for slay, _ := range slays {
 		if def.SlainBy(slay) <= 0 {
 			return

@@ -111,7 +111,7 @@ type glyph struct {
 // Glyphs used to render actors.
 var actorGlyphs = map[game.Species]glyph{
 	game.SpecHuman: glyph{Ch: '@', Fg: termbox.ColorWhite, Bg: termbox.ColorBlack},
-	game.SpecOrc:   glyph{Ch: 'o', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
+	game.SpecOrc:   glyph{Ch: 'm', Fg: termbox.ColorBlue | termbox.AttrBold, Bg: termbox.ColorBlack},
 	game.SpecAnt:   glyph{Ch: 'd', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
 }
 
@@ -122,6 +122,7 @@ var itemGlyphs = map[game.Species]glyph{
 	game.SpecCure:         glyph{Ch: '!', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 	game.SpecStim:         glyph{Ch: '!', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
 	game.SpecHyper:        glyph{Ch: '!', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
+	game.SpecRestore:      glyph{Ch: '!', Fg: termbox.ColorBlue, Bg: termbox.ColorBlack},
 }
 
 // Glyphs used to render tiles.

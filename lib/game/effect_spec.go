@@ -36,6 +36,10 @@ const (
 	EffectHyper
 	EffectVamp
 	EffectShatter
+	EffectDrainStr
+	EffectDrainAgi
+	EffectDrainVit
+	EffectDrainMnd
 
 	// Resists
 	ResistFire
@@ -54,6 +58,7 @@ const (
 	ResistCrit
 	ResistVamp
 	ResistAcid
+	ResistDrain
 
 	// Flags
 	WeakPearl
@@ -104,6 +109,10 @@ var EffectsSpecs = EffectsSpec{
 	EffectHyper:     {Type: EffectTypeStatus},
 	EffectVamp:      {Type: EffectTypeStatus, ResistedBy: ResistVamp},
 	EffectShatter:   {Type: EffectTypeStatus},
+	EffectDrainStr:  {Type: EffectTypeStatus},
+	EffectDrainAgi:  {Type: EffectTypeStatus},
+	EffectDrainVit:  {Type: EffectTypeStatus},
+	EffectDrainMnd:  {Type: EffectTypeStatus},
 
 	WeakPearl:  {Type: EffectTypeFlag},
 	WeakHunter: {Type: EffectTypeFlag},
@@ -125,6 +134,7 @@ var EffectsSpecs = EffectsSpec{
 	ResistPetrify: {Type: EffectTypeResist},
 	ResistCrit:    {Type: EffectTypeResist},
 	ResistVamp:    {Type: EffectTypeResist},
+	ResistDrain:   {Type: EffectTypeResist},
 }
 
 // Prototype map for effects that are applied every tick.
@@ -144,4 +154,8 @@ var ActiveEffects = map[Effect]ActiveEffect{
 	EffectHyper:     AEHyper,
 	EffectPetrify:   AEPetrify,
 	EffectShatter:   AECorrode,
+	EffectDrainStr:  AEDrainStr,
+	EffectDrainAgi:  AEDrainAgi,
+	EffectDrainVit:  AEDrainVit,
+	EffectDrainMnd:  AEDrainMnd,
 }

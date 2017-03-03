@@ -69,3 +69,11 @@ func hyperfunc(user User) {
 	u := user.Obj()
 	u.Ticker.AddEffect(EffectHyper, DieRoll(20, 4))
 }
+
+func restorefunc(user User) {
+	t := user.Obj().Ticker
+	t.RemoveEffect(EffectDrainStr)
+	t.RemoveEffect(EffectDrainAgi)
+	t.RemoveEffect(EffectDrainVit)
+	t.RemoveEffect(EffectDrainMnd)
+}

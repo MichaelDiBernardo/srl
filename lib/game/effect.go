@@ -389,6 +389,66 @@ var (
 			modAllStats(t.Obj().Sheet, -2)
 		},
 	}
+	AEDrainStr = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			msg := fmt.Sprintf("%s loses strength.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Str, -1)
+		},
+		OnTick: func(_ *ActiveEffect, _ Ticker, _ int) bool {
+			return false
+		},
+		OnEnd: func(ae *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s regains strength.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Str, ae.Counter)
+		},
+	}
+	AEDrainAgi = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			msg := fmt.Sprintf("%s loses agility.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Agi, -1)
+		},
+		OnTick: func(_ *ActiveEffect, _ Ticker, _ int) bool {
+			return false
+		},
+		OnEnd: func(ae *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s regains agility.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Agi, ae.Counter)
+		},
+	}
+	AEDrainVit = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			msg := fmt.Sprintf("%s loses vitality.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Vit, -1)
+		},
+		OnTick: func(_ *ActiveEffect, _ Ticker, _ int) bool {
+			return false
+		},
+		OnEnd: func(ae *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s regains vitality.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Vit, ae.Counter)
+		},
+	}
+	AEDrainMnd = ActiveEffect{
+		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
+			msg := fmt.Sprintf("%s loses mind.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Mnd, -1)
+		},
+		OnTick: func(_ *ActiveEffect, _ Ticker, _ int) bool {
+			return false
+		},
+		OnEnd: func(ae *ActiveEffect, t Ticker) {
+			msg := fmt.Sprintf("%s regains mind.", t.Obj().Spec.Name)
+			t.Obj().Game.Events.Message(msg)
+			t.Obj().Sheet.ChangeStatMod(Mnd, ae.Counter)
+		},
+	}
 )
 
 // An actor's stun level depends on how many turns of stun they've accumulated.

@@ -31,7 +31,7 @@ var Monsters = []*Spec{
 		Family:  FamActor,
 		Genus:   GenMonster,
 		Species: SpecOrc,
-		Name:    "ORC",
+		Name:    "VIOLETMOLD",
 		Gen: Gen{
 			Floors:    []int{1},
 			GroupSize: 2,
@@ -62,6 +62,7 @@ var Monsters = []*Spec{
 					skills: skilllist{
 						Melee:   1,
 						Evasion: 1,
+						Chi:     10,
 					},
 				},
 				speed:      2,
@@ -69,8 +70,8 @@ var Monsters = []*Spec{
 				maxhp:      20,
 				maxmp:      10,
 
-				atkeffects: NewEffects(map[Effect]int{}),
-				defeffects: NewEffects(map[Effect]int{WeakPearl: 1}),
+				atkeffects: NewEffects(map[Effect]int{EffectDrainStr: 1, EffectDrainAgi: 1, EffectDrainVit: 1, EffectDrainMnd: 1}),
+				defeffects: NewEffects(map[Effect]int{}),
 
 				damroll:  NewDice(2, 7),
 				protroll: NewDice(1, 4),
