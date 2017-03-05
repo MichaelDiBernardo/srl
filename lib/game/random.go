@@ -94,3 +94,35 @@ func OneIn(n int) bool {
 func Coinflip() bool {
 	return OneIn(2)
 }
+
+type Weighter interface {
+	Weight() int
+}
+
+// Selects 1 item from a weighted list of choices. In the weighted list {a: 1,
+// b: 2, c: 1}, we'd expect to see a selected 25% of the time, b selected 50%
+// of the time, and c selected 25% of the time.
+func WChoose(choices []Weighter) (pos int, chosen Weighter) {
+	if len(choices) == 0 {
+		return -1, nil
+	}
+
+	// Compute total weight of all items in choices.
+	tw := 0
+	for _, item := range choices {
+		tw += item.Weight()
+	}
+
+	// Select a random number in [0,tw). Now, continually add up weights. When
+	// we finally get a weight > r, select that item.
+	r, cw := RandInt(0, tw), 0
+	for i, item := range choices {
+		cw += item.Weight()
+		if r < cw {
+			return i, item
+		}
+	}
+
+	// This should never happen.
+	panic(fmt.Sprintf("Could not WChoose from %+v", choices))
+}
