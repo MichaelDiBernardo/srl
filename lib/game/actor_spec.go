@@ -31,7 +31,7 @@ var Monsters = []*Spec{
 		Family:  FamActor,
 		Genus:   GenMonster,
 		Species: SpecOrc,
-		Name:    "VIOLETMOLD",
+		Name:    "ORC",
 		Gen: Gen{
 			Floors:    []int{1},
 			GroupSize: 2,
@@ -79,6 +79,16 @@ var Monsters = []*Spec{
 						},
 						P: 1,
 					},
+					{
+						Attack: Attack{
+							Melee:   3,
+							Damroll: NewDice(1, 11),
+							CritDiv: 2,
+							Effects: Effects{},
+							Verb:    "stabs",
+						},
+						P: 1,
+					},
 				},
 
 				defeffects: NewEffects(map[Effect]int{}),
@@ -92,7 +102,7 @@ var Monsters = []*Spec{
 		Species: SpecAnt,
 		Name:    "DRAGON",
 		Gen: Gen{
-			Floors:    []int{10},
+			Floors:    []int{1},
 			GroupSize: 1,
 		},
 		Traits: &Traits{

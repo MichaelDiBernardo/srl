@@ -382,7 +382,6 @@ type applyBSTest struct {
 	rolls []int
 	// Expected
 	xdmg int
-	verb string
 }
 
 func TestApplyBS(t *testing.T) {
@@ -397,8 +396,8 @@ func TestApplyBS(t *testing.T) {
 	oldEffectsSpecs := EffectsSpecs
 
 	EffectsSpecs = EffectsSpec{
-		fakeBrand1:  {Type: EffectTypeBrand, ResistedBy: fakeResist1, Verb: "frobs"},
-		fakeBrand2:  {Type: EffectTypeBrand, Verb: "norfs"},
+		fakeBrand1:  {Type: EffectTypeBrand, ResistedBy: fakeResist1},
+		fakeBrand2:  {Type: EffectTypeBrand},
 		fakeSlay1:   {Type: EffectTypeSlay, Slays: fakeWeak1},
 		fakeWeak1:   {Type: EffectTypeFlag},
 		fakeResist1: {Type: EffectTypeResist},
@@ -414,56 +413,48 @@ func TestApplyBS(t *testing.T) {
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1}),
 			def:   Effects{},
 			rolls: []int{5},
-			verb:  "frobs",
 			xdmg:  5,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 2}),
 			def:   Effects{},
 			rolls: []int{5},
-			verb:  "frobs",
 			xdmg:  5,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1}),
 			def:   NewEffects(map[Effect]int{fakeResist1: 1}),
 			rolls: []int{5},
-			verb:  "frobs",
 			xdmg:  2,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1}),
 			def:   NewEffects(map[Effect]int{fakeResist1: 2}),
 			rolls: []int{5},
-			verb:  "frobs",
 			xdmg:  1,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1}),
 			def:   NewEffects(map[Effect]int{fakeResist1: -1}),
 			rolls: []int{5},
-			verb:  "*frobs*",
 			xdmg:  10,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1}),
 			def:   NewEffects(map[Effect]int{fakeResist1: -2}),
 			rolls: []int{5},
-			verb:  "*frobs*",
 			xdmg:  15,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{}),
 			def:   NewEffects(map[Effect]int{fakeResist1: -1}),
 			rolls: []int{5},
-			verb:  "hits",
 			xdmg:  0,
 		},
 		{
 			atk:   NewEffects(map[Effect]int{}),
 			def:   NewEffects(map[Effect]int{fakeResist1: 1}),
 			rolls: []int{5},
-			verb:  "hits",
 			xdmg:  0,
 		},
 		{
@@ -476,7 +467,6 @@ func TestApplyBS(t *testing.T) {
 			atk:   NewEffects(map[Effect]int{fakeBrand1: 1, fakeBrand2: 1}),
 			def:   NewEffects(map[Effect]int{fakeResist1: -1}),
 			rolls: []int{5, 5},
-			verb:  "*frobs*",
 			xdmg:  15,
 		},
 		{
@@ -489,7 +479,6 @@ func TestApplyBS(t *testing.T) {
 			atk:   NewEffects(map[Effect]int{fakeSlay1: 1}),
 			def:   NewEffects(map[Effect]int{fakeWeak1: 1}),
 			rolls: []int{5},
-			verb:  "*hits*",
 			xdmg:  5,
 		},
 		{
@@ -502,7 +491,6 @@ func TestApplyBS(t *testing.T) {
 			atk:   NewEffects(map[Effect]int{fakeSlay1: 1, fakeBrand1: 1}),
 			def:   NewEffects(map[Effect]int{fakeWeak1: 1}),
 			rolls: []int{5, 5},
-			verb:  "frobs",
 			xdmg:  10,
 		},
 	}
@@ -512,8 +500,8 @@ func TestApplyBS(t *testing.T) {
 		func() {
 			FixRandomDie(test.rolls)
 			defer RestoreRandom()
-			if xdmg, _, verb := applybs(10, test.atk, test.def); xdmg != test.xdmg || (test.verb != "" && verb != test.verb) {
-				t.Errorf(`Test %d: got (%d, "%s") want (%d, "%s")`, i, xdmg, verb, test.xdmg, test.verb)
+			if xdmg, _ := applybs(10, test.atk, test.def); xdmg != test.xdmg {
+				t.Errorf(`Test %d: got %d, want %d`, i, xdmg, test.xdmg)
 			}
 		}()
 	}
@@ -523,13 +511,13 @@ func TestApplyBrandPoison(t *testing.T) {
 	FixRandomDie([]int{5, 5, 5, 5})
 	defer RestoreRandom()
 
-	if xdmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{})); xdmg != 0 || poisondmg != 5 {
+	if xdmg, poisondmg := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{})); xdmg != 0 || poisondmg != 5 {
 		t.Errorf(`applybs poisondmg: got (%d, %d) want (0, 5)`, xdmg, poisondmg)
 	}
-	if xdmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{ResistPoison: 1})); xdmg != 0 || poisondmg != 2 {
+	if xdmg, poisondmg := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1}), NewEffects(map[Effect]int{ResistPoison: 1})); xdmg != 0 || poisondmg != 2 {
 		t.Errorf(`applybs poisondmg: got (%d, %d) want (0, 2)`, xdmg, poisondmg)
 	}
-	if xdmg, poisondmg, _ := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1, BrandFire: 1}), NewEffects(map[Effect]int{})); xdmg != 5 || poisondmg != 5 {
+	if xdmg, poisondmg := applybs(10, NewEffects(map[Effect]int{BrandPoison: 1, BrandFire: 1}), NewEffects(map[Effect]int{})); xdmg != 5 || poisondmg != 5 {
 		t.Errorf(`applybs poisondmg: got (%d, %d) want (5, 5)`, xdmg, poisondmg)
 	}
 }

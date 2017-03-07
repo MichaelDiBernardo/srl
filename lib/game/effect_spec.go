@@ -81,11 +81,11 @@ const (
 
 // Mapping of effects to their types.
 var EffectsSpecs = EffectsSpec{
-	BrandFire:   {Type: EffectTypeBrand, ResistedBy: ResistFire, Verb: "burns"},
-	BrandElec:   {Type: EffectTypeBrand, ResistedBy: ResistElec, Verb: "shocks"},
-	BrandIce:    {Type: EffectTypeBrand, ResistedBy: ResistIce, Verb: "freezes"},
-	BrandPoison: {Type: EffectTypeBrand, ResistedBy: ResistPoison, Verb: "poisons"},
-	BrandAcid:   {Type: EffectTypeBrand, ResistedBy: ResistAcid, Verb: "melts"},
+	BrandFire:   {Type: EffectTypeBrand, ResistedBy: ResistFire},
+	BrandElec:   {Type: EffectTypeBrand, ResistedBy: ResistElec},
+	BrandIce:    {Type: EffectTypeBrand, ResistedBy: ResistIce},
+	BrandPoison: {Type: EffectTypeBrand, ResistedBy: ResistPoison},
+	BrandAcid:   {Type: EffectTypeBrand, ResistedBy: ResistAcid},
 
 	SlayPearl:  {Type: EffectTypeSlay, Slays: WeakPearl},
 	SlayHunter: {Type: EffectTypeSlay, Slays: WeakHunter},

@@ -46,14 +46,15 @@ func hit(attacker Fighter, defender Fighter) {
 	// Calculate raw phys damage.
 	dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
 	// Figure out how much branded damage we did.
-	xdmg, poisondmg, verb := applybs(dmg, atk.Effects, def.Effects)
+	xdmg, poisondmg := applybs(dmg, atk.Effects, def.Effects)
 	dmg += xdmg
 
 	critstr := ""
 	if crits > 0 {
 		critstr = fmt.Sprintf(" %dx critical!", crits)
 	}
-	msg := fmt.Sprintf("%s %s %s (%d).%s", aname, verb, dname, dmg, critstr)
+
+	msg := fmt.Sprintf("%s %s %s (%d).%s", aname, atk.Verb, dname, dmg, critstr)
 	a.Game.Events.Message(msg)
 
 	if dmg <= 0 {
@@ -158,26 +159,22 @@ func hit(attacker Fighter, defender Fighter) {
 // effects, this figures out how much extra and poison damage should be done from
 // brands and slays. Poison damage is separated out because it is applied as
 // damage-over-time, instead of being immediately inflicted on the target.
-func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int, verb string) {
+func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int) {
 	if basedmg == 0 {
-		return 0, 0, "hits"
+		return 0, 0
 	}
 
 	slays, brands := atk.Slays(), atk.Brands()
-	fixverb := false
-	xdmg, poisondmg, verb = 0, 0, "hits"
+	xdmg, poisondmg = 0, 0
 
-	// We do slays first because brands should supercede slays when it comes to
-	// setting the verb.
 	for slay, _ := range slays {
 		if def.SlainBy(slay) <= 0 {
 			return
 		}
-		verb = "*hits*"
 		xdmg += DieRoll(1, basedmg)
 	}
 
-	for brand, info := range brands {
+	for brand, _ := range brands {
 		raw := DieRoll(1, basedmg)
 		resisted := def.ResistDmg(brand, raw)
 
@@ -186,25 +183,8 @@ func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int, verb s
 		} else {
 			xdmg += resisted
 		}
-
-		newverb := info.Verb
-
-		// Vulnerability
-		if def.Resists(brand) < 0 {
-			fixverb = true
-			verb = fmt.Sprintf("*%s*", newverb)
-		}
-
-		// If we've ever found a vulnerability before (including in this
-		// iteration), keep the old verb because it's at least as important as
-		// any other verb we might use. e.g. if you have fire and cold brands,
-		// and the target is vuln to fire, we want '*burns*' to have priority
-		// over 'freezes'
-		if !fixverb {
-			verb = newverb
-		}
 	}
-	return xdmg, poisondmg, verb
+	return xdmg, poisondmg
 }
 
 func checkpara(defender Fighter) {

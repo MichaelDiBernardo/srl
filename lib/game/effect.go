@@ -19,7 +19,6 @@ type EffectSpec struct {
 	Type       EffectType
 	ResistedBy Effect
 	Slays      Effect
-	Verb       string
 }
 
 // Definition of _all_ effects and their types.
