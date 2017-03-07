@@ -437,6 +437,7 @@ func (p *PlayerSheet) Attack() Attack {
 		Damroll: equip.Damroll.Add(0, bonusSides),
 		CritDiv: equip.Weight + BaseCritDiv,
 		Effects: equip.Effects,
+		Verb:    "hits",
 	}
 }
 
@@ -507,6 +508,17 @@ func (p *PlayerSheet) initmods() {
 	modMndSkills(p, p.stats.stat(Mnd))
 }
 
+// A spec for a monster attack.
+type MonsterAttack struct {
+	Attack
+	// How relatively frequently should we use this attack?
+	P int
+}
+
+func (m *MonsterAttack) Weight() int {
+	return m.P
+}
+
 // Sheet used for monsters, which have a lot of hardcoded attributes.
 type MonsterSheet struct {
 	Trait
@@ -536,14 +548,14 @@ type MonsterSheet struct {
 	petrified bool
 	corr      int
 
-	// Basically weapon weight.
-	critdivmod int
+	// The melee attacks this monster has. The elements in this slice should be
+	// immutable -- do not change their fields, as these are shared across all
+	// monsters that share the same spec.
+	attacks []*MonsterAttack
 
 	protroll Dice
-	damroll  Dice
 
 	// Innate attack + defense effects for this monster.
-	atkeffects Effects
 	defeffects Effects
 }
 
@@ -611,10 +623,10 @@ func (m *MonsterSheet) ChangeStatMod(stat StatName, diff int) {
 }
 
 func (m *MonsterSheet) Skill(skill SkillName) int {
-	s := m.skills.skill(skill)
-	if m.blind {
-		s = blindpenalty(skill, s)
+	if skill == Melee {
+		panic("Monster Melee must be checked through individual attacks.")
 	}
+	s := m.skills.skill(skill)
 	if !m.CanAct() {
 		s = parapenalty(skill, s)
 	}
@@ -797,12 +809,19 @@ func (m *MonsterSheet) CanAct() bool {
 }
 
 func (m *MonsterSheet) Attack() Attack {
-	return Attack{
-		Melee:   m.Skill(Melee),
-		Damroll: m.damroll,
-		CritDiv: m.critdivmod + BaseCritDiv,
-		Effects: m.atkeffects,
+	// Sigh.
+	weighted := make([]Weighter, len(m.attacks))
+	for i, at := range m.attacks {
+		weighted[i] = at
 	}
+
+	pos, _ := WChoose(weighted)
+
+	// Copy the attack.
+	atk := m.attacks[pos].Attack
+	atk.Melee = blindpenalty(Melee, atk.Melee)
+	atk.CritDiv += BaseCritDiv
+	return atk
 }
 
 func (m *MonsterSheet) Defense() Defense {
@@ -963,12 +982,15 @@ const (
 
 // Details about an actor's melee attack, before the melee roll is applied --
 // i.e. what melee bonus + damage should be done if no crits happen? What's the
-// base divisor to use for calculating # of crits?
+// base divisor to use for calculating # of crits? What base verb should we use
+// if it hits? (This latter may be altered by applybs() based on which effects
+// actually end up working.)
 type Attack struct {
 	Melee   int
 	Damroll Dice
 	CritDiv int
 	Effects Effects
+	Verb    string
 }
 
 // Roll damage for this attack, given that `crits` crits were rolled.

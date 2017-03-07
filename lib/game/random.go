@@ -107,6 +107,15 @@ func WChoose(choices []Weighter) (pos int, chosen Weighter) {
 		return -1, nil
 	}
 
+	// This is not necessary -- the loop below would handle this case. However,
+	// we use this function REALLY often in fighting-related tests where we
+	// already have to stub out a bunch of dierolls, and basically all of those
+	// tests use a single attack. To avoid having to put a leading '0' in every
+	// fake rolls list, we handle this case without consuming a random number.
+	if len(choices) == 1 {
+		return 0, choices[0]
+	}
+
 	// Compute total weight of all items in choices.
 	tw := 0
 	for _, item := range choices {

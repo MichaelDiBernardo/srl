@@ -60,21 +60,29 @@ var Monsters = []*Spec{
 				},
 				skills: &skills{
 					skills: skilllist{
-						Melee:   1,
 						Evasion: 1,
 						Chi:     10,
 					},
 				},
-				speed:      2,
-				critdivmod: 4,
-				maxhp:      20,
-				maxmp:      10,
+				speed: 2,
+				maxhp: 20,
+				maxmp: 10,
 
-				atkeffects: NewEffects(map[Effect]int{EffectDrainStr: 1, EffectDrainAgi: 1, EffectDrainVit: 1, EffectDrainMnd: 1}),
+				attacks: []*MonsterAttack{
+					{
+						Attack: Attack{
+							Melee:   0,
+							Damroll: NewDice(2, 7),
+							CritDiv: 4,
+							Effects: Effects{},
+							Verb:    "hits",
+						},
+						P: 1,
+					},
+				},
+
 				defeffects: NewEffects(map[Effect]int{}),
-
-				damroll:  NewDice(2, 7),
-				protroll: NewDice(1, 4),
+				protroll:   NewDice(1, 4),
 			}),
 		},
 	},
@@ -111,19 +119,38 @@ var Monsters = []*Spec{
 				},
 				skills: &skills{
 					skills: skilllist{
-						Melee:   5,
 						Evasion: 5,
 					},
 				},
-				speed:      2,
-				critdivmod: 4,
-				maxhp:      20,
-				maxmp:      10,
+				speed: 2,
+				maxhp: 20,
+				maxmp: 10,
 
-				damroll:  NewDice(1, 11),
-				protroll: NewDice(2, 4),
+				attacks: []*MonsterAttack{
+					{
+						Attack: Attack{
+							Melee:   3,
+							Damroll: NewDice(2, 9),
+							CritDiv: 4,
+							Effects: Effects{},
+							Verb:    "claws",
+						},
+						P: 3,
+					},
+					{
+						Attack: Attack{
+							Melee:   0,
+							Damroll: NewDice(2, 15),
+							CritDiv: 4,
+							Effects: NewEffects(map[Effect]int{BrandFire: 1}),
+							Verb:    "bites",
+						},
+						P: 3,
+					},
+				},
 
-				atkeffects: NewEffects(map[Effect]int{BrandFire: 1}),
+				protroll:   NewDice(2, 4),
+				defeffects: Effects{},
 			}),
 		},
 	},

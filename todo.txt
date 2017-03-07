@@ -1,17 +1,8 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 
-"Corrosion" effect, acid brand
-
-- [x] Sheet changes [ ] test
-    - Corrosion level stacks on each successful application
-    - Defense should have another collection of dice for corrosion
-    - subtract the corrosion roll from the protroll, capped at 0
-- [x] Activeffect [ ] test
-- [x] Hud changes
-- [x] Melee acid brand [ ] test
-- [x] Melee shatter effect [ ] test
-    - Skillcheck should be the same as the stun score, 10 for difficulty?
+- fix hit() and applybs() to work with different verbs from attack.
+- Move defense fields into a Defense{} spec for monsters.
 
 - Monsters have multiple abilities.
     - Abilities need:

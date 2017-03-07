@@ -31,7 +31,7 @@ func TestWChoose(t *testing.T) {
 	tests := []wchooseTC{
 		wchooseTC{
 			items: []Weighter{wchooseT{10}},
-			ints:  []int{0},
+			ints:  []int{},
 			pos:   0,
 		},
 		wchooseTC{

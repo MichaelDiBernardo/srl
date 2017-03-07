@@ -108,10 +108,14 @@ func TestHit(t *testing.T) {
 			Traits: &Traits{
 				Fighter: NewActorFighter,
 				Sheet: NewMonsterSheet(&MonsterSheet{
-					critdivmod: 0,
-					maxhp:      20,
-					damroll:    NewDice(1, 5),
-					protroll:   test.protdice,
+					maxhp: 20,
+					attacks: []*MonsterAttack{{
+						Attack: Attack{
+							Damroll: NewDice(1, 5),
+						},
+						P: 1,
+					}},
+					protroll: test.protdice,
 				}),
 			},
 		}
@@ -137,12 +141,16 @@ func makeTestHitterSpec(atk Effects) *Spec {
 		Traits: &Traits{
 			Fighter: NewActorFighter,
 			Sheet: NewMonsterSheet(&MonsterSheet{
-				critdivmod: 0,
-				maxhp:      20,
-				maxmp:      10,
-				damroll:    NewDice(1, 5),
-				speed:      1,
-				atkeffects: atk,
+				maxhp: 20,
+				maxmp: 10,
+				speed: 1,
+				attacks: []*MonsterAttack{{
+					Attack: Attack{
+						Damroll: NewDice(1, 5),
+						Effects: atk,
+					},
+					P: 1,
+				}},
 			}),
 			Ticker: NewActorTicker,
 		},
@@ -158,9 +166,12 @@ func TestHitCritResist(t *testing.T) {
 		Traits: &Traits{
 			Fighter: NewActorFighter,
 			Sheet: NewMonsterSheet(&MonsterSheet{
-				critdivmod: 0,
-				maxhp:      20,
-				damroll:    NewDice(1, 5),
+				maxhp: 20,
+				attacks: []*MonsterAttack{{
+					Attack: Attack{
+						Damroll: NewDice(1, 5),
+					},
+				}},
 				defeffects: NewEffects(map[Effect]int{ResistCrit: 1}),
 			}),
 		},
@@ -258,7 +269,7 @@ func TestHitShatter(t *testing.T) {
 	testMonSpec := makeTestHitterSpec(NewEffects(map[Effect]int{EffectShatter: 1}))
 	g := newTestGame()
 	attacker, defender := g.NewObj(testMonSpec), g.NewObj(testMonSpec)
-	attacker.Sheet.(*MonsterSheet).critdivmod = 10
+	attacker.Sheet.(*MonsterSheet).attacks[0].CritDiv = 10
 	// Roll 5 damage, and make sure to win shatter skillroll (10 vs 0 on d10s.)
 	FixRandomDie([]int{7, 1, 5, 10, 0, 1, 1, 1, 2})
 	defer RestoreRandom()
