@@ -552,11 +552,7 @@ type MonsterSheet struct {
 	// immutable -- do not change their fields, as these are shared across all
 	// monsters that share the same spec.
 	attacks []*MonsterAttack
-
-	protroll Dice
-
-	// Innate attack + defense effects for this monster.
-	defeffects Effects
+	defense Defense
 }
 
 // Given a copy of a MonsterSheet literal, this will return a function that will bind
@@ -625,6 +621,9 @@ func (m *MonsterSheet) ChangeStatMod(stat StatName, diff int) {
 func (m *MonsterSheet) Skill(skill SkillName) int {
 	if skill == Melee {
 		panic("Monster Melee must be checked through individual attacks.")
+	}
+	if skill == Evasion {
+		panic("Monster Evasion must be checked through Defense.")
 	}
 	s := m.skills.skill(skill)
 	if !m.CanAct() {
@@ -825,27 +824,20 @@ func (m *MonsterSheet) Attack() Attack {
 }
 
 func (m *MonsterSheet) Defense() Defense {
-	var dice []Dice
-	defeffects := m.defeffects
+	def := m.defense
+
 	if m.Petrified() {
-		dice = []Dice{petrifyProt}
 		cr := NewEffects(map[Effect]int{ResistCrit: petrifyCritResist})
-		defeffects = defeffects.Merge(cr)
-	} else {
-		dice = []Dice{m.protroll}
+		def.Effects = def.Effects.Merge(cr)
+		def.ProtDice = []Dice{petrifyProt}
 	}
 
-	corrdice := []Dice{}
+	def.CorrDice = []Dice{}
 	if corr := m.corr; corr > 0 {
-		corrdice = append(corrdice, NewDice(corr, 4))
+		def.CorrDice = append(def.CorrDice, NewDice(corr, 4))
 	}
 
-	return Defense{
-		Evasion:  m.Skill(Evasion),
-		ProtDice: dice,
-		CorrDice: corrdice,
-		Effects:  defeffects,
-	}
+	return def
 }
 
 func modAgiSkills(s Sheet, diff int) {

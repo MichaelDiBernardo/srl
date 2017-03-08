@@ -1,6 +1,5 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-- Move defense fields into a Defense{} spec for monsters.
 
 - Monsters have multiple abilities.
     - Abilities need:

@@ -60,8 +60,7 @@ var Monsters = []*Spec{
 				},
 				skills: &skills{
 					skills: skilllist{
-						Evasion: 1,
-						Chi:     10,
+						Chi: 10,
 					},
 				},
 				speed: 2,
@@ -90,9 +89,11 @@ var Monsters = []*Spec{
 						P: 1,
 					},
 				},
-
-				defeffects: NewEffects(map[Effect]int{}),
-				protroll:   NewDice(1, 4),
+				defense: Defense{
+					Evasion:  1,
+					ProtDice: []Dice{NewDice(1, 4)},
+					Effects:  NewEffects(map[Effect]int{}),
+				},
 			}),
 		},
 	},
@@ -128,9 +129,7 @@ var Monsters = []*Spec{
 					},
 				},
 				skills: &skills{
-					skills: skilllist{
-						Evasion: 5,
-					},
+					skills: skilllist{},
 				},
 				speed: 2,
 				maxhp: 20,
@@ -158,9 +157,11 @@ var Monsters = []*Spec{
 						P: 3,
 					},
 				},
-
-				protroll:   NewDice(2, 4),
-				defeffects: Effects{},
+				defense: Defense{
+					Evasion:  5,
+					ProtDice: []Dice{NewDice(2, 4)},
+					Effects:  NewEffects(map[Effect]int{}),
+				},
 			}),
 		},
 	},

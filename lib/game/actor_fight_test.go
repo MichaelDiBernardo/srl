@@ -115,7 +115,9 @@ func TestHit(t *testing.T) {
 						},
 						P: 1,
 					}},
-					protroll: test.protdice,
+					defense: Defense{
+						ProtDice: []Dice{test.protdice},
+					},
 				}),
 			},
 		}
@@ -172,7 +174,9 @@ func TestHitCritResist(t *testing.T) {
 						Damroll: NewDice(1, 5),
 					},
 				}},
-				defeffects: NewEffects(map[Effect]int{ResistCrit: 1}),
+				defense: Defense{
+					Effects: NewEffects(map[Effect]int{ResistCrit: 1}),
+				},
 			}),
 		},
 	}
