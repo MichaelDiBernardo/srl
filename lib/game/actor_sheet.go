@@ -1092,6 +1092,10 @@ func checkDeath(s Sheet) {
 	obj := s.Obj()
 	game := obj.Game
 
+	if obj.Dropper != nil {
+		obj.Dropper.DropItems()
+	}
+
 	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))
 	game.Kill(obj)
 }

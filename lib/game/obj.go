@@ -83,6 +83,7 @@ type Obj struct {
 	User     User
 	Senser   Senser
 	Ticker   Ticker
+	Dropper  Dropper
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
@@ -110,6 +111,7 @@ type Traits struct {
 	User     func(*Obj) User
 	Senser   func(*Obj) Senser
 	Ticker   func(*Obj) Ticker
+	Dropper  func(*Obj) Dropper
 
 	Equipment  func(*Obj) *Equipment
 	Consumable func(*Obj) *Consumable
@@ -152,6 +154,9 @@ func newObj(spec *Spec) *Obj {
 	}
 	if traits.Ticker != nil {
 		newobj.Ticker = traits.Ticker(newobj)
+	}
+	if traits.Dropper != nil {
+		newobj.Dropper = traits.Dropper(newobj)
 	}
 
 	if traits.Equipment != nil {

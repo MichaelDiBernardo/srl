@@ -1,5 +1,6 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
+- Tests for actor_drop
 
 - Monsters have multiple abilities.
     - Abilities need:
@@ -32,7 +33,7 @@ NEXT:
             - Stay at last position when lose detection
  
 Then:
-- Monsters drop loot
+- Open/close doors
 - Add a basic "you got to level 5 you win"
 - Unique items, monsters in gen.c
 - Monster capabilities: Can/can't open doors.
@@ -56,3 +57,4 @@ Stuff:
 
 Bug:
 - items can be placed / dropped on stairs.
+- Monster drops will just drop where they are, even if it's an open door or stairs?

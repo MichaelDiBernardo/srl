@@ -49,6 +49,9 @@ var Monsters = []*Spec{
 			Packer:  NewActorPacker,
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
+			Dropper: NewItemDropper(&ItemDropper{
+				num: 2,
+			}),
 			Sheet: NewMonsterSheet(&MonsterSheet{
 				stats: &stats{
 					stats: statlist{
@@ -119,6 +122,10 @@ var Monsters = []*Spec{
 			Packer:  NewActorPacker,
 			Senser:  NewActorSenser,
 			Ticker:  NewActorTicker,
+			Dropper: NewItemDropper(&ItemDropper{
+				num:   4,
+				boost: 3,
+			}),
 			Sheet: NewMonsterSheet(&MonsterSheet{
 				stats: &stats{
 					stats: statlist{
