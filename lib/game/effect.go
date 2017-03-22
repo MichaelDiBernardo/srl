@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // An effect is something that a monster or a piece of equipment can have. This
@@ -129,6 +130,14 @@ func (e Effects) ResistDmg(effect Effect, dmg int) int {
 	}
 }
 
+type AEStackType uint
+
+const (
+	AEStackAdd AEStackType = iota
+	AEStackReplace
+	AEStackIgnore
+)
+
 // An instance of an effect that is currently affected an actor. These are
 // managed by the actor's ticker.
 type ActiveEffect struct {
@@ -144,6 +153,9 @@ type ActiveEffect struct {
 	OnTick func(*ActiveEffect, Ticker, int) bool
 	// What to do when the effect has run its course.
 	OnEnd func(*ActiveEffect, Ticker)
+	// How should this effect stack? Should we add to the counter, replace it
+	// with the new value, or ignore the addition altogether?
+	Stacks AEStackType
 }
 
 // Creates a new ActiveEffect record for the given effect.
@@ -189,6 +201,7 @@ var (
 			}
 			return false
 		},
+		Stacks: AEStackIgnore,
 	}
 	AEPoison = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -204,6 +217,7 @@ var (
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s recovers from poison.", t.Obj().Spec.Name))
 		},
+		Stacks: AEStackAdd,
 	}
 	AECut = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -219,6 +233,7 @@ var (
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Game.Events.Message(fmt.Sprintf("%s is healed from wounds.", t.Obj().Spec.Name))
 		},
+		Stacks: AEStackAdd,
 	}
 	AEStun = ActiveEffect{
 		OnBegin: func(e *ActiveEffect, t Ticker, _ int) {
@@ -232,6 +247,7 @@ var (
 		OnEnd: func(_ *ActiveEffect, t Ticker) {
 			t.Obj().Sheet.SetStun(NotStunned)
 		},
+		Stacks: AEStackAdd,
 	}
 	AECorrode = ActiveEffect{
 		OnBegin: func(e *ActiveEffect, t Ticker, prev int) {
@@ -253,6 +269,7 @@ var (
 			msg := "%s armor is fixed."
 			t.Obj().Game.Events.Message(fmt.Sprintf(msg, poss(t.Obj().Spec.Name)))
 		},
+		Stacks: AEStackAdd,
 	}
 	AEBlind = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -266,6 +283,7 @@ var (
 			msg := fmt.Sprintf("%s can see again.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AESlow = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -279,6 +297,7 @@ var (
 			msg := fmt.Sprintf("%s speeds up again.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEConfuse = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -292,6 +311,7 @@ var (
 			msg := fmt.Sprintf("%s recovers from confusion.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEFear = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -305,9 +325,11 @@ var (
 			msg := fmt.Sprintf("%s recovers from fear.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEPara = ActiveEffect{
-		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
+		OnBegin: func(ae *ActiveEffect, t Ticker, _ int) {
+			log.Printf("Para: %d turns", ae.Counter)
 			t.Obj().Sheet.SetParalyzed(true)
 			msg := fmt.Sprintf("%s is paralyzed.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
@@ -318,6 +340,7 @@ var (
 			msg := fmt.Sprintf("%s can move again.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackIgnore,
 	}
 	AEPetrify = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -331,6 +354,7 @@ var (
 			msg := fmt.Sprintf("%s is no longer a statue.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackIgnore,
 	}
 	AESilence = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -344,6 +368,7 @@ var (
 			msg := fmt.Sprintf("%s can speak again.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AECurse = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, _ int) {
@@ -357,6 +382,7 @@ var (
 			msg := fmt.Sprintf("%s is no longer cursed.", t.Obj().Spec.Name)
 			t.Obj().Game.Events.Message(msg)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEStim = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -372,6 +398,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			modAllSkills(t.Obj().Sheet, -2)
 		},
+		Stacks: AEStackReplace,
 	}
 	AEHyper = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -387,6 +414,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			modAllStats(t.Obj().Sheet, -2)
 		},
+		Stacks: AEStackReplace,
 	}
 	AEDrainStr = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -402,6 +430,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			t.Obj().Sheet.ChangeStatMod(Str, ae.Counter)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEDrainAgi = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -417,6 +446,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			t.Obj().Sheet.ChangeStatMod(Agi, ae.Counter)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEDrainVit = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -432,6 +462,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			t.Obj().Sheet.ChangeStatMod(Vit, ae.Counter)
 		},
+		Stacks: AEStackAdd,
 	}
 	AEDrainMnd = ActiveEffect{
 		OnBegin: func(_ *ActiveEffect, t Ticker, prev int) {
@@ -447,6 +478,7 @@ var (
 			t.Obj().Game.Events.Message(msg)
 			t.Obj().Sheet.ChangeStatMod(Mnd, ae.Counter)
 		},
+		Stacks: AEStackAdd,
 	}
 )
 

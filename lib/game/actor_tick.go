@@ -76,8 +76,17 @@ func (t *ActorTicker) AddEffect(e Effect, counter int) {
 		t.Effects[e] = ae
 	} else {
 		prev = ae.Counter
-		ae.Counter += counter
+		switch ae.Stacks {
+		case AEStackAdd:
+			ae.Counter += counter
+		case AEStackReplace:
+			ae.Counter = counter
+		case AEStackIgnore:
+			// Don't want to run OnBegin when ignoring.
+			return
+		}
 	}
+
 	ae.OnBegin(ae, t, prev)
 }
 

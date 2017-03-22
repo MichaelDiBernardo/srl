@@ -320,6 +320,8 @@ func TestHitPara(t *testing.T) {
 		t.Errorf(`Para counter %d; want 12`, para)
 	}
 
+	// Any hit should break out of para.
+	attacker.Sheet.(*MonsterSheet).attacks[0].Effects = Effects{}
 	attacker.Fighter.Hit(defender.Fighter)
 
 	if para := defender.Ticker.Counter(EffectPara); para != 0 {

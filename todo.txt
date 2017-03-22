@@ -54,7 +54,5 @@ Stuff:
   brands, damage resisted
 - markup language in Message that can be used to suggest colors in client.
 
-Bugs:
-- When Con is boosted or drained, current HP needs to scale up or down
-  accordingly.
-- Buff consumables shouldn't stack if you use them consecutively.
+Bug:
+- items can be placed / dropped on stairs.

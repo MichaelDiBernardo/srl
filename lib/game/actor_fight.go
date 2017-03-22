@@ -2,6 +2,8 @@ package game
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
@@ -43,8 +45,12 @@ func hit(attacker Fighter, defender Fighter) {
 	}
 
 	crits := residual / (atk.CritDiv + def.Effects.Has(ResistCrit))
+
 	// Calculate raw phys damage.
-	dmg := math.Max(0, atk.RollDamage(crits)-def.RollProt())
+	droll, proll := atk.RollDamage(crits), def.RollProt()
+	log.Printf("DR: %d PR: %d", droll, proll)
+	dmg := math.Max(0, droll-proll)
+
 	// Figure out how much branded damage we did.
 	xdmg, poisondmg := applybs(dmg, atk.Effects, def.Effects)
 	dmg += xdmg
@@ -60,6 +66,8 @@ func hit(attacker Fighter, defender Fighter) {
 	if dmg <= 0 {
 		return
 	}
+
+	ispara := d.Sheet.Paralyzed()
 
 	for effect, _ := range atk.Effects {
 		switch effect {
@@ -89,21 +97,10 @@ func hit(attacker Fighter, defender Fighter) {
 				d.Ticker.AddEffect(EffectConfuse, DieRoll(5, 4))
 			}
 		case EffectPara:
-			// Don't let the effect accumulate; also, give the defender a
-			// chance to break out when they are hurt.
-			if d.Sheet.Paralyzed() {
-				checkpara(defender)
-				break
-			}
-
 			if savingthrow(d, def.Effects, effect) {
 				d.Ticker.AddEffect(EffectPara, DieRoll(4, 4))
 			}
 		case EffectPetrify:
-			// Don't let the effect accumulate.
-			if d.Sheet.Petrified() {
-				break
-			}
 			if savingthrow(d, def.Effects, effect) {
 				d.Ticker.AddEffect(EffectPetrify, DieRoll(4, 4))
 			}
@@ -144,6 +141,9 @@ func hit(attacker Fighter, defender Fighter) {
 		}
 	}
 
+	if ispara {
+		checkpara(defender)
+	}
 	d.Sheet.Hurt(dmg)
 
 	// Have to handle this outside the effect loop above because we need the
@@ -190,9 +190,6 @@ func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int) {
 func checkpara(defender Fighter) {
 	obj := defender.Obj()
 	sheet := obj.Sheet
-	if !sheet.Paralyzed() {
-		return
-	}
 
 	if OneIn(2) {
 		msg := fmt.Sprintf("%s breaks out of paralysis!", obj.Spec.Name)

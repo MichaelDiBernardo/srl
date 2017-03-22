@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
+	"log"
 )
 
 // Rolls a non-combat skillcheck of 'skill' vs 'difficulty. 'challenger' is
@@ -37,13 +38,17 @@ func savingthrow(defender *Obj, defeffects Effects, effect Effect) bool {
 // false; only one roll will be made. If roller or roller.Sheet is nil, the die
 // will only be rolled once.
 func skillroll(roller *Obj) int {
-	return sroll(roller, 10)
+	sr := sroll(roller, 10)
+	log.Printf("SR: %d", sr)
+	return sr
 }
 
 // Same as skillroll, but uses d20s. This should be used for all melee,
 // evasion, shooting rolls.
 func combatroll(roller *Obj) int {
-	return sroll(roller, 20)
+	s := sroll(roller, 20)
+	log.Printf("CR: %d", s)
+	return s
 }
 
 // Actual implementation of skill + melee rolls.
