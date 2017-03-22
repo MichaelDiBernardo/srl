@@ -54,6 +54,50 @@ func TestHealPlayerDoesntExceedMaxHP(t *testing.T) {
 	}
 }
 
+func TestChangingPlayerVitAdjustsHP(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Vit: 2}},
+		hp:    15,
+	})
+
+	g.Player = obj
+
+	obj.Sheet.ChangeStatMod(Vit, 3)
+	if hp := obj.Sheet.HP(); hp != 30 {
+		t.Errorf(`Player hp scaled to %d hp; want %d.`, hp, 30)
+	}
+
+	obj.Sheet.SetStat(Vit, -1)
+	if hp := obj.Sheet.HP(); hp != 15 {
+		t.Errorf(`Player hp scaled to %d hp; want %d.`, hp, 15)
+	}
+}
+
+func TestChangingPlayerMndAdjustsMP(t *testing.T) {
+	g := newTestGame()
+	obj := g.Player
+	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{
+		Trait: Trait{obj: obj},
+		stats: &stats{stats: statlist{Mnd: 2}},
+		mp:    15,
+	})
+
+	g.Player = obj
+
+	obj.Sheet.ChangeStatMod(Mnd, 3)
+	if mp := obj.Sheet.MP(); mp != 30 {
+		t.Errorf(`Player mp scaled to %d mp; want %d.`, mp, 30)
+	}
+
+	obj.Sheet.SetStat(Mnd, -1)
+	if mp := obj.Sheet.MP(); mp != 15 {
+		t.Errorf(`Player mp scaled to %d mp; want %d.`, mp, 15)
+	}
+}
+
 var astKnifeSpec = &Spec{
 	Family:  FamItem,
 	Genus:   GenEquipment,

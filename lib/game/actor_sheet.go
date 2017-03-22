@@ -156,7 +156,7 @@ func NewPlayerSheet(obj *Obj) Sheet {
 			stats: statlist{
 				Str: 2,
 				Agi: 5,
-				Vit: 20,
+				Vit: 4,
 				Mnd: 3,
 			},
 		},
@@ -203,14 +203,20 @@ func (p *PlayerSheet) Stat(stat StatName) int {
 }
 
 func (p *PlayerSheet) SetStat(stat StatName, amt int) {
+	oldstat := p.Stat(stat)
+	p.stats.set(stat, amt)
+	newstat := p.Stat(stat)
+
 	switch stat {
 	case Agi:
-		modAgiSkills(p, amt-p.stats.stat(stat))
+		modAgiSkills(p, newstat-oldstat)
+	case Vit:
+		scaleHP(p, oldstat, newstat)
 	case Mnd:
-		modMndSkills(p, amt-p.stats.stat(stat))
+		modMndSkills(p, newstat-oldstat)
+		scaleMP(p, oldstat, newstat)
 	}
 
-	p.stats.set(stat, amt)
 }
 
 func (p *PlayerSheet) UnmodStat(stat StatName) int {
@@ -222,11 +228,16 @@ func (p *PlayerSheet) StatMod(stat StatName) int {
 }
 
 func (p *PlayerSheet) ChangeStatMod(stat StatName, diff int) {
+	old := p.Stat(stat)
+
 	switch stat {
 	case Agi:
 		modAgiSkills(p, diff)
+	case Vit:
+		scaleHP(p, old, old+diff)
 	case Mnd:
 		modMndSkills(p, diff)
+		scaleMP(p, old, old+diff)
 	}
 	p.stats.changemod(stat, diff)
 }
@@ -278,7 +289,7 @@ func (p *PlayerSheet) setHP(hp int) {
 }
 
 func (p *PlayerSheet) MaxHP() int {
-	return 10 * (1 + math.Max(p.stats.stat(Vit), 1))
+	return vital(p.stats.stat(Vit))
 }
 
 func (p *PlayerSheet) MP() int {
@@ -290,7 +301,7 @@ func (p *PlayerSheet) setMP(mp int) {
 }
 
 func (p *PlayerSheet) MaxMP() int {
-	return 10 * (1 + math.Max(p.stats.stat(Mnd), 1))
+	return vital(p.stats.stat(Mnd))
 }
 
 func (p *PlayerSheet) Regen() int {
@@ -1105,6 +1116,18 @@ func parapenalty(skill SkillName, score int) int {
 
 func slowpenalty(spd int) int {
 	return math.Max(spd-1, 1)
+}
+
+func vital(stat int) int {
+	return 10 * (1 + math.Max(stat, 1))
+}
+
+func scaleHP(sheet Sheet, oldv, newv int) {
+	sheet.setHP(sheet.HP() * vital(newv) / vital(oldv))
+}
+
+func scaleMP(sheet Sheet, oldv, newv int) {
+	sheet.setMP(sheet.MP() * vital(newv) / vital(oldv))
 }
 
 type StunLevel uint
