@@ -102,6 +102,14 @@ func (inv *Inventory) HasUsables() bool {
 	return false
 }
 
+// Call f on each item in inventory.
+func (inv *Inventory) EachItem(f func(o *Obj)) {
+	for e := inv.Items.Front(); e != nil; e = e.Next() {
+		item := e.Value.(*Obj)
+		f(item)
+	}
+}
+
 func (inv *Inventory) itemElemAt(index int) *list.Element {
 	itemElem := inv.Items.Back()
 	for i := 0; i != index; i++ {

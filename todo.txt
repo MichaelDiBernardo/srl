@@ -56,5 +56,3 @@ Stuff:
 - markup language in Message that can be used to suggest colors in client.
 
 Bug:
-- items can be placed / dropped on stairs.
-- Monster drops will just drop where they are, even if it's an open door or stairs?

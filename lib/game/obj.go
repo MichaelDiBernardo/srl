@@ -51,6 +51,15 @@ func (g Gen) Findable(low, high int) bool {
 	return false
 }
 
+// The first floor you can find this on.
+func (g Gen) First() int {
+	first := g.Floors[0]
+	for i := 1; i < len(g.Floors); i++ {
+		first = math.Min(first, g.Floors[i])
+	}
+	return first
+}
+
 // A specification for a type of game object.
 type Spec struct {
 	Family  Family
@@ -72,6 +81,7 @@ type Obj struct {
 	Tile  *Tile
 	Level *Level
 	Game  *Game
+	Seen  bool
 
 	// Actor traits.
 	Mover    Mover
@@ -84,6 +94,7 @@ type Obj struct {
 	Senser   Senser
 	Ticker   Ticker
 	Dropper  Dropper
+	Learner  Learner
 
 	// Item traits. Since these don't ever conceivably need alternate
 	// implementations, they are not interface types.
@@ -112,6 +123,7 @@ type Traits struct {
 	Senser   func(*Obj) Senser
 	Ticker   func(*Obj) Ticker
 	Dropper  func(*Obj) Dropper
+	Learner  func(*Obj) Learner
 
 	Equipment  func(*Obj) *Equipment
 	Consumable func(*Obj) *Consumable
@@ -157,6 +169,9 @@ func newObj(spec *Spec) *Obj {
 	}
 	if traits.Dropper != nil {
 		newobj.Dropper = traits.Dropper(newobj)
+	}
+	if traits.Learner != nil {
+		newobj.Learner = traits.Learner(newobj)
 	}
 
 	if traits.Equipment != nil {

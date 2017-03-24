@@ -166,7 +166,8 @@ func (l *Level) SwapActors(x *Obj, y *Obj) {
 	l.placeActor(y, tx)
 }
 
-// Update what the player can see.
+// Update what the player can see. Also notify the player's learner of what it
+// has seen.
 func (l *Level) UpdateVis(fov Field) {
 	for _, row := range l.Map {
 		for _, tile := range row {
@@ -174,8 +175,20 @@ func (l *Level) UpdateVis(fov Field) {
 		}
 	}
 
+	p := l.game.Player
 	for _, pt := range fov {
 		tile := l.At(pt)
+
+		if a := tile.Actor; a != nil && !a.IsPlayer() {
+			p.Learner.LearnSight(a)
+			a.Seen = true
+		}
+
+		tile.Items.EachItem(func(item *Obj) {
+			p.Learner.LearnSight(item)
+			item.Seen = true
+		})
+
 		tile.Visible = true
 		tile.Seen = true
 	}

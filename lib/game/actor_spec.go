@@ -23,6 +23,7 @@ var PlayerSpec = &Spec{
 		Sheet:    NewPlayerSheet,
 		Senser:   NewActorSenser,
 		Ticker:   NewActorTicker,
+		Learner:  NewActorLearner,
 	},
 }
 
