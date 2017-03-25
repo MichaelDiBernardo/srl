@@ -9,6 +9,7 @@ var lTestActor = &Spec{
 	Family:  FamActor,
 	Genus:   GenMonster,
 	Species: "TestSpecies",
+	Gen:     Gen{Floors: []int{2}},
 	Name:    "Hi",
 	Traits:  &Traits{Sheet: NewPlayerSheet},
 }
@@ -16,8 +17,18 @@ var lTestActor = &Spec{
 var lTestItem = &Spec{
 	Family:  FamItem,
 	Genus:   GenEquipment,
-	Species: "TestSpecies",
+	Species: "TestSpecies2",
+	Gen:     Gen{Floors: []int{1}},
 	Name:    "Hiiii",
+	Traits:  &Traits{},
+}
+
+var lTestItem2 = &Spec{
+	Family:  FamItem,
+	Genus:   GenEquipment,
+	Species: "TestSpecies3",
+	Gen:     Gen{Floors: []int{3}},
+	Name:    "Hiiiiiiii",
 	Traits:  &Traits{},
 }
 
@@ -246,6 +257,32 @@ func TestPathfinding(t *testing.T) {
 				t.Errorf(`Pathfinding test %d: mismatch at %d, got %v, want %v`, ti, i, path, test.want)
 				break
 			}
+		}
+	}
+}
+
+func TestUpdateVisTeachesPlayer(t *testing.T) {
+	g := newTestGame()
+	dest := math.Pt(1, 1)
+
+	i1, i2, m := g.NewObj(lTestItem), g.NewObj(lTestItem2), g.NewObj(lTestActor)
+
+	g.Level.Place(g.Player, dest)
+	g.Level.Place(i1, dest)
+	g.Level.Place(i2, dest)
+
+	mloc := math.Pt(1, 2)
+	g.Level.Place(m, mloc)
+
+	g.Level.UpdateVis(Field{dest, mloc})
+
+	if xp := g.Player.Learner.XP(); xp != 60 {
+		t.Errorf(`Learner.XP() was %d, want 60`, xp)
+	}
+
+	for i, obj := range []*Obj{i1, i2, m} {
+		if !obj.Seen {
+			t.Errorf(`o.Seen (%d, %v) was false, want true`, i, obj)
 		}
 	}
 }

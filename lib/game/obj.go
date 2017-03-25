@@ -53,6 +53,10 @@ func (g Gen) Findable(low, high int) bool {
 
 // The first floor you can find this on.
 func (g Gen) First() int {
+	if len(g.Floors) == 0 {
+		return -1
+	}
+
 	first := g.Floors[0]
 	for i := 1; i < len(g.Floors); i++ {
 		first = math.Min(first, g.Floors[i])
