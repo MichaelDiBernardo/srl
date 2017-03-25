@@ -1,6 +1,7 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 o xp for exceeding maxdepth
+- tests for LearnFloor (previous commit)
 
 - Monsters have multiple abilities.
     - Abilities need:

@@ -27,6 +27,20 @@ type Progress struct {
 	Turns int
 }
 
+// Change floor. Returns `true` if this is higher than the player has gone
+// before.
+func (p *Progress) ChangeFloor(dir int) bool {
+	p.PrevFloor = p.Floor
+	p.Floor += dir
+
+	if p.Floor > p.MaxFloor {
+		p.MaxFloor = p.Floor
+		return true
+	}
+
+	return false
+}
+
 // Create a new game.
 func NewGame() *Game {
 	return &Game{
@@ -88,8 +102,10 @@ func (g *Game) Kill(actor *Obj) {
 
 // Switch floors on the player.
 func (g *Game) ChangeFloor(dir int) {
-	g.Progress.PrevFloor = g.Progress.Floor
-	g.Progress.Floor += dir
+	isNewMax := g.Progress.ChangeFloor(dir)
+	if isNewMax {
+		g.Player.Learner.LearnFloor(g.Progress.Floor)
+	}
 	g.Level = NewDungeon(g)
 }
 

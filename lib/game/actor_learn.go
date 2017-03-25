@@ -12,8 +12,12 @@ type Learner interface {
 	LearnSight(obj *Obj)
 	// Call this when a specific instance of a monster has been seen.
 	LearnKill(mon *Obj)
+	// Gain XP for seeing a new floor.
+	LearnFloor(floor int)
 	// How much XP does this actor have?
 	XP() int
+	// How much have they accumulated in total?
+	TotalXP() int
 }
 
 // Used by the player to track what they have seen, and how much XP they have.
@@ -31,6 +35,10 @@ func NewActorLearner(obj *Obj) Learner {
 }
 
 func (l *ActorLearner) XP() int {
+	return l.xp
+}
+
+func (l *ActorLearner) TotalXP() int {
 	return l.xp
 }
 
@@ -66,6 +74,10 @@ func (l *ActorLearner) LearnSight(obj *Obj) {
 
 	l.xp += xp
 	l.seen[s]++
+}
+
+func (l *ActorLearner) LearnFloor(floor int) {
+	l.xp += floor * 50
 }
 
 func monxp(mon *Obj, n int) int {
