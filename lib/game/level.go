@@ -196,7 +196,7 @@ func (l *Level) UpdateVis(fov Field) {
 
 // Update the player's smell on the map.
 func (l *Level) UpdateScent(scent Field) {
-	pos, turns := l.game.Player.Pos(), l.game.Turns
+	pos, turns := l.game.Player.Pos(), l.game.Progress.Turns
 
 	for _, pt := range scent {
 		tile := l.At(pt)

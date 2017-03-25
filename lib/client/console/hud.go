@@ -308,7 +308,7 @@ func (s *statusPanel) Render(g *game.Game) {
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d:%-3d", "HP", sheet.HP(), sheet.MaxHP()), fg, bg)
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d:%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%3d", "XP", player.Learner.XP()), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%5d", "XP", player.Learner.XP()), fg, bg)
 
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+13, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
 
@@ -318,7 +318,7 @@ func (s *statusPanel) Render(g *game.Game) {
 	}
 	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+14, fmt.Sprintf("%-7s%8s", "DEF", def.Describe()), defc, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+15, fmt.Sprintf("%dF", g.Floor), fg, bg)
+	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+15, fmt.Sprintf("%dF", g.Progress.Floor), fg, bg)
 
 	if pois := player.Ticker.Counter(game.EffectPoison); pois > 0 {
 		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+17, fmt.Sprintf("POIS %2d", pois), fg, bg)

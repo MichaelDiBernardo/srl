@@ -1,6 +1,6 @@
 NEXT:
 - [ ] display all relevant effects on HUD, fix problem of too many lights
-- xp for exceeding maxdepth
+o xp for exceeding maxdepth
 
 - Monsters have multiple abilities.
     - Abilities need:

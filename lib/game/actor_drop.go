@@ -30,7 +30,7 @@ func (i *ItemDropper) DropItems() {
 	g := i.obj.Game
 	num := RandInt(0, i.num) + 1
 
-	groups := Generate(num, g.Floor, 2, Items, g)
+	groups := Generate(num, g.Progress.Floor, 2, Items, g)
 
 	for _, group := range groups {
 		for _, item := range group {

@@ -9,18 +9,35 @@ const MaxFloor = 5
 
 // Backend for a single game.
 type Game struct {
-	Player    *Obj
-	Level     *Level
-	Events    *EventQueue
-	Floor     int
+	Player   *Obj
+	Level    *Level
+	Events   *EventQueue
+	Progress *Progress
+	mode     Mode
+}
+
+type Progress struct {
+	// Floor player is on.
+	Floor int
+	// Floor player was previously on.
 	PrevFloor int
-	Turns     int
-	mode      Mode
+	// The highest floor this player has been on.
+	MaxFloor int
+	// How many turns have passed.
+	Turns int
 }
 
 // Create a new game.
 func NewGame() *Game {
-	return &Game{Events: newEventQueue(), Floor: 1, PrevFloor: 1}
+	return &Game{
+		Events: newEventQueue(),
+		Progress: &Progress{
+			Floor:     1,
+			PrevFloor: 1,
+			MaxFloor:  1,
+			Turns:     0,
+		},
+	}
 }
 
 // Temp convenience method to init the game before playing.
@@ -43,7 +60,7 @@ func (g *Game) Handle(c Command) {
 	if evolve {
 		for {
 			g.Level.Evolve()
-			g.Turns++
+			g.Progress.Turns++
 			// If player is para/stone/whatever, keep evolving the game because
 			// they can't do anything right now.
 			if g.Player.Sheet.CanAct() {
@@ -71,8 +88,8 @@ func (g *Game) Kill(actor *Obj) {
 
 // Switch floors on the player.
 func (g *Game) ChangeFloor(dir int) {
-	g.PrevFloor = g.Floor
-	g.Floor += dir
+	g.Progress.PrevFloor = g.Progress.Floor
+	g.Progress.Floor += dir
 	g.Level = NewDungeon(g)
 }
 
