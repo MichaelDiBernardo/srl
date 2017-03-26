@@ -68,4 +68,32 @@ func (s *sheetPanel) Render(g *game.Game) {
 	s.display.Write(22, 8, fmt.Sprintf("DEF %11s", sheet.Defense().Describe()), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(22, 10, fmt.Sprintf("HP %12s", fmt.Sprintf("%d:%d", sheet.HP(), sheet.MaxHP())), termbox.ColorWhite, termbox.ColorBlack)
 	s.display.Write(22, 11, fmt.Sprintf("MP %12s", fmt.Sprintf("%d:%d", sheet.MP(), sheet.MaxMP())), termbox.ColorWhite, termbox.ColorBlack)
+
+	for sk := game.Melee; sk < game.NumSkills; sk++ {
+		rowfmt := "%-5s %3d = %2d %3s"
+		row := fmt.Sprintf(rowfmt, skillname(sk), sheet.Skill(sk), sheet.UnmodSkill(sk), extrasign(sheet.SkillMod(sk)))
+		s.display.Write(40, 7+int(sk), row, termbox.ColorWhite, termbox.ColorBlack)
+	}
+}
+
+func extrasign(x int) string {
+	s := fmt.Sprintf("%d", x)
+	if x >= 0 {
+		s = "+" + s
+	}
+	return s
+}
+
+func skillname(s game.SkillName) string {
+	skillnames := []string{
+		"FIGHT",
+		"DODGE",
+		"SHOOT",
+		"SNEAK",
+		"CHI",
+		"SENSE",
+		"MAGIC",
+		"SONG",
+	}
+	return skillnames[s]
 }
