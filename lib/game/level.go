@@ -180,12 +180,12 @@ func (l *Level) UpdateVis(fov Field) {
 		tile := l.At(pt)
 
 		if a := tile.Actor; a != nil && !a.IsPlayer() {
-			p.Learner.LearnSight(a)
+			p.Learner.GainXPSight(a)
 			a.Seen = true
 		}
 
 		tile.Items.EachItem(func(item *Obj) {
-			p.Learner.LearnSight(item)
+			p.Learner.GainXPSight(item)
 			item.Seen = true
 		})
 

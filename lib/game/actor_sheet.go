@@ -1096,7 +1096,7 @@ func checkDeath(s Sheet) {
 		obj.Dropper.DropItems()
 	}
 	if !obj.IsPlayer() {
-		game.Player.Learner.LearnKill(obj)
+		game.Player.Learner.GainXPKill(obj)
 	}
 
 	game.Events.Message(fmt.Sprintf("%s fell.", obj.Spec.Name))

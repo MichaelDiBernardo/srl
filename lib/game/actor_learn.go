@@ -7,19 +7,22 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
 
-// Tracks xp gained by monsters and items seen and killed.
-type Learner interface {
+// Something that gains XP from new experiences.
+type XPGainer interface {
 	// Call this when a specific instance of an item or monster has been seen.
-	LearnSight(obj *Obj)
+	GainXPSight(obj *Obj)
 	// Call this when a specific instance of a monster has been seen.
-	LearnKill(mon *Obj)
+	GainXPKill(mon *Obj)
 	// Gain XP for seeing a new floor.
-	LearnFloor(floor int)
+	GainXPFloor(floor int)
 	// How much XP does this actor have?
 	XP() int
 	// How much have they accumulated in total?
 	TotalXP() int
+}
 
+// Something that can "spend" XP to increase skill points.
+type SkillLearner interface {
 	// Start buying skills. This cannot be called again until CancelLearning or
 	// EndLearning has been called.
 	BeginLearning() (*SkillChange, error)
@@ -47,13 +50,20 @@ type Learner interface {
 	EndLearning() error
 }
 
+// Aggregate learner interface.
+type Learner interface {
+	XPGainer
+	SkillLearner
+}
+
 // Used by the player to track what they have seen, and how much XP they have.
 type ActorLearner struct {
 	Trait
-	seen   map[Species]int
-	killed map[Species]int
-	xp     int
-	change *SkillChange
+	seen    map[Species]int
+	killed  map[Species]int
+	xp      int
+	totalxp int
+	change  *SkillChange
 }
 
 // Stores the state of a player's current request to upgrade their skills by
@@ -90,10 +100,10 @@ func (l *ActorLearner) XP() int {
 }
 
 func (l *ActorLearner) TotalXP() int {
-	return l.xp
+	return l.totalxp
 }
 
-func (l *ActorLearner) LearnKill(mon *Obj) {
+func (l *ActorLearner) GainXPKill(mon *Obj) {
 	if genus := mon.Spec.Genus; genus != GenMonster {
 		panic(fmt.Sprintf("Obj *v with genus %v is not monster.", mon, genus))
 	}
@@ -101,12 +111,11 @@ func (l *ActorLearner) LearnKill(mon *Obj) {
 	s := mon.Spec.Species
 	n := l.killed[s]
 
-	xpgain := monxp(mon, n)
-	l.xp += xpgain
+	l.gainxp(monxp(mon, n))
 	l.killed[s]++
 }
 
-func (l *ActorLearner) LearnSight(obj *Obj) {
+func (l *ActorLearner) GainXPSight(obj *Obj) {
 	if obj.Seen {
 		return
 	}
@@ -123,12 +132,12 @@ func (l *ActorLearner) LearnSight(obj *Obj) {
 		panic(fmt.Sprintf("Obj *v with genus %v is not xpable on sight.", obj, genus))
 	}
 
-	l.xp += xp
+	l.gainxp(xp)
 	l.seen[s]++
 }
 
-func (l *ActorLearner) LearnFloor(floor int) {
-	l.xp += floor * 50
+func (l *ActorLearner) GainXPFloor(floor int) {
+	l.gainxp(floor * 50)
 }
 
 func (l *ActorLearner) BeginLearning() (*SkillChange, error) {
@@ -219,6 +228,12 @@ func (l *ActorLearner) EndLearning() error {
 	}
 	l.change = nil
 	return nil
+}
+
+// Gain xp, updating both xp and totalxp.
+func (l *ActorLearner) gainxp(xp int) {
+	l.xp += xp
+	l.totalxp += xp
 }
 
 // How much XP should you get for seeing or killing mon for the nth time?

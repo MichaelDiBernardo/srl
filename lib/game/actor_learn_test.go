@@ -9,7 +9,7 @@ func TestSeenMonsterGivesNoXP(t *testing.T) {
 	mon := g.NewObj(atActorSpec)
 	mon.Seen = true
 
-	g.Player.Learner.LearnSight(mon)
+	g.Player.Learner.GainXPSight(mon)
 
 	if xp := g.Player.Learner.XP(); xp != 0 {
 		t.Errorf(`Learner.XP() was %d, want 0`, xp)
@@ -29,21 +29,21 @@ func TestSeenXPDecaysForMonsters(t *testing.T) {
 	g := newTestGame()
 	mon := g.NewObj(monspec)
 
-	g.Player.Learner.LearnSight(mon)
+	g.Player.Learner.GainXPSight(mon)
 
 	// Should get 30 xp for first sighting.
 	if xp := g.Player.Learner.XP(); xp != 30 {
 		t.Errorf(`Learner.XP() was %d, want 30`, xp)
 	}
 
-	g.Player.Learner.LearnSight(mon)
+	g.Player.Learner.GainXPSight(mon)
 
 	// Should get an additional 15 for next.
 	if xp := g.Player.Learner.XP(); xp != 45 {
 		t.Errorf(`Learner.XP() was %d, want 45`, xp)
 	}
 
-	g.Player.Learner.LearnSight(mon)
+	g.Player.Learner.GainXPSight(mon)
 
 	// Should get an additional 10 for next.
 	if xp := g.Player.Learner.XP(); xp != 55 {
@@ -64,13 +64,13 @@ func TestSeenItemXPIs0AfterFirstSighting(t *testing.T) {
 	g := newTestGame()
 	item := g.NewObj(itemspec)
 
-	g.Player.Learner.LearnSight(item)
+	g.Player.Learner.GainXPSight(item)
 
 	if xp := g.Player.Learner.XP(); xp != 20 {
 		t.Errorf(`Learner.XP() was %d, want 20`, xp)
 	}
 
-	g.Player.Learner.LearnSight(item)
+	g.Player.Learner.GainXPSight(item)
 
 	if xp := g.Player.Learner.XP(); xp != 20 {
 		t.Errorf(`Learner.XP() was %d, want 20`, xp)
@@ -90,21 +90,21 @@ func TestKillXPDecaysForMonsters(t *testing.T) {
 	g := newTestGame()
 	mon := g.NewObj(monspec)
 
-	g.Player.Learner.LearnKill(mon)
+	g.Player.Learner.GainXPKill(mon)
 
 	// Should get 30 xp for first sighting.
 	if xp := g.Player.Learner.XP(); xp != 30 {
 		t.Errorf(`Learner.XP() was %d, want 30`, xp)
 	}
 
-	g.Player.Learner.LearnKill(mon)
+	g.Player.Learner.GainXPKill(mon)
 
 	// Should get an additional 15 for next.
 	if xp := g.Player.Learner.XP(); xp != 45 {
 		t.Errorf(`Learner.XP() was %d, want 45`, xp)
 	}
 
-	g.Player.Learner.LearnKill(mon)
+	g.Player.Learner.GainXPKill(mon)
 
 	// Should get an additional 10 for next.
 	if xp := g.Player.Learner.XP(); xp != 55 {
@@ -162,7 +162,7 @@ func TestLearningScenario(t *testing.T) {
 	s.ChangeSkillMod(Shooting, 3)
 
 	// Give the player some initial XP to spend.
-	l.(*ActorLearner).xp = 5000
+	l.(*ActorLearner).gainxp(5000)
 
 	// Learn some stuff.
 	l.BeginLearning()
@@ -242,12 +242,15 @@ func TestLearningScenario(t *testing.T) {
 	if xp, want := l.XP(), 4300; xp != want {
 		t.Errorf(`l.XP() was %d, want %d`, xp, want)
 	}
+	if totalxp, want := l.TotalXP(), 5000; totalxp != want {
+		t.Errorf(`l.TotalXP() was %d, want %d`, totalxp, want)
+	}
 }
 
 func TestCancelLearning(t *testing.T) {
 	g := newTestGame()
 	l, s := g.Player.Learner, g.Player.Sheet
-	l.(*ActorLearner).xp = 5000
+	l.(*ActorLearner).gainxp(5000)
 
 	l.BeginLearning()
 	l.LearnSkill(Melee)
@@ -267,7 +270,7 @@ func TestCancelLearning(t *testing.T) {
 func TestCantOverspendXP(t *testing.T) {
 	g := newTestGame()
 	l, s := g.Player.Learner, g.Player.Sheet
-	l.(*ActorLearner).xp = 299
+	l.(*ActorLearner).gainxp(299)
 
 	l.BeginLearning()
 	l.LearnSkill(Melee)
@@ -293,7 +296,7 @@ func TestCantOverspendXP(t *testing.T) {
 func TestCantOverRefundXP(t *testing.T) {
 	g := newTestGame()
 	l, s := g.Player.Learner, g.Player.Sheet
-	l.(*ActorLearner).xp = 100
+	l.(*ActorLearner).gainxp(100)
 
 	l.BeginLearning()
 	l.LearnSkill(Melee)

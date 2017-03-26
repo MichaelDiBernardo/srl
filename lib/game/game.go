@@ -104,7 +104,7 @@ func (g *Game) Kill(actor *Obj) {
 func (g *Game) ChangeFloor(dir int) {
 	isNewMax := g.Progress.ChangeFloor(dir)
 	if isNewMax {
-		g.Player.Learner.LearnFloor(g.Progress.Floor)
+		g.Player.Learner.GainXPFloor(g.Progress.Floor)
 	}
 	g.Level = NewDungeon(g)
 }
