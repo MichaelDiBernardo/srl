@@ -157,16 +157,15 @@ func (l *ActorLearner) LearnSkill(sk SkillName) (*SkillChange, error) {
 	schange := l.change.Changes[sk]
 
 	cost := skillxp(currskill + 1)
-	newtotal := l.change.TotalCost + cost
 
-	if newtotal > l.XP() {
+	if cost > l.XP() {
 		return l.change, ErrNotEnoughXP
 	}
 
 	schange.Points++
 	schange.Cost += cost
 	l.change.Changes[sk] = schange
-	l.change.TotalCost = newtotal
+	l.change.TotalCost += cost
 
 	// Actually modify the player so that these changes will be fully reflected
 	// on the character sheet. If they decide to cancel, we'll revert all

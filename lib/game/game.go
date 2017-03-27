@@ -58,6 +58,8 @@ func NewGame() *Game {
 func (g *Game) Start() {
 	g.mode = ModeHud
 	g.Player = g.NewObj(PlayerSpec)
+	// TODO: We need an InitPlayer
+	g.Player.Learner.(*ActorLearner).gainxp(5000)
 	g.Level = NewDungeon(g)
 }
 
@@ -135,6 +137,16 @@ type MenuCommand struct{ Option int }
 type AscendCommand struct{}
 
 type DescendCommand struct{}
+
+type StartLearningCommand struct{}
+
+type CancelLearningCommand struct{}
+
+type FinishLearningCommand struct{}
+
+type LearnSkillCommand struct{ Skill SkillName }
+
+type UnlearnSkillCommand struct{ Skill SkillName }
 
 type NoCommand struct{}
 
@@ -266,6 +278,28 @@ func dropController(g *Game, com Command) bool {
 // Do stuff when player is looking at character sheet.
 func sheetController(g *Game, com Command) bool {
 	switch c := com.(type) {
+	case StartLearningCommand:
+		change, err := g.Player.Learner.BeginLearning()
+		if err != nil {
+			panic("Wat")
+		}
+		g.Events.SkillChange(change)
+	case CancelLearningCommand:
+		err := g.Player.Learner.CancelLearning()
+		if err != nil {
+			panic("Wat")
+		}
+	case FinishLearningCommand:
+		err := g.Player.Learner.EndLearning()
+		if err != nil {
+			panic("Wat")
+		}
+	case LearnSkillCommand:
+		change, _ := g.Player.Learner.LearnSkill(c.Skill)
+		g.Events.SkillChange(change)
+	case UnlearnSkillCommand:
+		change, _ := g.Player.Learner.UnlearnSkill(c.Skill)
+		g.Events.SkillChange(change)
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
 	}
@@ -283,6 +317,11 @@ type MessageEvent struct {
 
 // Force the player to --more--.
 type MoreEvent struct {
+}
+
+// Sent while editing skills.
+type SkillChangeEvent struct {
+	Change *SkillChange
 }
 
 // Modes that the game can be in.
@@ -343,6 +382,10 @@ func (eq *EventQueue) Message(msg string) {
 // Tell client we're switching game modes to mode.
 func (eq *EventQueue) SwitchMode(mode Mode) {
 	eq.push(ModeEvent{Mode: mode})
+}
+
+func (eq *EventQueue) SkillChange(c *SkillChange) {
+	eq.push(SkillChangeEvent{Change: c})
 }
 
 // Tell client to force a --more-- confirm.

@@ -9,7 +9,10 @@ import (
 func newSheetScreen(display display) *screen {
 	return &screen{
 		display: display,
-		panels:  []panel{newSheetPanel(display)},
+		panels: []panel{
+			newSkillEditPanel(display),
+			newSheetPanel(display),
+		},
 	}
 }
 
@@ -59,6 +62,75 @@ func (s *sheetPanel) Render(g *game.Game) {
 		rowfmt := "%-5s %3d = %2d %3s"
 		row := fmt.Sprintf(rowfmt, skillname(sk), sheet.Skill(sk), sheet.UnmodSkill(sk), extrasign(sheet.SkillMod(sk)))
 		s.display.Write(40, 7+int(sk), row, termbox.ColorWhite, termbox.ColorBlack)
+	}
+}
+
+type skillEditPanel struct {
+	display display
+	editing bool
+	cur     game.SkillName
+	change  *game.SkillChange
+}
+
+func newSkillEditPanel(display display) *skillEditPanel {
+	return &skillEditPanel{display: display}
+}
+
+func (s *skillEditPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+	if !s.editing {
+		switch tboxev.Ch {
+		case 'i':
+			s.editing = true
+			return game.StartLearningCommand{}, nil
+		}
+	} else {
+		switch tboxev.Key {
+		case termbox.KeyEsc:
+			s.editing = false
+			s.change = nil
+			return game.CancelLearningCommand{}, nil
+		case termbox.KeyEnter:
+			s.editing = false
+			s.change = nil
+			return game.FinishLearningCommand{}, nil
+		}
+
+		switch tboxev.Ch {
+		case 'j':
+			s.cur = (s.cur + 1) % game.NumSkills
+		case 'k':
+			if s.cur == game.Melee {
+				s.cur = game.Song
+			} else {
+				s.cur--
+			}
+		case 'h':
+			return game.UnlearnSkillCommand{Skill: s.cur}, nil
+		case 'l':
+			return game.LearnSkillCommand{Skill: s.cur}, nil
+		}
+	}
+	return nocommand()
+}
+
+func (s *skillEditPanel) HandleEvent(e game.Event) {
+	switch ev := e.(type) {
+	case game.SkillChangeEvent:
+		s.change = ev.Change
+	}
+}
+
+func (s *skillEditPanel) Render(g *game.Game) {
+	if !s.editing || s.change == nil {
+		return
+	}
+
+	for sk := game.Melee; sk < game.NumSkills; sk++ {
+		row, fg := fmt.Sprintf("%5d", s.change.Changes[sk].Cost), termbox.ColorWhite
+		if sk == s.cur {
+			fg = termbox.ColorBlue
+		}
+		s.display.Write(60, 7+int(sk), row, fg, termbox.ColorBlack)
 	}
 }
 
