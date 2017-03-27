@@ -34,8 +34,19 @@ func (s *Session) Loop() {
 	defer s.client.Close()
 
 	for {
-		s.client.Render(s.game)
-		command := s.client.NextCommand()
+		// Take potentially multiple inputs from the user until they do
+		// something that generates a command.
+		var command game.Command
+		for {
+			s.client.Render(s.game)
+			com, err := s.client.Poll()
+			if err == nil {
+				command = com
+				break
+			}
+		}
+
+		// Handle the command.
 		_, quit := command.(game.QuitCommand)
 		if quit {
 			return
@@ -46,7 +57,7 @@ func (s *Session) Loop() {
 		// event handled.
 		for !s.game.Events.Empty() {
 			ev := s.game.Events.Next()
-			s.client.Handle(ev)
+			s.client.HandleEvent(ev)
 			s.client.Render(s.game)
 		}
 	}

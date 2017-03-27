@@ -16,18 +16,18 @@ type Closer interface {
 	Close()
 }
 
-type Commander interface {
-	NextCommand() game.Command
+type Poller interface {
+	Poll() (game.Command, error)
 }
 
 type EventHandler interface {
-	Handle(game.Event)
+	HandleEvent(game.Event)
 }
 
 type Client interface {
 	Closer
 	Initer
 	Renderer
-	Commander
+	Poller
 	EventHandler
 }

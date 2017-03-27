@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestMessagePanelHandleMessageEvent(t *testing.T) {
+func TestMessagePanelHandleEventMessageEvent(t *testing.T) {
 	sut := newMessagePanel(1, &fakedisplay{})
 	ev := game.MessageEvent{Text: "hi"}
-	sut.Handle(ev)
+	sut.HandleEvent(ev)
 
 	if l := sut.lines.Len(); l != 1 {
 		t.Errorf(`MessageEvent added %d lines, want 1`, l)
@@ -23,9 +23,9 @@ func TestMessagePanelHasLimit(t *testing.T) {
 	size := 2
 	sut := newMessagePanel(size, &fakedisplay{})
 
-	sut.Handle(game.MessageEvent{Text: "hi"})
-	sut.Handle(game.MessageEvent{Text: "bye"})
-	sut.Handle(game.MessageEvent{Text: "foo"})
+	sut.HandleEvent(game.MessageEvent{Text: "hi"})
+	sut.HandleEvent(game.MessageEvent{Text: "bye"})
+	sut.HandleEvent(game.MessageEvent{Text: "foo"})
 
 	if l := sut.lines.Len(); l != size {
 		t.Errorf(`MessagePanel held %d messages, want %d`, l, size)

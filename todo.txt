@@ -1,4 +1,6 @@
 NEXT:
+- Implement the skills editing panel on sheet screen, using this ^
+
 - [ ] display all relevant effects on HUD, fix problem of too many lights
 o xp for exceeding maxdepth
 

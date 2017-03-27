@@ -136,6 +136,8 @@ type AscendCommand struct{}
 
 type DescendCommand struct{}
 
+type NoCommand struct{}
+
 // A controller is a function that handles 'command' using 'game', and returns
 // true if a turn should pass due to the player's action. (Some player commands
 // might result in no time passing, like cancelling out of a menu or trying to

@@ -6,31 +6,10 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-type sheetScreen struct {
-	display display
-	sheet   panel
-}
-
-func newSheetScreen(display display) *sheetScreen {
-	return &sheetScreen{
+func newSheetScreen(display display) *screen {
+	return &screen{
 		display: display,
-		sheet:   newSheetPanel(display),
-	}
-}
-
-func (s *sheetScreen) Render(g *game.Game) {
-	s.sheet.Render(g)
-}
-
-func (inv *sheetScreen) Handle(ev game.Event) {
-}
-
-func (inv *sheetScreen) NextCommand() game.Command {
-	for {
-		tboxev := inv.display.PollEvent()
-		if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
-			return game.ModeCommand{Mode: game.ModeHud}
-		}
+		panels:  []panel{newSheetPanel(display)},
 	}
 }
 
@@ -42,7 +21,14 @@ func newSheetPanel(display display) *sheetPanel {
 	return &sheetPanel{display: display}
 }
 
-func (s *sheetPanel) Handle(e game.Event) {
+func (s *sheetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+		return game.ModeCommand{Mode: game.ModeHud}, nil
+	}
+	return nocommand()
+}
+
+func (s *sheetPanel) HandleEvent(e game.Event) {
 }
 
 func (s *sheetPanel) Render(g *game.Game) {
