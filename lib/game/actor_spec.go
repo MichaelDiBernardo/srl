@@ -77,7 +77,7 @@ var Monsters = []*Spec{
 							Melee:   0,
 							Damroll: NewDice(2, 7),
 							CritDiv: 4,
-							Effects: Effects{},
+							Effects: NewEffects(map[Effect]int{EffectPoison: 1}),
 							Verb:    "hits",
 						},
 						P: 1,

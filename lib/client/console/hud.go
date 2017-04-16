@@ -6,6 +6,7 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 	"github.com/nsf/termbox-go"
+	"log"
 )
 
 var hudBounds = consoleBounds
@@ -17,7 +18,7 @@ var messagePanelBounds = math.Rect(math.Pt(1, 19), math.Pt(1, hudBounds.Max.Y))
 var messagePanelNumLines = messagePanelBounds.Height()
 
 // Where the status panel should go.
-var statusPanelBounds = math.Rect(math.Pt(38, 0), math.Pt(hudBounds.Max.X-38, messagePanelBounds.Min.Y))
+var statusPanelBounds = math.Rect(math.Pt(38, 0), math.Pt(hudBounds.Max.X, messagePanelBounds.Min.Y))
 
 // Where the map panel should go.
 var mapPanelBounds = math.Rect(math.Origin, math.Pt(statusPanelBounds.Min.X, messagePanelBounds.Min.Y))
@@ -281,33 +282,184 @@ func (s *statusPanel) Render(g *game.Game) {
 	fg, bg := termbox.ColorWhite, termbox.ColorBlack
 	sheet := player.Sheet
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+1, "Human", fg, bg)
+	lcol, rcol := statusPanelBounds.Min.X, statusPanelBounds.Min.X+20
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", sheet.Stat(game.Str)), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", sheet.Stat(game.Agi)), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", sheet.Stat(game.Vit)), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", sheet.Stat(game.Mnd)), fg, bg)
+	// left
+	s.display.Write(lcol, statusPanelBounds.Min.Y+0, player.Spec.Name, fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+1, "Human", fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%3d:%-3d", "HP", sheet.HP(), sheet.MaxHP()), fg, bg)
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%3d:%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d/%-3d", "HP", sheet.HP(), sheet.MaxHP()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d/%-3d", "MP", sheet.MP(), sheet.MaxMP()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%5d", "XP", player.Learner.XP()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%2dF", "FL", g.Progress.Floor), fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+11, fmt.Sprintf("%-7s%5d", "XP", player.Learner.XP()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+13, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
+	// right
+	s.display.Write(rcol, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", sheet.Stat(game.Str)), fg, bg)
+	s.display.Write(rcol, statusPanelBounds.Min.Y+4, fmt.Sprintf("%-7s%3d", "AGI", sheet.Stat(game.Agi)), fg, bg)
+	s.display.Write(rcol, statusPanelBounds.Min.Y+5, fmt.Sprintf("%-7s%3d", "VIT", sheet.Stat(game.Vit)), fg, bg)
+	s.display.Write(rcol, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%3d", "MND", sheet.Stat(game.Mnd)), fg, bg)
 
 	def, defc := sheet.Defense(), fg
 	if len(def.CorrDice) > 0 {
 		defc = termbox.ColorRed
 	}
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+14, fmt.Sprintf("%-7s%8s", "DEF", def.Describe()), defc, bg)
+	s.display.Write(rcol, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%8s", "DEF", def.Describe()), defc, bg)
 
-	s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+16, fmt.Sprintf("%dF", g.Progress.Floor), fg, bg)
+	s.printEffects(player)
+}
 
-	if pois := player.Ticker.Counter(game.EffectPoison); pois > 0 {
-		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+17, fmt.Sprintf("POIS %2d", pois), fg, bg)
+func (s *statusPanel) printEffects(player *game.Obj) {
+	x, y := statusPanelBounds.Min.X, statusPanelBounds.Min.Y+10
+	linelen, w := 0, statusPanelBounds.Width()
+
+	log.Printf("Status box width is %d", w)
+
+	for _, lightspec := range effectLights {
+		ticks := lightspec.cond(player)
+		if ticks <= 0 {
+			continue
+		}
+		light, col := lightspec.makelight(lightspec, ticks)
+
+		incr := len(light) + 1
+		if linelen+incr > w {
+			x, y, linelen = statusPanelBounds.Min.X, y+1, 0
+		}
+
+		s.display.Write(x, y, light, col, termbox.ColorBlack)
+
+		x += incr
+		linelen += incr
 	}
-	if stun := player.Ticker.Counter(game.EffectStun); stun > 0 {
-		s.display.Write(statusPanelBounds.Min.X, statusPanelBounds.Min.Y+18, fmt.Sprintf("STUN %2d", stun), fg, bg)
+}
+
+type effectLight struct {
+	label        string
+	defaultcolor termbox.Attribute
+	cond         func(*game.Obj) int
+	makelight    func(effectLight, int) (string, termbox.Attribute)
+}
+
+var effectLights = []effectLight{
+	{
+		label:        "Pois %2d",
+		defaultcolor: termbox.ColorGreen,
+		cond: func(p *game.Obj) int {
+			return p.Ticker.Counter(game.EffectPoison)
+		},
+		makelight: makeCountingLight,
+	},
+	{
+		label:        "Cut %2d",
+		defaultcolor: termbox.ColorRed,
+		cond: func(p *game.Obj) int {
+			return p.Ticker.Counter(game.EffectCut)
+		},
+		makelight: makeCountingLight,
+	},
+	{
+		label:        "Stun %2d",
+		defaultcolor: termbox.ColorYellow,
+		cond: func(p *game.Obj) int {
+			return p.Ticker.Counter(game.EffectStun)
+		},
+		makelight: makeCountingLight,
+	},
+	{
+		label:        "Blind",
+		defaultcolor: termbox.ColorWhite,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Blind())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Slow",
+		defaultcolor: termbox.ColorBlue,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Slow())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Conf",
+		defaultcolor: termbox.ColorYellow,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Confused())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Fear",
+		defaultcolor: termbox.ColorWhite,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Afraid())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Para",
+		defaultcolor: termbox.ColorRed,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Paralyzed())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Stone",
+		defaultcolor: termbox.ColorWhite,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Petrified())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Sil",
+		defaultcolor: termbox.ColorBlue,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Silenced())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Curse",
+		defaultcolor: termbox.ColorWhite,
+		cond: func(p *game.Obj) int {
+			return bool2int(p.Sheet.Cursed())
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Hyp",
+		defaultcolor: termbox.ColorBlue,
+		cond: func(p *game.Obj) int {
+			return p.Ticker.Counter(game.EffectHyper)
+		},
+		makelight: makeLabelLight,
+	},
+	{
+		label:        "Stim",
+		defaultcolor: termbox.ColorYellow,
+		cond: func(p *game.Obj) int {
+			return p.Ticker.Counter(game.EffectStim)
+		},
+		makelight: makeLabelLight,
+	},
+}
+
+func makeCountingLight(el effectLight, ticks int) (light string, fg termbox.Attribute) {
+	return fmt.Sprintf(el.label, ticks), el.defaultcolor
+}
+
+func makeLabelLight(el effectLight, ticks int) (light string, fg termbox.Attribute) {
+	return el.label, el.defaultcolor
+}
+
+func bool2int(b bool) int {
+	if b {
+		return 1
 	}
+	return 0
 }

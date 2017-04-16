@@ -1,8 +1,6 @@
 NEXT:
-- Implement the skills editing panel on sheet screen, using this ^
 
-- [ ] display all relevant effects on HUD, fix problem of too many lights
-o xp for exceeding maxdepth
+- Revisit and clean up skills panel
 
 - Monsters have multiple abilities.
     - Abilities need:
@@ -58,3 +56,8 @@ Stuff:
 - markup language in Message that can be used to suggest colors in client.
 
 Bug:
+- If you equip a weapon that grants +ev, you see 0-0 in prot display if you're not wearing armor.
+
+Cleanup:
+- Great Visibility Sweep -- exporting types and fields has been done really
+  haphazardly, and signals the wrong things. Should be cleaned up.
