@@ -129,6 +129,22 @@ func (t *targetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
 		t.nextTarget()
 	case '<':
 		t.prevTarget()
+	case 'h':
+		t.freeTarget(math.Pt(-1, 0))
+	case 'j':
+		t.freeTarget(math.Pt(0, 1))
+	case 'k':
+		t.freeTarget(math.Pt(0, -1))
+	case 'l':
+		t.freeTarget(math.Pt(1, 0))
+	case 'y':
+		t.freeTarget(math.Pt(-1, -1))
+	case 'u':
+		t.freeTarget(math.Pt(1, -1))
+	case 'b':
+		t.freeTarget(math.Pt(-1, 1))
+	case 'n':
+		t.freeTarget(math.Pt(1, 1))
 	}
 
 	return nocommand()
@@ -187,6 +203,14 @@ func (t *targetPanel) nextTarget() {
 		return
 	}
 	t.cur = (t.cur + 1) % len(t.targets)
+}
+
+func (t *targetPanel) freeTarget(pt math.Point) {
+	if t.target() != nil {
+		t.pos = mapPlayerPos
+		t.cur = -1
+	}
+	t.pos = t.pos.Add(pt)
 }
 
 func (t *targetPanel) anyTargets() bool {

@@ -3,11 +3,9 @@ NEXT:
 
 - Ranged weapons
     - Player can shoot
-        - Should return a list of paths to targets, sorted by proximity
-        - F rotates, esc cancels, hjklyubn keys freetarget, f confirms
-        - Move messages to a separate queue in EventQueue, so that we can
-          always render the last few from there rather than just buffering in
-          the panel.
+        - hjklyubn keys freetarget, f confirms
+        - Targets should be sorted by proximity?
+        - restrict targets and freetargeting by range
         x Weapons need a 'range' attribute
         x if you have no ranged attack, should message and switch back to hud.
         x Body needs a 'ranged' slot.
@@ -15,12 +13,15 @@ NEXT:
             - This can be the thing that computes targets + paths, and actually
               shoots
             - Shoot() does what Hit() does for ActorFighter
+            - gun specialties
+                - no sides bonus based on weight
         - Sheet interface needs Ranged() that returns ranged attack
+        - Move messages to a separate queue in EventQueue, so that we can
+          always render the last few from there rather than just buffering in
+          the panel.
         - MonsterSheet needs ranged []Attack
         - Ranged attack needs to show up on sheet screen and hud
         - Monster AI needs to be adjusted for monsters with ranged attacks.
-    - gun specialties
-        - no sides bonus based on weight
     - "Archer" AI
 
 - Monsters have multiple abilities.
