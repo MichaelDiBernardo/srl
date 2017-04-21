@@ -5,6 +5,7 @@ type Slot int
 
 const (
 	SlotHand = iota
+	SlotRanged
 	SlotHead
 	SlotBody
 	SlotArms
@@ -74,6 +75,10 @@ func (b *Body) ProtDice() []Dice {
 
 func (b *Body) Weapon() *Obj {
 	return b.Slots[SlotHand]
+}
+
+func (b *Body) Shooter() *Obj {
+	return b.Slots[SlotRanged]
 }
 
 // Accumulate all the effects on all of our armor.

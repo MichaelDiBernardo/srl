@@ -16,6 +16,9 @@ type display interface {
 	PollEvent() termbox.Event
 	Clear(fg, bg termbox.Attribute) error
 	SetCell(x, y int, ch rune, fg, bg termbox.Attribute)
+	HideCursor()
+	SetCursor(x, y int)
+
 	Write(x, y int, text string, fg, bg termbox.Attribute)
 }
 
@@ -61,31 +64,12 @@ func (d *tbdisplay) PollEvent() termbox.Event {
 	return termbox.PollEvent()
 }
 
-// A fake display that does nothing and can be used in tests.
-type fakedisplay struct {
+// Remove the cursor from the display.
+func (d *tbdisplay) HideCursor() {
+	termbox.HideCursor()
 }
 
-func (d *fakedisplay) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
-}
-
-func (d *fakedisplay) Write(x, y int, text string, fg, bg termbox.Attribute) {
-}
-
-func (d *fakedisplay) Clear(fg, bg termbox.Attribute) error {
-	return nil
-}
-
-func (d *fakedisplay) Init() error {
-	return nil
-}
-
-func (d *fakedisplay) Close() {
-}
-
-func (d *fakedisplay) Flush() error {
-	return nil
-}
-
-func (d *fakedisplay) PollEvent() termbox.Event {
-	return termbox.Event{}
+// Put the cursor at x, y.
+func (d *tbdisplay) SetCursor(x, y int) {
+	termbox.SetCursor(x, y)
 }

@@ -31,6 +31,7 @@ func newHudScreen(display display) *screen {
 	return &screen{
 		display: display,
 		panels: []panel{
+			newHudControlPanel(),
 			newMapPanel(display),
 			newStatusPanel(display),
 			newMessagePanel(messagePanelNumLines, display),
@@ -54,10 +55,92 @@ var hudKeymap = map[rune]game.Command{
 	'w': game.TryEquipCommand{},
 	'r': game.TryRemoveCommand{},
 	'a': game.TryUseCommand{},
+	'f': game.TryShootCommand{},
 	'i': game.ModeCommand{Mode: game.ModeInventory},
 	'>': game.AscendCommand{},
 	'<': game.DescendCommand{},
 	'@': game.ModeCommand{Mode: game.ModeSheet},
+}
+
+// A panel that just controls input to the HUD. Doesn't draw anything.
+type hudControlPanel struct{}
+
+func newHudControlPanel() *hudControlPanel {
+	return &hudControlPanel{}
+}
+
+func (h *hudControlPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+	if tboxev.Type != termbox.EventKey || tboxev.Key != 0 {
+		return nocommand()
+	}
+
+	srlev := hudKeymap[tboxev.Ch]
+	if srlev != 0 {
+		return srlev, nil
+	}
+
+	return nocommand()
+}
+
+// Listens to nothing.
+func (_ *hudControlPanel) HandleEvent(e game.Event) {
+}
+
+// Draw nothing.
+func (_ *hudControlPanel) Render(g *game.Game) {
+}
+
+// A panel that handles targetting on the HUD, when the game is in targetting mode.
+type targetPanel struct {
+	display display
+	targets []game.Target // The targets in LOS that we can cycle through.
+	cur     int           // Index into targets for cur. If we're freetargeting, this will be -1.
+	pos     math.Point    // Where our target cursor should be.
+}
+
+func newTargetPanel() *targetPanel {
+	return &targetPanel{}
+}
+
+func (t *targetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
+		// Switch to normal mode again.
+	}
+
+	//	srlev := targetKeymap[tboxev.Ch]
+	//	if srlev != 0 {
+	//		return srlev, nil
+	//	}
+
+	return nocommand()
+}
+
+// Listens to nothing.
+func (_ *targetPanel) HandleEvent(e game.Event) {
+}
+
+// Move cursor to current target.
+func (t *targetPanel) Render(g *game.Game) {
+	// TODO: There should be either something that comes back in the ModeEvent
+	// or an explicit Init() from screen -> panel that lets this panel init
+	// itself with targets on modeswitch, instead of this hack init check every
+	// render.
+	if t.targets == nil {
+		t.initTargets(g)
+		t.targets = g.Player.Shooter.Targets()
+	}
+}
+
+func (t *targetPanel) initTargets(g *game.Game) {
+	t.targets = g.Player.Shooter.Targets()
+
+	if len(t.targets) == 0 {
+		t.cur = -1
+		t.pos = math.Origin
+	} else {
+		t.cur = 0
+		t.pos = t.targets[t.cur].Pos
+	}
 }
 
 // Panel that renders the gameplay map.

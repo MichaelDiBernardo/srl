@@ -45,6 +45,7 @@ func (c *Console) Init() error {
 // Render the current screen on this console.
 func (c *Console) Render(g *game.Game) {
 	c.display.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	c.display.HideCursor()
 	c.curscr.Render(g)
 	c.display.Flush()
 }

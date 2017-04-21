@@ -130,6 +130,8 @@ type TryRemoveCommand struct{}
 
 type TryUseCommand struct{}
 
+type TryShootCommand struct{}
+
 type ModeCommand struct{ Mode Mode }
 
 type MenuCommand struct{ Option int }
@@ -159,14 +161,15 @@ type controller func(*Game, Command) bool
 // Controller functions that take commands for each given mode and run them on
 // the game.
 var controllers = map[Mode]controller{
+	ModeDrop:      dropController,
+	ModeEquip:     equipController,
 	ModeHud:       hudController,
 	ModeInventory: inventoryController,
 	ModePickup:    pickupController,
-	ModeEquip:     equipController,
-	ModeUse:       useController,
 	ModeRemove:    removeController,
-	ModeDrop:      dropController,
 	ModeSheet:     sheetController,
+	ModeShoot:     shootController,
+	ModeUse:       useController,
 }
 
 // Do stuff when player is actually playing the game.
@@ -189,6 +192,8 @@ func hudController(g *Game, com Command) bool {
 		g.Player.Equipper.TryRemove()
 	case TryUseCommand:
 		g.Player.User.TryUse()
+	case TryShootCommand:
+		g.Player.Shooter.TryShoot()
 	case AscendCommand:
 		g.Player.Mover.Ascend()
 		evolve = true
@@ -199,6 +204,10 @@ func hudController(g *Game, com Command) bool {
 		g.SwitchMode(c.Mode)
 	}
 	return evolve
+}
+
+func shootController(g *Game, com Command) bool {
+	return false
 }
 
 // Do stuff when player is looking at inventory.
@@ -328,15 +337,16 @@ type SkillChangeEvent struct {
 type Mode int
 
 const (
-	ModeHud Mode = iota
+	ModeDrop Mode = iota
+	ModeEquip
+	ModeGameOver
+	ModeHud
 	ModeInventory
 	ModePickup
-	ModeEquip
 	ModeRemove
-	ModeDrop
-	ModeUse
 	ModeSheet
-	ModeGameOver
+	ModeShoot
+	ModeUse
 )
 
 // Tells the client that we've switched game 'modes'.

@@ -24,6 +24,7 @@ var PlayerSpec = &Spec{
 		Senser:   NewActorSenser,
 		Ticker:   NewActorTicker,
 		Learner:  NewActorLearner,
+		Shooter:  NewActorShooter,
 	},
 }
 
