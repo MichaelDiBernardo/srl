@@ -68,7 +68,11 @@ func (a *ActorEquipper) Equip(index int) bool {
 	equip = inv.Take(index)
 
 	if swapped := a.body.Wear(equip); swapped != nil {
+		msg := fmt.Sprintf("%s removed %v and equipped %v.", a.obj.Spec.Name, swapped.Spec.Name, equip.Spec.Name)
+		a.obj.Game.Events.Message(msg)
 		a.obj.Packer.Inventory().Add(swapped)
+	} else {
+		a.obj.Game.Events.Message(fmt.Sprintf("%s equipped %v.", a.obj.Spec.Name, equip.Spec.Name))
 	}
 	return true
 }
@@ -81,6 +85,7 @@ func (a *ActorEquipper) Remove(slot Slot) bool {
 		return false
 	}
 
+	a.obj.Game.Events.Message(fmt.Sprintf("%s removed %s.", a.obj.Spec.Name, removed.Spec.Name))
 	if added := a.obj.Packer.Inventory().Add(removed); added {
 		return true
 	}

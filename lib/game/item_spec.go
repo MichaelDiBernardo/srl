@@ -3,6 +3,7 @@ package game
 const (
 	SpecFist         = "fist"
 	SpecSword        = "sword"
+	SpecColt         = "colt"
 	SpecLeatherArmor = "leatherarmor"
 
 	SpecCure    = "cure"
@@ -24,11 +25,31 @@ var Items = []*Spec{
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Damroll: NewDice(2, 5),
-				Melee:   0,
+				Hit:     0,
 				Evasion: 1,
 				Weight:  3,
 				Slot:    SlotHand,
 				Effects: NewEffects(map[Effect]int{EffectVamp: 1, SlayPearl: 1}),
+			}),
+		},
+	},
+	&Spec{
+		Family:  FamItem,
+		Genus:   GenEquipment,
+		Species: SpecColt,
+		Name:    "COLT",
+		Gen: Gen{
+			Floors:    []int{1},
+			GroupSize: 1,
+		},
+		Traits: &Traits{
+			Equipment: NewEquipment(Equipment{
+				Damroll: NewDice(6, 1),
+				Hit:     0,
+				Evasion: 0,
+				Weight:  3,
+				Slot:    SlotRanged,
+				Effects: NewEffects(map[Effect]int{}),
 			}),
 		},
 	},
@@ -44,7 +65,7 @@ var Items = []*Spec{
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 4),
-				Melee:    0,
+				Hit:      0,
 				Evasion:  -1,
 				Weight:   4,
 				Slot:     SlotBody,

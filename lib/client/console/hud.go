@@ -165,6 +165,7 @@ var actorGlyphs = map[game.Species]glyph{
 // Glyphs used to render items.
 var itemGlyphs = map[game.Species]glyph{
 	game.SpecSword:        glyph{Ch: '|', Fg: termbox.ColorBlue, Bg: termbox.ColorBlack},
+	game.SpecColt:         glyph{Ch: '{', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},
 	game.SpecLeatherArmor: glyph{Ch: '[', Fg: termbox.ColorYellow, Bg: termbox.ColorBlack},
 	game.SpecCure:         glyph{Ch: '!', Fg: termbox.ColorGreen, Bg: termbox.ColorBlack},
 	game.SpecStim:         glyph{Ch: '!', Fg: termbox.ColorRed, Bg: termbox.ColorBlack},

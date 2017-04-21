@@ -51,7 +51,7 @@ func (b *Body) Naked() bool {
 func (b *Body) Melee() int {
 	melee := 0
 	for _, equip := range b.all() {
-		melee += equip.Equipment.Melee
+		melee += equip.Equipment.Hit
 	}
 	return melee
 }

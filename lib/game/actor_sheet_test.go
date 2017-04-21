@@ -106,7 +106,7 @@ var astKnifeSpec = &Spec{
 	Traits: &Traits{
 		Equipment: NewEquipment(Equipment{
 			Damroll: NewDice(1, 7),
-			Melee:   1,
+			Hit:     1,
 			Evasion: 1,
 			Weight:  2,
 			Slot:    SlotHand,
@@ -273,7 +273,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 4),
-				Melee:    0,
+				Hit:      0,
 				Evasion:  -1,
 				Weight:   4,
 				Slot:     SlotBody,
@@ -288,7 +288,7 @@ func TestPlayerDefenseWithArmor(t *testing.T) {
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Protroll: NewDice(1, 3),
-				Melee:    0,
+				Hit:      0,
 				Evasion:  -2,
 				Weight:   2,
 				Slot:     SlotHead,

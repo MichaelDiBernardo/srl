@@ -469,7 +469,7 @@ func (p *PlayerSheet) fist() *Obj {
 		Traits: &Traits{
 			Equipment: NewEquipment(Equipment{
 				Damroll: NewDice(1, math.Max(1, p.stats.stat(Str)+1)),
-				Melee:   0,
+				Hit:     0,
 				Weight:  0,
 				Slot:    SlotHand,
 			}),

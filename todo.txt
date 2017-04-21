@@ -5,17 +5,19 @@ NEXT:
     - Player can shoot
         - Should return a list of paths to targets, sorted by proximity
         - F rotates, esc cancels, hjklyubn keys freetarget, f confirms
-        - if you have no ranged attack, should message and switch back to hud.
-        - Weapons need a 'ranged' attribute. 
-        - Body needs a 'ranged' slot.
+        x Weapons need a 'range' attribute
+        x if you have no ranged attack, should message and switch back to hud.
+        x Body needs a 'ranged' slot.
         - ActorShooter
             - This can be the thing that computes targets + paths, and actually
               shoots
-            - Sheet interface needs Ranged() that returns ranged attack
-            - MonsterSheet needs ranged []Attack
-            - Shoot does what Hit() does for ActorFighter
-            - Ranged attack needs to show up on sheet screen and hud
+            - Shoot() does what Hit() does for ActorFighter
+        - Sheet interface needs Ranged() that returns ranged attack
+        - MonsterSheet needs ranged []Attack
+        - Ranged attack needs to show up on sheet screen and hud
         - Monster AI needs to be adjusted for monsters with ranged attacks.
+    - gun specialties
+        - no sides bonus based on weight
     - "Archer" AI
 
 - Monsters have multiple abilities.

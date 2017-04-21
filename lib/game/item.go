@@ -15,9 +15,10 @@ type Equipment struct {
 	Trait
 	Damroll  Dice
 	Protroll Dice
-	Melee    int
+	Hit      int // +Melee for melee weapons, +Shoot for shooters.
 	Evasion  int
 	Weight   int
+	Range    int // If this is a shooter, how far can it shoot?
 	Slot     Slot
 	Effects  Effects
 }
