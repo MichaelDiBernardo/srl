@@ -6,7 +6,6 @@ import (
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 	"github.com/nsf/termbox-go"
-	"log"
 )
 
 var hudBounds = consoleBounds
@@ -120,13 +119,17 @@ func newTargetPanel(display display) *targetPanel {
 
 func (t *targetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
-		// Switch to normal mode again.
+		// TODO: This is another good argument for a panel Init()
+		t.clearTargets()
+		return game.ModeCommand{Mode: game.ModeHud}, nil
 	}
 
-	//	srlev := targetKeymap[tboxev.Ch]
-	//	if srlev != 0 {
-	//		return srlev, nil
-	//	}
+	switch tboxev.Ch {
+	case '>':
+		t.nextTarget()
+	case '<':
+		t.prevTarget()
+	}
 
 	return nocommand()
 }
@@ -137,20 +140,18 @@ func (_ *targetPanel) HandleEvent(e game.Event) {
 
 // Move cursor to current target.
 func (t *targetPanel) Render(g *game.Game) {
-	log.Printf("Rendering target panel!")
 	// TODO: There should be either something that comes back in the ModeEvent
 	// or an explicit Init() from screen -> panel that lets this panel init
 	// itself with targets on modeswitch, instead of this hack init check every
 	// render.
 	if t.targets == nil {
 		t.initTargets(g)
-		t.targets = g.Player.Shooter.Targets()
 	}
 
 	if t.cur == -1 {
 		t.display.SetCursor(t.pos.X, t.pos.Y)
 	} else {
-		pos := t.targets[t.cur].Pos.Add(mapPlayerPos)
+		pos := t.target().Pos.Add(mapPlayerPos)
 		t.display.SetCursor(pos.X, pos.Y)
 	}
 }
@@ -158,12 +159,45 @@ func (t *targetPanel) Render(g *game.Game) {
 func (t *targetPanel) initTargets(g *game.Game) {
 	t.targets = g.Player.Shooter.Targets()
 
-	if len(t.targets) == 0 {
+	if t.anyTargets() {
+		t.cur = 0
+	} else {
 		t.cur = -1
 		t.pos = mapPlayerPos
+	}
+}
+
+func (t *targetPanel) clearTargets() {
+	t.targets = nil
+}
+
+func (t *targetPanel) prevTarget() {
+	if !t.anyTargets() {
+		return
+	}
+
+	t.cur--
+	if t.cur < 0 {
+		t.cur = len(t.targets) - 1
+	}
+}
+
+func (t *targetPanel) nextTarget() {
+	if !t.anyTargets() {
+		return
+	}
+	t.cur = (t.cur + 1) % len(t.targets)
+}
+
+func (t *targetPanel) anyTargets() bool {
+	return len(t.targets) > 0
+}
+
+func (t *targetPanel) target() *game.Target {
+	if t.cur == -1 {
+		return nil
 	} else {
-		t.cur = 0
-		t.pos = t.targets[t.cur].Pos
+		return &t.targets[t.cur]
 	}
 }
 

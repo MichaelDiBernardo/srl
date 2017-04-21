@@ -208,7 +208,12 @@ func hudController(g *Game, com Command) bool {
 }
 
 func shootController(g *Game, com Command) bool {
-	return false
+	evolve := false
+	switch c := com.(type) {
+	case ModeCommand:
+		g.SwitchMode(c.Mode)
+	}
+	return evolve
 }
 
 // Do stuff when player is looking at inventory.
