@@ -58,6 +58,7 @@ func NewGame() *Game {
 func (g *Game) Start() {
 	g.mode = ModeHud
 	g.Player = g.NewObj(PlayerSpec)
+	g.Player.Equipper.Body().Wear(g.NewObj(Items[1]))
 	// TODO: We need an InitPlayer
 	g.Player.Learner.(*ActorLearner).gainxp(5000)
 	g.Level = NewDungeon(g)

@@ -27,6 +27,7 @@ func New() *Console {
 		game.ModeDrop:      newDropScreen(display),
 		game.ModeUse:       newUseScreen(display),
 		game.ModeSheet:     newSheetScreen(display),
+		game.ModeShoot:     newTargetScreen(display),
 		game.ModeGameOver:  newGameOverScreen(display),
 	}
 	console := &Console{

@@ -23,6 +23,9 @@ var statusPanelBounds = math.Rect(math.Pt(38, 0), math.Pt(hudBounds.Max.X, messa
 // Where the map panel should go.
 var mapPanelBounds = math.Rect(math.Origin, math.Pt(statusPanelBounds.Min.X, messagePanelBounds.Min.Y))
 
+// The screen coordinate where the player will render.
+var mapPlayerPos = mapPanelBounds.Center()
+
 // Create a new HUD.
 func newHudScreen(display display) *screen {
 	// Since the messagePanel may capture --more-- prompts and require a redraw
@@ -32,6 +35,19 @@ func newHudScreen(display display) *screen {
 		display: display,
 		panels: []panel{
 			newHudControlPanel(),
+			newMapPanel(display),
+			newStatusPanel(display),
+			newMessagePanel(messagePanelNumLines, display),
+		},
+	}
+}
+
+// Create a new targeting hud (used for picking ranged, spell targets.)
+func newTargetScreen(display display) *screen {
+	return &screen{
+		display: display,
+		panels: []panel{
+			newTargetPanel(display),
 			newMapPanel(display),
 			newStatusPanel(display),
 			newMessagePanel(messagePanelNumLines, display),
@@ -98,8 +114,8 @@ type targetPanel struct {
 	pos     math.Point    // Where our target cursor should be.
 }
 
-func newTargetPanel() *targetPanel {
-	return &targetPanel{}
+func newTargetPanel(display display) *targetPanel {
+	return &targetPanel{display: display}
 }
 
 func (t *targetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
@@ -121,6 +137,7 @@ func (_ *targetPanel) HandleEvent(e game.Event) {
 
 // Move cursor to current target.
 func (t *targetPanel) Render(g *game.Game) {
+	log.Printf("Rendering target panel!")
 	// TODO: There should be either something that comes back in the ModeEvent
 	// or an explicit Init() from screen -> panel that lets this panel init
 	// itself with targets on modeswitch, instead of this hack init check every
@@ -129,6 +146,13 @@ func (t *targetPanel) Render(g *game.Game) {
 		t.initTargets(g)
 		t.targets = g.Player.Shooter.Targets()
 	}
+
+	if t.cur == -1 {
+		t.display.SetCursor(t.pos.X, t.pos.Y)
+	} else {
+		pos := t.targets[t.cur].Pos.Add(mapPlayerPos)
+		t.display.SetCursor(pos.X, pos.Y)
+	}
 }
 
 func (t *targetPanel) initTargets(g *game.Game) {
@@ -136,7 +160,7 @@ func (t *targetPanel) initTargets(g *game.Game) {
 
 	if len(t.targets) == 0 {
 		t.cur = -1
-		t.pos = math.Origin
+		t.pos = mapPlayerPos
 	} else {
 		t.cur = 0
 		t.pos = t.targets[t.cur].Pos
@@ -189,15 +213,6 @@ func newMapPanel(display display) *mapPanel {
 }
 
 func (m *mapPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
-	if tboxev.Type != termbox.EventKey || tboxev.Key != 0 {
-		return nocommand()
-	}
-
-	srlev := hudKeymap[tboxev.Ch]
-	if srlev != 0 {
-		return srlev, nil
-	}
-
 	return nocommand()
 }
 
@@ -208,7 +223,7 @@ func (m *mapPanel) HandleEvent(e game.Event) {
 // Render the gameplay map to the hud.
 func (m *mapPanel) Render(g *game.Game) {
 	center := g.Player.Pos()
-	boundsdist := math.Pt(mapPanelBounds.Width()/2, mapPanelBounds.Height()/2)
+	boundsdist := mapPlayerPos
 	viewport := math.Rect(center.Sub(boundsdist), center.Add(boundsdist))
 	maptrans := mapPanelBounds.Min.Sub(viewport.Min)
 	level := g.Level
@@ -397,8 +412,6 @@ func (s *statusPanel) Render(g *game.Game) {
 func (s *statusPanel) printEffects(player *game.Obj) {
 	x, y := statusPanelBounds.Min.X, statusPanelBounds.Min.Y+10
 	linelen, w := 0, statusPanelBounds.Width()
-
-	log.Printf("Status box width is %d", w)
 
 	for _, lightspec := range effectLights {
 		ticks := lightspec.cond(player)

@@ -5,6 +5,9 @@ NEXT:
     - Player can shoot
         - Should return a list of paths to targets, sorted by proximity
         - F rotates, esc cancels, hjklyubn keys freetarget, f confirms
+        - Move messages to a separate queue in EventQueue, so that we can
+          always render the last few from there rather than just buffering in
+          the panel.
         x Weapons need a 'range' attribute
         x if you have no ranged attack, should message and switch back to hud.
         x Body needs a 'ranged' slot.

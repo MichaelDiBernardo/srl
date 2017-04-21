@@ -21,8 +21,9 @@ type Shooter interface {
 // east with one space intervening, its Pos would be (2,0) and its path would
 // be {(1,0), (2,0))
 type Target struct {
-	Pos  math.Point
-	Path Path
+	Pos    math.Point
+	Path   Path
+	Target *Obj
 }
 
 type ActorShooter struct {
@@ -44,10 +45,36 @@ func (s *ActorShooter) TryShoot() {
 		msg := fmt.Sprintf("%s is too confused to shoot!", obj.Spec.Name)
 		obj.Game.Events.Message(msg)
 	} else {
-		obj.Game.Events.SwitchMode(ModeShoot)
+		obj.Game.SwitchMode(ModeShoot)
 	}
 }
 
 func (s *ActorShooter) Targets() []Target {
-	return []Target{}
+	fov, lev, pos := s.obj.Senser.FOV(), s.obj.Game.Level, s.obj.Pos()
+	targets := []Target{}
+
+	for _, p := range fov {
+		tile := lev.At(p)
+		victim := tile.Actor
+
+		if victim == nil || victim == s.obj {
+			continue
+		}
+
+		path, ok := lev.FindPath(pos, tile.Pos, PathCost)
+		if !ok {
+			continue
+		}
+		for i := 0; i < len(path); i++ {
+			path[i] = path[i].Sub(pos)
+		}
+
+		target := Target{
+			Pos:    tile.Pos.Sub(pos),
+			Path:   path,
+			Target: victim,
+		}
+		targets = append(targets, target)
+	}
+	return targets
 }
