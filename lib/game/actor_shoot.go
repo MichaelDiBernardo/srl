@@ -1,9 +1,13 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
+
+var ErrTargetOutOfRange = errors.New("TargetOutOfRange")
+var ErrNoClearShot = errors.New("NoClearShot")
 
 // Anything that can attack at range.
 type Shooter interface {
@@ -14,6 +18,10 @@ type Shooter interface {
 	TryShoot()
 	// Return a list of targets in LOS, sorted by proximity.
 	Targets() []Target
+	// Given a point on the map, this will give the target info for shooting at
+	// that spot. Will return ErrTargetOutOfRange or ErrNoClearShot if the shot
+	// is impossible.
+	Target(math.Point) (Target, error)
 }
 
 // A target in LOS of the shooter. Points in Pos and Path are relative to the
@@ -50,36 +58,44 @@ func (s *ActorShooter) TryShoot() {
 }
 
 func (s *ActorShooter) Targets() []Target {
-	fov, lev, pos := s.obj.Senser.FOV(), s.obj.Game.Level, s.obj.Pos()
-	srange := s.obj.Equipper.Body().Shooter().Equipment.Range
+	fov := s.obj.Senser.FOV()
 	targets := []Target{}
 
 	for _, p := range fov {
-		tile := lev.At(p)
+		tile := s.obj.Game.Level.At(p)
 		victim := tile.Actor
 
 		if victim == nil || victim == s.obj {
 			continue
 		}
 
-		if math.EucDist(pos, tile.Pos) > srange {
+		target, err := s.Target(tile.Pos)
+		if err != nil {
 			continue
-		}
-
-		path, ok := lev.FindPath(pos, tile.Pos, PathCost)
-		if !ok {
-			continue
-		}
-		for i := 0; i < len(path); i++ {
-			path[i] = path[i].Sub(pos)
-		}
-
-		target := Target{
-			Pos:    tile.Pos.Sub(pos),
-			Path:   path,
-			Target: victim,
 		}
 		targets = append(targets, target)
 	}
 	return targets
+}
+
+func (s *ActorShooter) Target(p math.Point) (Target, error) {
+	// TODO: Replace with sheet attack range, or something.
+	mypos, lev := s.obj.Pos(), s.obj.Game.Level
+	srange := s.obj.Equipper.Body().Shooter().Equipment.Range
+
+	if math.EucDist(s.obj.Pos(), p) > srange {
+		return Target{}, ErrTargetOutOfRange
+	}
+
+	path, ok := lev.FindPath(mypos, p, PathCost)
+	if !ok {
+		return Target{}, ErrNoClearShot
+	}
+
+	target := Target{
+		Pos:    p,
+		Path:   path,
+		Target: lev.At(p).Actor,
+	}
+	return target, nil
 }

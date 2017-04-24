@@ -111,14 +111,14 @@ type targetPanel struct {
 	targets []game.Target // The targets in LOS that we can cycle through.
 	srange  int           // Max range player can shoot.
 	cur     int           // Index into targets for cur. If we're freetargeting, this will be -1.
-	pos     math.Point    // Where our target cursor should be, in map coords.
+	pos     math.Point    // Where our target cursor should be when freetargeting, in map coords.
 }
 
 func newTargetPanel(display display) *targetPanel {
 	return &targetPanel{display: display}
 }
 
-func (t *targetPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
+func (t *targetPanel) HandleInput(g *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		// TODO: This is another good argument for a panel Init()
 		t.clearTargets()
@@ -131,21 +131,21 @@ func (t *targetPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Comm
 	case '<':
 		t.prevTarget()
 	case 'h':
-		t.freeTarget(math.Pt(-1, 0))
+		t.freeTarget(g, math.Pt(-1, 0))
 	case 'j':
-		t.freeTarget(math.Pt(0, 1))
+		t.freeTarget(g, math.Pt(0, 1))
 	case 'k':
-		t.freeTarget(math.Pt(0, -1))
+		t.freeTarget(g, math.Pt(0, -1))
 	case 'l':
-		t.freeTarget(math.Pt(1, 0))
+		t.freeTarget(g, math.Pt(1, 0))
 	case 'y':
-		t.freeTarget(math.Pt(-1, -1))
+		t.freeTarget(g, math.Pt(-1, -1))
 	case 'u':
-		t.freeTarget(math.Pt(1, -1))
+		t.freeTarget(g, math.Pt(1, -1))
 	case 'b':
-		t.freeTarget(math.Pt(-1, 1))
+		t.freeTarget(g, math.Pt(-1, 1))
 	case 'n':
-		t.freeTarget(math.Pt(1, 1))
+		t.freeTarget(g, math.Pt(1, 1))
 	}
 
 	return nocommand()
@@ -168,7 +168,7 @@ func (t *targetPanel) Render(g *game.Game) {
 	if t.cur == -1 {
 		t.display.SetCursor(t.pos.X, t.pos.Y)
 	} else {
-		pos := t.target().Pos.Add(mapPlayerPos)
+		pos := g2m(g.Player.Pos(), t.target().Pos)
 		t.display.SetCursor(pos.X, pos.Y)
 	}
 }
@@ -208,14 +208,17 @@ func (t *targetPanel) nextTarget() {
 	t.cur = (t.cur + 1) % len(t.targets)
 }
 
-func (t *targetPanel) freeTarget(pt math.Point) {
+func (t *targetPanel) freeTarget(g *game.Game, relpt math.Point) {
+	gplayerpos := g.Player.Pos()
+
 	if target := t.target(); target != nil {
-		t.pos = target.Pos.Add(mapPlayerPos)
+		t.pos = g2m(gplayerpos, target.Pos)
 		t.cur = -1
 	}
 
-	next := t.pos.Add(pt)
-	if math.EucDist(mapPlayerPos, next) > t.srange {
+	next := t.pos.Add(relpt)
+	_, err := g.Player.Shooter.Target(m2g(gplayerpos, next))
+	if err != nil {
 		return
 	}
 	t.pos = next

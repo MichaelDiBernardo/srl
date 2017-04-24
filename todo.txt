@@ -61,7 +61,6 @@ Then:
 Stuff:
 - Consumables stack in inventories.
 - Monster pack starting formation and proper pack placement.
-- XP spending on skills
 - user-level configs for
     - keymaps
     - morgues
@@ -80,3 +79,7 @@ Bug:
 Cleanup:
 - Great Visibility Sweep -- exporting types and fields has been done really
   haphazardly, and signals the wrong things. Should be cleaned up.
+- Need a "read-only" game interface or something that the client can pull from
+  when it needs information, instead of having access to the whole game. Maybe
+  a distilled gamestate, which represents what we'll need to send over wire to
+  the web client anyways.
