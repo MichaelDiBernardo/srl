@@ -111,7 +111,7 @@ type targetPanel struct {
 	targets []game.Target // The targets in LOS that we can cycle through.
 	srange  int           // Max range player can shoot.
 	cur     int           // Index into targets for cur. If we're freetargeting, this will be -1.
-	pos     math.Point    // Where our target cursor should be.
+	pos     math.Point    // Where our target cursor should be, in map coords.
 }
 
 func newTargetPanel(display display) *targetPanel {
@@ -288,28 +288,29 @@ func (m *mapPanel) HandleEvent(e game.Event) {
 
 // Render the gameplay map to the hud.
 func (m *mapPanel) Render(g *game.Game) {
-	center := g.Player.Pos()
-	boundsdist := mapPlayerPos
-	viewport := math.Rect(center.Sub(boundsdist), center.Add(boundsdist))
-	maptrans := mapPanelBounds.Min.Sub(viewport.Min)
-	level := g.Level
+	// Figure out viewport in map coordinates.
+	viewport := math.Rect(math.Origin, mapPlayerPos.Add(mapPlayerPos))
+	level, gplayerpos := g.Level, g.Player.Pos()
 
 	for x := viewport.Min.X; x < viewport.Max.X; x++ {
 		for y := viewport.Min.Y; y < viewport.Max.Y; y++ {
-			cur := math.Pt(x, y)
-			if !cur.In(level) {
+			// The current coordinate in map coords.
+			mcur := math.Pt(x, y)
+			// The current coordinate in game coords.
+			gcur := m2g(gplayerpos, mcur)
+
+			if !gcur.In(level) {
 				continue
 			}
 
-			tile := level.At(cur)
+			tile := level.At(gcur)
 			hasactor := tile.Actor != nil
 			isplayer := hasactor && tile.Actor.IsPlayer()
-			drawpos := cur.Add(maptrans)
 
 			// When you're blind, you may be walking on unseen tiles. So, we
 			// always want to show the player, even if the tile is unseen.
 			if !tile.Seen && !isplayer {
-				m.display.SetCell(drawpos.X, drawpos.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
+				m.display.SetCell(mcur.X, mcur.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
 				continue
 			}
 
@@ -334,9 +335,25 @@ func (m *mapPanel) Render(g *game.Game) {
 					gl.Fg = termbox.ColorBlack | termbox.AttrBold
 				}
 			}
-			m.display.SetCell(drawpos.X, drawpos.Y, gl.Ch, gl.Fg, gl.Bg)
+			m.display.SetCell(mcur.X, mcur.Y, gl.Ch, gl.Fg, gl.Bg)
 		}
 	}
+}
+
+// Convert a map panel coordinate to a game coordinate.
+func m2g(gplayerpos, mpos math.Point) math.Point {
+	// Relative displacement of mpos from player in map coords.
+	mrel := mapPlayerPos.Sub(mpos)
+	// Find that point in game coords.
+	return gplayerpos.Sub(mrel)
+}
+
+// Convert a game coordinate to a map panel coordinate.
+func g2m(gplayerpos, gpos math.Point) math.Point {
+	// Relative displacement of gpos from player in game coords.
+	grel := gplayerpos.Sub(gpos)
+	// Find that point in map coords.
+	return mapPlayerPos.Sub(grel)
 }
 
 type messageLine struct {
