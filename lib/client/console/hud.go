@@ -107,11 +107,11 @@ func (_ *hudControlPanel) Render(g *game.Game) {
 
 // A panel that handles targetting on the HUD, when the game is in targetting mode.
 type targetPanel struct {
-	display display
-	targets []game.Target // The targets in LOS that we can cycle through.
-	srange  int           // Max range player can shoot.
-	cur     int           // Index into targets for cur. If we're freetargeting, this will be -1.
-	pos     math.Point    // Where our target cursor should be when freetargeting, in map coords.
+	display    display
+	targets    []game.Target // The targets in LOS that we can cycle through.
+	srange     int           // Max range player can shoot.
+	cur        int           // Index into targets for cur. If we're freetargeting, this will be -1.
+	freetarget game.Target   // What we're aiming at when freetargeting.
 }
 
 func newTargetPanel(display display) *targetPanel {
@@ -165,12 +165,15 @@ func (t *targetPanel) Render(g *game.Game) {
 		t.initTargets(g)
 	}
 
+	var target game.Target
 	if t.cur == -1 {
-		t.display.SetCursor(t.pos.X, t.pos.Y)
+		target = t.freetarget
 	} else {
-		pos := g2m(g.Player.Pos(), t.target().Pos)
-		t.display.SetCursor(pos.X, pos.Y)
+		target = *t.target()
 	}
+
+	pos := g2m(g.Player.Pos(), target.Pos)
+	t.display.SetCursor(pos.X, pos.Y)
 }
 
 func (t *targetPanel) initTargets(g *game.Game) {
@@ -182,7 +185,7 @@ func (t *targetPanel) initTargets(g *game.Game) {
 		t.cur = 0
 	} else {
 		t.cur = -1
-		t.pos = mapPlayerPos
+		t.freetarget, _ = g.Player.Shooter.Target(g.Player.Pos())
 	}
 }
 
@@ -209,19 +212,17 @@ func (t *targetPanel) nextTarget() {
 }
 
 func (t *targetPanel) freeTarget(g *game.Game, relpt math.Point) {
-	gplayerpos := g.Player.Pos()
-
 	if target := t.target(); target != nil {
-		t.pos = g2m(gplayerpos, target.Pos)
+		t.freetarget = *target
 		t.cur = -1
 	}
 
-	next := t.pos.Add(relpt)
-	_, err := g.Player.Shooter.Target(m2g(gplayerpos, next))
+	next := t.freetarget.Pos.Add(relpt)
+	nexttarget, err := g.Player.Shooter.Target(next)
 	if err != nil {
 		return
 	}
-	t.pos = next
+	t.freetarget = nexttarget
 }
 
 func (t *targetPanel) anyTargets() bool {
