@@ -51,6 +51,7 @@ func (s *ActorShooter) TryShoot() {
 
 func (s *ActorShooter) Targets() []Target {
 	fov, lev, pos := s.obj.Senser.FOV(), s.obj.Game.Level, s.obj.Pos()
+	srange := s.obj.Equipper.Body().Shooter().Equipment.Range
 	targets := []Target{}
 
 	for _, p := range fov {
@@ -58,6 +59,10 @@ func (s *ActorShooter) Targets() []Target {
 		victim := tile.Actor
 
 		if victim == nil || victim == s.obj {
+			continue
+		}
+
+		if math.EucDist(pos, tile.Pos) > srange {
 			continue
 		}
 

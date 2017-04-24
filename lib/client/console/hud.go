@@ -46,8 +46,8 @@ func newTargetScreen(display display) *screen {
 	return &screen{
 		display: display,
 		panels: []panel{
-			newTargetPanel(display),
 			newMapPanel(display),
+			newTargetPanel(display),
 			newStatusPanel(display),
 			newMessagePanel(messagePanelNumLines, display),
 		},
@@ -109,6 +109,7 @@ func (_ *hudControlPanel) Render(g *game.Game) {
 type targetPanel struct {
 	display display
 	targets []game.Target // The targets in LOS that we can cycle through.
+	srange  int           // Max range player can shoot.
 	cur     int           // Index into targets for cur. If we're freetargeting, this will be -1.
 	pos     math.Point    // Where our target cursor should be.
 }
@@ -174,6 +175,8 @@ func (t *targetPanel) Render(g *game.Game) {
 
 func (t *targetPanel) initTargets(g *game.Game) {
 	t.targets = g.Player.Shooter.Targets()
+	// TODO: Okay, this seriously needs a better accessor (through shooter?)
+	t.srange = g.Player.Equipper.Body().Shooter().Equipment.Range
 
 	if t.anyTargets() {
 		t.cur = 0
@@ -206,11 +209,16 @@ func (t *targetPanel) nextTarget() {
 }
 
 func (t *targetPanel) freeTarget(pt math.Point) {
-	if t.target() != nil {
-		t.pos = mapPlayerPos
+	if target := t.target(); target != nil {
+		t.pos = target.Pos.Add(mapPlayerPos)
 		t.cur = -1
 	}
-	t.pos = t.pos.Add(pt)
+
+	next := t.pos.Add(pt)
+	if math.EucDist(mapPlayerPos, next) > t.srange {
+		return
+	}
+	t.pos = next
 }
 
 func (t *targetPanel) anyTargets() bool {

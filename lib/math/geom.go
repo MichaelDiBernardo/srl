@@ -2,6 +2,7 @@ package math
 
 import (
 	"fmt"
+	"math"
 )
 
 // A point in 2D space.
@@ -152,6 +153,14 @@ func ChebyDist(p1, p2 Point) int {
 	return Max(Abs(p1.X-p2.X), Abs(p1.Y-p2.Y))
 }
 
+// The euclidean distance between two points, floored to the nearest integer.
+func EucDist(p1, p2 Point) int {
+	diffxs := math.Pow(float64(p1.X-p2.X), 2)
+	diffys := math.Pow(float64(p1.Y-p2.Y), 2)
+	return int(math.Sqrt(diffxs + diffys))
+}
+
+// Get all points adjacent to pt.
 func Adj(pt Point) []Point {
 	around := ChebyEdge(1)
 	adj := make([]Point, 0, 8)
