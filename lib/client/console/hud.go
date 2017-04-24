@@ -172,6 +172,16 @@ func (t *targetPanel) Render(g *game.Game) {
 		target = *t.target()
 	}
 
+	t.renderTarget(g, target)
+}
+
+func (t *targetPanel) renderTarget(g *game.Game, target game.Target) {
+	for _, gcur := range target.Path {
+		mcur := g2m(g.Player.Pos(), gcur)
+		tile := g.Level.At(gcur)
+		drawglyph(t.display, tile, mcur, true)
+	}
+
 	pos := g2m(g.Player.Pos(), target.Pos)
 	t.display.SetCursor(pos.X, pos.Y)
 }
@@ -308,40 +318,50 @@ func (m *mapPanel) Render(g *game.Game) {
 			}
 
 			tile := level.At(gcur)
-			hasactor := tile.Actor != nil
-			isplayer := hasactor && tile.Actor.IsPlayer()
-
-			// When you're blind, you may be walking on unseen tiles. So, we
-			// always want to show the player, even if the tile is unseen.
-			if !tile.Seen && !isplayer {
-				m.display.SetCell(mcur.X, mcur.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
-				continue
-			}
-
-			var gl glyph
-
-			// If you're blind (see above), you may be on an unseen and/or
-			// not-visible tile, but we still want to draw the player glyph.
-			if hasactor && (tile.Visible || isplayer) {
-				gl = actorGlyphs[tile.Actor.Spec.Species]
-				if tile.Actor.Sheet.Petrified() {
-					gl.Fg = termbox.ColorBlack | termbox.AttrBold
-				}
-			} else if !tile.Items.Empty() {
-				item, stack := tile.Items.Top(), tile.Items.Len() > 1
-				gl = itemGlyphs[item.Spec.Species]
-				if stack {
-					gl.Bg = termbox.ColorCyan
-				}
-			} else {
-				gl = featureGlyphs[tile.Feature.Type]
-				if !tile.Visible {
-					gl.Fg = termbox.ColorBlack | termbox.AttrBold
-				}
-			}
-			m.display.SetCell(mcur.X, mcur.Y, gl.Ch, gl.Fg, gl.Bg)
+			drawglyph(m.display, tile, mcur, false)
 		}
 	}
+}
+
+// Draws a glyph for tile 'tile' onto the map panel at map coordinate 'mc'. If
+// 'highlight' is true, the background color for this cell will be overridden
+// by the highlight color. This is used in targetting.
+func drawglyph(display display, tile *game.Tile, mc math.Point, highlight bool) {
+	hasactor := tile.Actor != nil
+	isplayer := hasactor && tile.Actor.IsPlayer()
+
+	// When you're blind, you may be walking on unseen tiles. So, we
+	// always want to show the player, even if the tile is unseen.
+	if !tile.Seen && !isplayer {
+		display.SetCell(mc.X, mc.Y, ' ', termbox.ColorBlack, termbox.ColorBlack)
+		return
+	}
+
+	var gl glyph
+
+	// If you're blind (see above), you may be on an unseen and/or
+	// not-visible tile, but we still want to draw the player glyph.
+	if hasactor && (tile.Visible || isplayer) {
+		gl = actorGlyphs[tile.Actor.Spec.Species]
+		if tile.Actor.Sheet.Petrified() {
+			gl.Fg = termbox.ColorBlack | termbox.AttrBold
+		}
+	} else if !tile.Items.Empty() {
+		item, stack := tile.Items.Top(), tile.Items.Len() > 1
+		gl = itemGlyphs[item.Spec.Species]
+		if stack {
+			gl.Bg = termbox.ColorCyan
+		}
+	} else {
+		gl = featureGlyphs[tile.Feature.Type]
+		if !tile.Visible {
+			gl.Fg = termbox.ColorBlack | termbox.AttrBold
+		}
+	}
+	if highlight {
+		gl.Bg = termbox.ColorWhite
+	}
+	display.SetCell(mc.X, mc.Y, gl.Ch, gl.Fg, gl.Bg)
 }
 
 // Convert a map panel coordinate to a game coordinate.

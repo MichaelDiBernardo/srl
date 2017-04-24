@@ -49,7 +49,7 @@ var Items = []*Spec{
 				Evasion: 0,
 				Weight:  3,
 				Slot:    SlotRanged,
-				Range:   2,
+				Range:   4,
 				Effects: NewEffects(map[Effect]int{}),
 			}),
 		},
