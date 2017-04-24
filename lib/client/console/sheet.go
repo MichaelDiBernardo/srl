@@ -24,7 +24,7 @@ func newSheetPanel(display display) *sheetPanel {
 	return &sheetPanel{display: display}
 }
 
-func (s *sheetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (s *sheetPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		return game.ModeCommand{Mode: game.ModeHud}, nil
 	}
@@ -76,7 +76,7 @@ func newSkillEditPanel(display display) *skillEditPanel {
 	return &skillEditPanel{display: display}
 }
 
-func (s *skillEditPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (s *skillEditPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if !s.editing {
 		switch tboxev.Ch {
 		case 'i':

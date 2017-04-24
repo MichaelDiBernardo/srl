@@ -62,8 +62,8 @@ func (c *Console) HandleEvent(ev game.Event) {
 }
 
 // Get the next command from the player to be sent to the game instance.
-func (c *Console) Poll() (game.Command, error) {
-	return c.curscr.Poll()
+func (c *Console) Poll(g *game.Game) (game.Command, error) {
+	return c.curscr.Poll(g)
 }
 
 // Tear down the console client.

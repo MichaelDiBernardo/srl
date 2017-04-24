@@ -22,7 +22,7 @@ func newGameOverPanel(display display) *gameOverPanel {
 	return &gameOverPanel{display: display}
 }
 
-func (g *gameOverPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (g *gameOverPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && (tboxev.Key == termbox.KeyEsc || tboxev.Key == termbox.KeyEnter) {
 		return game.QuitCommand{}, nil
 	}

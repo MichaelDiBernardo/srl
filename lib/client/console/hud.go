@@ -84,7 +84,7 @@ func newHudControlPanel() *hudControlPanel {
 	return &hudControlPanel{}
 }
 
-func (h *hudControlPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (h *hudControlPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type != termbox.EventKey || tboxev.Key != 0 {
 		return nocommand()
 	}
@@ -118,7 +118,7 @@ func newTargetPanel(display display) *targetPanel {
 	return &targetPanel{display: display}
 }
 
-func (t *targetPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (t *targetPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		// TODO: This is another good argument for a panel Init()
 		t.clearTargets()
@@ -278,7 +278,7 @@ func newMapPanel(display display) *mapPanel {
 	return &mapPanel{display: display}
 }
 
-func (m *mapPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (m *mapPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	return nocommand()
 }
 
@@ -380,7 +380,7 @@ func newMessagePanel(size int, display display) *messagePanel {
 	}
 }
 
-func (m *messagePanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (m *messagePanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	return nocommand()
 }
 
@@ -450,7 +450,7 @@ func newStatusPanel(display display) *statusPanel {
 	return &statusPanel{display: display}
 }
 
-func (s *statusPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (s *statusPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	return nocommand()
 }
 

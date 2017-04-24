@@ -1,8 +1,6 @@
 package console
 
 import (
-	"errors"
-
 	"github.com/MichaelDiBernardo/srl/lib/client"
 	"github.com/MichaelDiBernardo/srl/lib/game"
 	"github.com/nsf/termbox-go"
@@ -17,8 +15,6 @@ type screen struct {
 	panels  []panel
 }
 
-var ErrPollNoCommand = errors.New("PollNoCommand")
-
 func (s *screen) Render(g *game.Game) {
 	for _, p := range s.panels {
 		p.Render(g)
@@ -28,15 +24,15 @@ func (s *screen) Render(g *game.Game) {
 // Polls the player for input, and then asks every panel to handle it. If a
 // panel responds back with a command that should be sent to the game, the
 // other panels are not asked.
-func (s *screen) Poll() (game.Command, error) {
+func (s *screen) Poll(g *game.Game) (game.Command, error) {
 	tboxev := s.display.PollEvent()
 	for _, p := range s.panels {
-		command, err := p.HandleInput(tboxev)
+		command, err := p.HandleInput(g, tboxev)
 		if err == nil {
 			return command, err
 		}
 	}
-	return game.NoCommand{}, ErrPollNoCommand
+	return game.NoCommand{}, client.ErrNoCommand
 }
 
 // Asks the panels to handle ev, in order.
@@ -58,10 +54,14 @@ type panel interface {
 }
 
 type InputHandler interface {
-	HandleInput(termbox.Event) (game.Command, error)
+	// Respond to a user action, using the given game as read-only context if
+	// required. Do not mutate this instance of the game! Returns a command if
+	// one should be issued to the game, or an error if this thing has no
+	// command to furnish.
+	HandleInput(*game.Game, termbox.Event) (game.Command, error)
 }
 
 // Shortcut for saying "I don't have a command in response to this input."
 func nocommand() (game.Command, error) {
-	return game.NoCommand{}, ErrPollNoCommand
+	return game.NoCommand{}, client.ErrNoCommand
 }

@@ -24,7 +24,7 @@ func newInventoryPanel(display display) *inventoryPanel {
 	return &inventoryPanel{display: display}
 }
 
-func (inv *inventoryPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (inv *inventoryPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		return game.ModeCommand{Mode: game.ModeHud}, nil
 	}
@@ -65,7 +65,7 @@ func newPickupPanel(display display) *pickupPanel {
 	return &pickupPanel{display: display}
 }
 
-func (p *pickupPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (p *pickupPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type != termbox.EventKey {
 		return nocommand()
 	}
@@ -108,7 +108,7 @@ func newDropPanel(display display) *dropPanel {
 	return &dropPanel{display: display}
 }
 
-func (d *dropPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (d *dropPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type != termbox.EventKey {
 		return nocommand()
 	}
@@ -151,7 +151,7 @@ func newEquipPanel(display display) *equipPanel {
 	return &equipPanel{display: display}
 }
 
-func (e *equipPanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (e *equipPanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		return game.ModeCommand{Mode: game.ModeHud}, nil
 	} else if ch := tboxev.Ch; ch != 0 {
@@ -191,7 +191,7 @@ func newRemovePanel(display display) *removePanel {
 	return &removePanel{display: display}
 }
 
-func (r *removePanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (r *removePanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		return game.ModeCommand{Mode: game.ModeHud}, nil
 	} else if ch := tboxev.Ch; ch != 0 {
@@ -241,7 +241,7 @@ func newUsePanel(display display) *usePanel {
 	return &usePanel{display: display}
 }
 
-func (u *usePanel) HandleInput(tboxev termbox.Event) (game.Command, error) {
+func (u *usePanel) HandleInput(_ *game.Game, tboxev termbox.Event) (game.Command, error) {
 	if tboxev.Type == termbox.EventKey && tboxev.Key == termbox.KeyEsc {
 		return game.ModeCommand{Mode: game.ModeHud}, nil
 	} else if ch := tboxev.Ch; ch != 0 {

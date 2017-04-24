@@ -39,7 +39,7 @@ func (s *Session) Loop() {
 		var command game.Command
 		for {
 			s.client.Render(s.game)
-			com, err := s.client.Poll()
+			com, err := s.client.Poll(s.game)
 			if err == nil {
 				command = com
 				break
