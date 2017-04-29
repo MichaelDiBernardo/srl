@@ -87,9 +87,7 @@ func (s *ActorShooter) Target(p math.Point) (Target, error) {
 		return Target{}, ErrTargetOutOfRange
 	}
 
-	// TODO: Bresenham pls, then trim the path where it intersects with
-	// something solid.
-	path, ok := lev.FindPath(mypos, p, PathCost)
+	path, ok := lev.FindLine(mypos, p, LineTest)
 	if !ok {
 		return Target{}, ErrNoClearShot
 	}

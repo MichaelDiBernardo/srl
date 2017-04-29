@@ -169,3 +169,57 @@ func Adj(pt Point) []Point {
 	}
 	return adj
 }
+
+// Approximate a straight line between p1 and p2.
+// Uses Bresenham's algorithm, stolen and adapted from
+// http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm#Go
+func Line(p1, p2 Point) (line []Point) {
+	x1, y1 := p1.X, p1.Y
+	x2, y2 := p2.X, p2.Y
+
+	isSteep := Abs(y2-y1) > Abs(x2-x1)
+	if isSteep {
+		x1, y1 = y1, x1
+		x2, y2 = y2, x2
+	}
+
+	reversed := false
+	if x1 > x2 {
+		x1, x2 = x2, x1
+		y1, y2 = y2, y1
+		reversed = true
+	}
+
+	deltaX := x2 - x1
+	deltaY := Abs(y2 - y1)
+	err := deltaX / 2
+	y := y1
+	var ystep int
+
+	if y1 < y2 {
+		ystep = 1
+	} else {
+		ystep = -1
+	}
+
+	for x := x1; x < x2+1; x++ {
+		if isSteep {
+			line = append(line, Pt(y, x))
+		} else {
+			line = append(line, Pt(x, y))
+		}
+		err -= deltaY
+		if err < 0 {
+			y += ystep
+			err += deltaX
+		}
+	}
+
+	if reversed {
+		for i, j := 0, len(line)-1; i < j; i, j = i+1, j-1 {
+			line[i], line[j] = line[j], line[i]
+		}
+	}
+
+	return
+}

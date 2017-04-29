@@ -261,6 +261,27 @@ func (d *dijkstraQ) Pop() interface{} {
 	return x
 }
 
+// Finds an approximation of a straight line between start and end. If test()
+// returns false for any point on the line, this will return the truncated line
+// segment that leads to the point that caused the failure, and 'ok' will be
+// false.
+func (l *Level) FindLine(start, end math.Point, test func(*Level, math.Point) bool) (path Path, ok bool) {
+	line := math.Line(start, end)
+	for _, pt := range line {
+		if !test(l, pt) {
+			return path, false
+		}
+		path = append(path, pt)
+	}
+	return path, true
+}
+
+// Most common point test used for finding clear lines of fire on the level.
+func LineTest(l *Level, p math.Point) bool {
+	tile := l.At(p)
+	return !tile.Feature.Solid
+}
+
 // Finds a reasonably direct path between start and dest in this level. If no
 // path could be found, 'path' will be zero and 'ok' will be false. This uses
 // Dijkstra's algorithm.
