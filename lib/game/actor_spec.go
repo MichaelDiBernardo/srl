@@ -75,7 +75,7 @@ var Monsters = []*Spec{
 				attacks: []*MonsterAttack{
 					{
 						Attack: Attack{
-							Melee:   0,
+							Hit:     0,
 							Damroll: NewDice(2, 7),
 							CritDiv: 4,
 							Effects: NewEffects(map[Effect]int{EffectPoison: 1}),
@@ -85,7 +85,7 @@ var Monsters = []*Spec{
 					},
 					{
 						Attack: Attack{
-							Melee:   3,
+							Hit:     3,
 							Damroll: NewDice(1, 11),
 							CritDiv: 2,
 							Effects: Effects{},
@@ -147,7 +147,7 @@ var Monsters = []*Spec{
 				attacks: []*MonsterAttack{
 					{
 						Attack: Attack{
-							Melee:   3,
+							Hit:     3,
 							Damroll: NewDice(2, 9),
 							CritDiv: 4,
 							Effects: Effects{},
@@ -157,7 +157,7 @@ var Monsters = []*Spec{
 					},
 					{
 						Attack: Attack{
-							Melee:   0,
+							Hit:     0,
 							Damroll: NewDice(2, 15),
 							CritDiv: 4,
 							Effects: NewEffects(map[Effect]int{BrandFire: 1}),

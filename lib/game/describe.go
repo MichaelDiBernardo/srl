@@ -15,12 +15,12 @@ func (species Species) Describe() string {
 }
 
 func (atk Attack) Describe() string {
-	melee := fmt.Sprintf("%s%d", extrasign(atk.Melee), atk.Melee)
+	hit := fmt.Sprintf("%s%d", extrasign(atk.Hit), atk.Hit)
 	dam := ""
 	if atk.Damroll != ZeroDice {
 		dam = "," + atk.Damroll.String()
 	}
-	return "(" + melee + dam + ")"
+	return "(" + hit + dam + ")"
 }
 
 func (def Defense) Describe() string {

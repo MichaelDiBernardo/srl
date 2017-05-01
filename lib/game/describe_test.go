@@ -11,10 +11,10 @@ type atkDescTest struct {
 
 var atkDescTests = []atkDescTest{
 	{atk: Attack{}, want: "(+0)"},
-	{atk: Attack{Melee: -2}, want: "(-2)"},
-	{atk: Attack{Melee: 3}, want: "(+3)"},
-	{atk: Attack{Melee: 0, Damroll: NewDice(2, 3)}, want: "(+0,2d3)"},
-	{atk: Attack{Melee: -2, Damroll: NewDice(3, 5)}, want: "(-2,3d5)"},
+	{atk: Attack{Hit: -2}, want: "(-2)"},
+	{atk: Attack{Hit: 3}, want: "(+3)"},
+	{atk: Attack{Hit: 0, Damroll: NewDice(2, 3)}, want: "(+0,2d3)"},
+	{atk: Attack{Hit: -2, Damroll: NewDice(3, 5)}, want: "(-2,3d5)"},
 }
 
 func TestDescribeAttack(t *testing.T) {

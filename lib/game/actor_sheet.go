@@ -36,6 +36,8 @@ type Sheet interface {
 
 	// Get information about this actor's melee attack capability.
 	Attack() Attack
+	// Get information about this actor's ranged attack capability.
+	Ranged() Attack
 	// Get information about this actor's defensive capability.
 	Defense() Defense
 
@@ -429,22 +431,32 @@ func (p *PlayerSheet) CanAct() bool {
 }
 
 func (p *PlayerSheet) Attack() Attack {
-	// We use skills.skill instead of Skill because Skill already applies the
-	// blind penalty. We need to avoid it so we can apply the penalty to the
-	// entire quantity.
-	melee := p.obj.Equipper.Body().Melee() + p.skills.skill(Melee)
+	return p.makeattack(Melee, p.weapon().Equipment)
+}
+
+func (p *PlayerSheet) Ranged() Attack {
+	shooter := p.obj.Equipper.Body().Shooter()
+	if shooter == nil {
+		return Attack{}
+	}
+	return p.makeattack(Shooting, shooter.Equipment)
+}
+
+func (p *PlayerSheet) makeattack(stype SkillName, equip *Equipment) Attack {
+	tohit := p.obj.Equipper.Body().Hit() + p.skills.skill(stype)
 	if p.blind {
-		melee = blindpenalty(Melee, melee)
+		tohit = blindpenalty(stype, tohit)
 	}
 
-	weap := p.weapon()
-	equip := weap.Equipment
-
-	str := p.stats.stat(Str)
-	bonusSides := math.Min(math.Abs(str), weap.Equipment.Weight) * math.Sgn(str)
+	var bonusSides int
+	if !equip.NoStr {
+		str := p.stats.stat(Str)
+		bonusSides = math.Min(math.Abs(str), equip.Weight) * math.Sgn(str)
+	}
 
 	return Attack{
-		Melee:   melee,
+		Hit:     tohit,
+		Range:   equip.Range,
 		Damroll: equip.Damroll.Add(0, bonusSides),
 		CritDiv: equip.Weight + BaseCritDiv,
 		Effects: equip.Effects,
@@ -829,9 +841,13 @@ func (m *MonsterSheet) Attack() Attack {
 
 	// Copy the attack.
 	atk := m.attacks[pos].Attack
-	atk.Melee = blindpenalty(Melee, atk.Melee)
+	atk.Hit = blindpenalty(Melee, atk.Hit)
 	atk.CritDiv += BaseCritDiv
 	return atk
+}
+
+func (m *MonsterSheet) Ranged() Attack {
+	return Attack{}
 }
 
 func (m *MonsterSheet) Defense() Defense {
@@ -983,13 +999,10 @@ const (
 	NumSkills
 )
 
-// Details about an actor's melee attack, before the melee roll is applied --
-// i.e. what melee bonus + damage should be done if no crits happen? What's the
-// base divisor to use for calculating # of crits? What base verb should we use
-// if it hits? (This latter may be altered by applybs() based on which effects
-// actually end up working.)
+// Details about an actor's attack, ranged or otherwise.
 type Attack struct {
-	Melee   int
+	Hit     int
+	Range   int
 	Damroll Dice
 	CritDiv int
 	Effects Effects

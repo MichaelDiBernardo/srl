@@ -18,7 +18,8 @@ type Equipment struct {
 	Hit      int // +Melee for melee weapons, +Shoot for shooters.
 	Evasion  int
 	Weight   int
-	Range    int // If this is a shooter, how far can it shoot?
+	Range    int  // If this is a shooter, how far can it shoot?
+	NoStr    bool // Don't use strength to calculate a sides bonus/malus on this weapon.
 	Slot     Slot
 	Effects  Effects
 }

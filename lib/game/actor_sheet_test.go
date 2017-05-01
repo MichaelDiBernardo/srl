@@ -115,8 +115,8 @@ var astKnifeSpec = &Spec{
 }
 
 func testAtkEq(t *testing.T, atk Attack, want Attack) {
-	if m, w := atk.Melee, want.Melee; m != w {
-		t.Errorf(`atk.Melee was %d, want %d`, m, w)
+	if m, w := atk.Hit, want.Hit; m != w {
+		t.Errorf(`atk.Hit was %d, want %d`, m, w)
 	}
 	if d, w := atk.Damroll.Dice, want.Damroll.Dice; d != w {
 		t.Errorf(`atk.Damroll.Dice was %d, want %d`, d, w)
@@ -135,7 +135,7 @@ func TestPlayerAttackNoBonuses(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 7)})
+	testAtkEq(t, atk, Attack{Hit: 1, Damroll: NewDice(1, 7)})
 }
 
 func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
@@ -150,7 +150,7 @@ func TestPlayerAttackStrBonusBelowCap(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 8)})
+	testAtkEq(t, atk, Attack{Hit: 1, Damroll: NewDice(1, 8)})
 }
 
 func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
@@ -165,7 +165,7 @@ func TestPlayerAttackStrBonusAboveCap(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 1, Damroll: NewDice(1, 9)})
+	testAtkEq(t, atk, Attack{Hit: 1, Damroll: NewDice(1, 9)})
 }
 
 func TestPlayerAttackMeleeBonus(t *testing.T) {
@@ -180,7 +180,7 @@ func TestPlayerAttackMeleeBonus(t *testing.T) {
 	obj.Equipper.Body().Wear(weap)
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 4, Damroll: NewDice(1, 7)})
+	testAtkEq(t, atk, Attack{Hit: 4, Damroll: NewDice(1, 7)})
 }
 
 func TestPlayerAttackFistNoStrSides(t *testing.T) {
@@ -188,7 +188,7 @@ func TestPlayerAttackFistNoStrSides(t *testing.T) {
 	obj := g.Player
 	obj.Sheet = NewPlayerSheetFromSpec(&PlayerSheet{Trait: Trait{obj: obj}})
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 1)})
+	testAtkEq(t, atk, Attack{Hit: 0, Damroll: NewDice(1, 1)})
 }
 
 func TestPlayerAttackFistStrSides(t *testing.T) {
@@ -200,7 +200,7 @@ func TestPlayerAttackFistStrSides(t *testing.T) {
 	})
 
 	atk := obj.Sheet.Attack()
-	testAtkEq(t, atk, Attack{Melee: 0, Damroll: NewDice(1, 11)})
+	testAtkEq(t, atk, Attack{Hit: 0, Damroll: NewDice(1, 11)})
 }
 
 func testDefEq(t *testing.T, def Defense, want Defense) {
@@ -339,8 +339,8 @@ func TestPlayerBlind(t *testing.T) {
 		t.Errorf(`sheet.Sight() was %d, want 0`, s)
 	}
 
-	if m := sheet.Attack().Melee; m != 5 {
-		t.Errorf(`atk.Melee = %d, want 5`, m)
+	if m := sheet.Attack().Hit; m != 5 {
+		t.Errorf(`atk.Hit = %d, want 5`, m)
 	}
 
 	if e := sheet.Defense().Evasion; e != 5 {

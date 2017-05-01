@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -25,15 +26,146 @@ func NewActorFighter(obj *Obj) Fighter {
 }
 
 func (f *ActorFighter) Hit(other Fighter) {
-	hit(f, other)
+	atk := f.obj.Sheet.Attack()
+	hit(atk, f.obj, other.Obj())
 }
 
-func hit(attacker Fighter, defender Fighter) {
-	a, d := attacker.Obj(), defender.Obj()
-	atk, def := a.Sheet.Attack(), d.Sheet.Defense()
+// Anything that can attack at range.
+type Shooter interface {
+	Objgetter
+	// Primarily for the player -- try to switch to "shooting mode". If the
+	// player has no ranged weapon or is otherwise in no shape to shoot, this
+	// will emit a message and cancel the modeswitch.
+	TryShoot()
+	// Return a list of targets in LOS, sorted by proximity.
+	Targets() []Target
+	// Given a point on the map, this will give the target info for shooting at
+	// that spot. Will return ErrTargetOutOfRange or ErrNoClearShot if the shot
+	// is impossible.
+	Target(math.Point) (Target, error)
+	// Shoot at the given point on the map. Returns the same errors under the
+	// same conditions that Target() does. If an actor is hit on the way to the
+	// intended target, combat rolls etc. will be run against it and the
+	// projectile will stop.
+	Shoot(math.Point) error
+}
 
-	atkroll := combatroll(attacker.Obj()) + atk.Melee
-	defroll := combatroll(defender.Obj()) + def.Evasion
+var ErrTargetOutOfRange = errors.New("TargetOutOfRange")
+var ErrNoClearShot = errors.New("NoClearShot")
+
+// A target in LOS of the shooter. Points in Pos and Path are relative to the
+// actor, who is considered to be at origin. So, if there is a target to the
+// east with one space intervening, its Pos would be (2,0) and its path would
+// be {(1,0), (2,0))
+type Target struct {
+	Pos    math.Point
+	Path   Path
+	Target *Obj
+}
+
+type ActorShooter struct {
+	Trait
+}
+
+func NewActorShooter(obj *Obj) Shooter {
+	return &ActorShooter{Trait: Trait{obj: obj}}
+}
+
+func (s *ActorShooter) TryShoot() {
+	obj := s.obj
+	if obj.Equipper.Body().Shooter() == nil {
+		obj.Game.Events.Message("Nothing to shoot with.")
+	} else if s.obj.Sheet.Afraid() {
+		msg := fmt.Sprintf("%s is too afraid to shoot!", obj.Spec.Name)
+		obj.Game.Events.Message(msg)
+	} else if s.obj.Sheet.Confused() {
+		msg := fmt.Sprintf("%s is too confused to shoot!", obj.Spec.Name)
+		obj.Game.Events.Message(msg)
+	} else {
+		obj.Game.SwitchMode(ModeShoot)
+	}
+}
+
+func (s *ActorShooter) Targets() []Target {
+	fov := s.obj.Senser.FOV()
+	targets := []Target{}
+
+	for _, p := range fov {
+		tile := s.obj.Game.Level.At(p)
+		victim := tile.Actor
+
+		if victim == nil || victim == s.obj {
+			continue
+		}
+
+		target, err := s.Target(tile.Pos)
+		if err != nil {
+			continue
+		}
+		targets = append(targets, target)
+	}
+	return targets
+}
+
+func (s *ActorShooter) Target(p math.Point) (Target, error) {
+	mypos, lev := s.obj.Pos(), s.obj.Game.Level
+	srange := s.obj.Sheet.Ranged().Range
+
+	if math.EucDist(s.obj.Pos(), p) > srange {
+		return Target{}, ErrTargetOutOfRange
+	}
+
+	path, ok := lev.FindLine(mypos, p, LineTest)
+	if !ok {
+		return Target{}, ErrNoClearShot
+	}
+
+	target := Target{
+		Pos:    p,
+		Path:   path,
+		Target: lev.At(p).Actor,
+	}
+	return target, nil
+}
+
+func (s *ActorShooter) Shoot(p math.Point) error {
+	target, err := s.Target(p)
+	if err != nil {
+		return err
+	}
+
+	attacker, level, path := s.obj, s.obj.Level, target.Path[1:]
+	atk := attacker.Sheet.Ranged()
+	dist := 0
+
+	for _, pt := range path {
+		dist++
+		defender := level.At(pt).Actor
+
+		atk.Hit -= dist / 2
+
+		// Unintended targets are much harder to hit.
+		if pt != target.Pos {
+			atk.Hit /= 2
+		}
+
+		if hit(atk, attacker, defender) {
+			break
+		}
+	}
+
+	return nil
+}
+
+// hit has the attacker attack the defender with the given attack. This works
+// for both melee and ranged attacks, but presumes the target is in range.
+// Returns true if the target was hit; it could be for 0 damage, but as long as
+// contact was made, this will return true.
+func hit(atk Attack, a, d *Obj) bool {
+	def := d.Sheet.Defense()
+
+	atkroll := combatroll(a) + atk.Hit
+	defroll := combatroll(d) + def.Evasion
 	residual := atkroll - defroll
 
 	aname, dname := a.Spec.Name, d.Spec.Name
@@ -41,7 +173,7 @@ func hit(attacker Fighter, defender Fighter) {
 	if residual <= 0 {
 		msg := fmt.Sprintf("%v missed %v.", aname, dname)
 		a.Game.Events.Message(msg)
-		return
+		return false
 	}
 
 	crits := residual / (atk.CritDiv + def.Effects.Has(ResistCrit))
@@ -64,7 +196,7 @@ func hit(attacker Fighter, defender Fighter) {
 	a.Game.Events.Message(msg)
 
 	if dmg <= 0 {
-		return
+		return true
 	}
 
 	ispara := d.Sheet.Paralyzed()
@@ -142,7 +274,7 @@ func hit(attacker Fighter, defender Fighter) {
 	}
 
 	if ispara {
-		checkpara(defender)
+		checkpara(d)
 	}
 	d.Sheet.Hurt(dmg)
 
@@ -153,6 +285,7 @@ func hit(attacker Fighter, defender Fighter) {
 		def.Effects.Resists(EffectVamp) <= 0 {
 		vamp(a, d)
 	}
+	return true
 }
 
 // Given the base physical damage done by an attack, and the atk and def
@@ -187,8 +320,7 @@ func applybs(basedmg int, atk Effects, def Effects) (xdmg, poisondmg int) {
 	return xdmg, poisondmg
 }
 
-func checkpara(defender Fighter) {
-	obj := defender.Obj()
+func checkpara(obj *Obj) {
 	sheet := obj.Sheet
 
 	if OneIn(2) {

@@ -188,8 +188,7 @@ func (t *targetPanel) renderTarget(g *game.Game, target game.Target) {
 
 func (t *targetPanel) initTargets(g *game.Game) {
 	t.targets = g.Player.Shooter.Targets()
-	// TODO: Okay, this seriously needs a better accessor (through shooter?)
-	t.srange = g.Player.Equipper.Body().Shooter().Equipment.Range
+	t.srange = g.Player.Sheet.Ranged().Range
 
 	if t.anyTargets() {
 		t.cur = 0

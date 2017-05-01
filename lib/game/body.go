@@ -47,13 +47,13 @@ func (b *Body) Naked() bool {
 	return true
 }
 
-// Get the total bonus/malus to melee from equipment worn on this body.
-func (b *Body) Melee() int {
-	melee := 0
+// Get the total bonus/malus to attack from equipment worn on this body.
+func (b *Body) Hit() int {
+	tohit := 0
 	for _, equip := range b.all() {
-		melee += equip.Equipment.Hit
+		tohit += equip.Equipment.Hit
 	}
-	return melee
+	return tohit
 }
 
 // Get the total bonus/malus to evasion from equipment worn on this body.
