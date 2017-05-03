@@ -50,6 +50,7 @@ var Items = []*Spec{
 				Weight:  3,
 				Slot:    SlotRanged,
 				Range:   4,
+				NoStr:   true,
 				Effects: NewEffects(map[Effect]int{}),
 			}),
 		},

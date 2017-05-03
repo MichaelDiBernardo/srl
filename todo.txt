@@ -1,29 +1,12 @@
 NEXT:
 
-- Ranged weapons
-    - Player can shoot
-        x hjklyubn keys freetarget
-        x f confirms
-        - Targets should be sorted by proximity?
-        x restrict targets and freetargeting by range
-        x Weapons need a 'range' attribute
-        x if you have no ranged attack, should message and switch back to hud.
-        x Body needs a 'ranged' slot.
-        - ActorShooter
-            x This can be the thing that computes targets + paths, and actually
-              shoots
-            x Shoot() does what Hit() does for ActorFighter
-            - gun specialties
-                - no sides bonus based on weight
-        x Sheet interface needs Ranged() that returns ranged attack
-        x Ranged attack needs to show up on sheet screen and hud
-        - Move messages to a separate queue in EventQueue, so that we can
-          always render the last few from there rather than just buffering in
-          the panel.
-        - MonsterSheet needs ranged []Attack
-        - Monster AI needs to be adjusted for monsters with ranged attacks.
-        - weapons can have an effect at the end? (e.g. rockets, quakehammers)
+- Monster Ranged weapons
+    - MonsterSheet needs ranged []Attack
+    - Monster AI needs to be adjusted for monsters with ranged attacks.
     - "Archer" AI
+- Weapon procs
+    - weapons can have an effect at the end? (e.g. rockets, quakehammers)
+
 - "Remember" last target between shots.
 
 - Monsters have multiple abilities.
@@ -59,6 +42,16 @@ Then:
 - Unique items, monsters in gen.c
 - Monster capabilities: Can/can't open doors.
 - Equipment needs to be able to modify all skills, stats, etc.
+- Mores
+  - Game should emit important events so that user prefs can decide to more
+    on them or not.
+  - e.g. GameOverEvent should trigger a more.
+  - Multiple more-triggering events generated after a single user turn should
+    just generate a single more.
+  - The hud should process messages before processing events. (How? Events are done externally.)
+  - Mores (for paging purposes) and "force mores" (warning!!!) should be
+    separate ideas. 
+
 
 Stuff:
 - Consumables stack in inventories.

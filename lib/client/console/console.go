@@ -18,8 +18,9 @@ type Console struct {
 // Create a new console client.
 func New() *Console {
 	display := &tbdisplay{}
+	hudscreen, targetscreen := newHudScreens(display)
 	screens := map[game.Mode]*screen{
-		game.ModeHud:       newHudScreen(display),
+		game.ModeHud:       hudscreen,
 		game.ModeInventory: newInventoryScreen(display),
 		game.ModePickup:    newPickupScreen(display),
 		game.ModeEquip:     newEquipScreen(display),
@@ -27,7 +28,7 @@ func New() *Console {
 		game.ModeDrop:      newDropScreen(display),
 		game.ModeUse:       newUseScreen(display),
 		game.ModeSheet:     newSheetScreen(display),
-		game.ModeShoot:     newTargetScreen(display),
+		game.ModeShoot:     targetscreen,
 		game.ModeGameOver:  newGameOverScreen(display),
 	}
 	console := &Console{

@@ -25,33 +25,43 @@ var mapPanelBounds = math.Rect(math.Origin, math.Pt(statusPanelBounds.Min.X, mes
 // The screen coordinate where the player will render.
 var mapPlayerPos = mapPanelBounds.Center()
 
-// Create a new HUD.
-func newHudScreen(display display) *screen {
+// Creates new HUD and target screens. These share some panels, so they're
+// constructed at the same time.
+func newHudScreens(display display) (hud *screen, target *screen) {
+	// We share these primarily so that the message panel will display the
+	// correct messages in both hud and targetting mode (since we switch
+	// screens entirely when we switch into target mode.) The other two are
+	// shared... for no good reason, really. They don't have any state anyways.
+	pmap := newMapPanel(display)
+	pstat := newStatusPanel(display)
+	pmsg := newMessagePanel(messagePanelNumLines, display)
+
 	// Since the messagePanel may capture --more-- prompts and require a redraw
 	// of itself in mid-screen render, we want to make sure the other panels
 	// have already been drawn first.
-	return &screen{
+	hud = &screen{
 		display: display,
 		panels: []panel{
 			newHudControlPanel(),
-			newMapPanel(display),
-			newStatusPanel(display),
-			newMessagePanel(messagePanelNumLines, display),
+			pmap,
+			pstat,
+			pmsg,
 		},
 	}
-}
 
-// Create a new targeting hud (used for picking ranged, spell targets.)
-func newTargetScreen(display display) *screen {
-	return &screen{
+	// We place the targetpanel second here, so that any target-related lines
+	// it draws will be drawn _after_ the map was rendered.
+	target = &screen{
 		display: display,
 		panels: []panel{
-			newMapPanel(display),
+			pmap,
 			newTargetPanel(display),
-			newStatusPanel(display),
-			newMessagePanel(messagePanelNumLines, display),
+			pstat,
+			pmsg,
 		},
 	}
+
+	return hud, target
 }
 
 var hudKeymap = map[rune]game.Command{
