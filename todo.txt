@@ -1,30 +1,30 @@
 NEXT:
-- Revisit and clean up skills panel
 
 - Ranged weapons
     - Player can shoot
         x hjklyubn keys freetarget
-        - f confirms
+        x f confirms
         - Targets should be sorted by proximity?
         x restrict targets and freetargeting by range
         x Weapons need a 'range' attribute
         x if you have no ranged attack, should message and switch back to hud.
         x Body needs a 'ranged' slot.
         - ActorShooter
-            - This can be the thing that computes targets + paths, and actually
+            x This can be the thing that computes targets + paths, and actually
               shoots
-            - Shoot() does what Hit() does for ActorFighter
+            x Shoot() does what Hit() does for ActorFighter
             - gun specialties
                 - no sides bonus based on weight
-        - Sheet interface needs Ranged() that returns ranged attack
+        x Sheet interface needs Ranged() that returns ranged attack
+        x Ranged attack needs to show up on sheet screen and hud
         - Move messages to a separate queue in EventQueue, so that we can
           always render the last few from there rather than just buffering in
           the panel.
         - MonsterSheet needs ranged []Attack
-        - Ranged attack needs to show up on sheet screen and hud
         - Monster AI needs to be adjusted for monsters with ranged attacks.
-        - ranged weapons can have an effect at the end? (e.g. rockets)
+        - weapons can have an effect at the end? (e.g. rockets, quakehammers)
     - "Archer" AI
+- "Remember" last target between shots.
 
 - Monsters have multiple abilities.
     - Abilities need:
@@ -79,6 +79,7 @@ Bug:
 - If you equip a weapon that grants +ev, you see 0-0 in prot display if you're not wearing armor.
 
 Cleanup:
+- Revisit and clean up skills panel
 - Great Visibility Sweep -- exporting types and fields has been done really
   haphazardly, and signals the wrong things. Should be cleaned up.
 - Need a "read-only" game interface or something that the client can pull from

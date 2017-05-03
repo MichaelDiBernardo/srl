@@ -153,6 +153,8 @@ type UnlearnSkillCommand struct{ Skill SkillName }
 
 type NoCommand struct{}
 
+type ConfirmTargetCommand struct{ Pos math.Point }
+
 // A controller is a function that handles 'command' using 'game', and returns
 // true if a turn should pass due to the player's action. (Some player commands
 // might result in no time passing, like cancelling out of a menu or trying to
@@ -212,6 +214,9 @@ func shootController(g *Game, com Command) bool {
 	switch c := com.(type) {
 	case ModeCommand:
 		g.SwitchMode(c.Mode)
+	case ConfirmTargetCommand:
+		evolve = true
+		g.Player.Shooter.Shoot(c.Pos)
 	}
 	return evolve
 }

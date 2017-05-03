@@ -146,6 +146,10 @@ func (t *targetPanel) HandleInput(g *game.Game, tboxev termbox.Event) (game.Comm
 		t.freeTarget(g, math.Pt(-1, 1))
 	case 'n':
 		t.freeTarget(g, math.Pt(1, 1))
+	case 'f':
+		c, e := t.confirmTarget()
+		t.clearTargets()
+		return c, e
 	}
 
 	return nocommand()
@@ -176,7 +180,7 @@ func (t *targetPanel) Render(g *game.Game) {
 }
 
 func (t *targetPanel) renderTarget(g *game.Game, target game.Target) {
-	for _, gcur := range target.Path {
+	for _, gcur := range target.Path[1:] {
 		mcur := g2m(g.Player.Pos(), gcur)
 		tile := g.Level.At(gcur)
 		drawglyph(t.display, tile, mcur, true)
@@ -232,6 +236,16 @@ func (t *targetPanel) freeTarget(g *game.Game, relpt math.Point) {
 		return
 	}
 	t.freetarget = nexttarget
+}
+
+func (t *targetPanel) confirmTarget() (game.Command, error) {
+	var target math.Point
+	if t.cur == -1 {
+		target = t.freetarget.Pos
+	} else {
+		target = t.target().Pos
+	}
+	return game.ConfirmTargetCommand{Pos: target}, nil
 }
 
 func (t *targetPanel) anyTargets() bool {
@@ -499,6 +513,7 @@ func (s *statusPanel) Render(g *game.Game) {
 	s.display.Write(lcol, statusPanelBounds.Min.Y+6, fmt.Sprintf("%-7s%2dF", "FL", g.Progress.Floor), fg, bg)
 
 	s.display.Write(lcol, statusPanelBounds.Min.Y+8, fmt.Sprintf("%-7s%8s", "FIGHT", sheet.Attack().Describe()), fg, bg)
+	s.display.Write(lcol, statusPanelBounds.Min.Y+9, fmt.Sprintf("%-7s%8s", "SHOOT", sheet.Ranged().Describe()), fg, bg)
 
 	// right
 	s.display.Write(rcol, statusPanelBounds.Min.Y+3, fmt.Sprintf("%-7s%3d", "STR", sheet.Stat(game.Str)), fg, bg)

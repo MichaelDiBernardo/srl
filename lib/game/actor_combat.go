@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/MichaelDiBernardo/srl/lib/math"
 )
@@ -52,16 +53,22 @@ type Shooter interface {
 
 var ErrTargetOutOfRange = errors.New("TargetOutOfRange")
 var ErrNoClearShot = errors.New("NoClearShot")
+var ErrTargetSelf = errors.New("TargetSelf")
 
-// A target in LOS of the shooter. Points in Pos and Path are relative to the
-// actor, who is considered to be at origin. So, if there is a target to the
-// east with one space intervening, its Pos would be (2,0) and its path would
-// be {(1,0), (2,0))
+// A target in LOS of the shooter. Points in Pos and Path are absolute points
+// in map coordinates.
 type Target struct {
 	Pos    math.Point
+	Dist   int
 	Path   Path
 	Target *Obj
 }
+
+type targetsByDist []Target
+
+func (t targetsByDist) Len() int           { return len(t) }
+func (t targetsByDist) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+func (t targetsByDist) Less(i, j int) bool { return t[i].Dist < t[j].Dist }
 
 type ActorShooter struct {
 	Trait
@@ -104,14 +111,17 @@ func (s *ActorShooter) Targets() []Target {
 		}
 		targets = append(targets, target)
 	}
+
+	sort.Stable(targetsByDist(targets))
 	return targets
 }
 
 func (s *ActorShooter) Target(p math.Point) (Target, error) {
 	mypos, lev := s.obj.Pos(), s.obj.Game.Level
 	srange := s.obj.Sheet.Ranged().Range
+	dist := math.EucDist(s.obj.Pos(), p)
 
-	if math.EucDist(s.obj.Pos(), p) > srange {
+	if dist > srange {
 		return Target{}, ErrTargetOutOfRange
 	}
 
@@ -122,6 +132,7 @@ func (s *ActorShooter) Target(p math.Point) (Target, error) {
 
 	target := Target{
 		Pos:    p,
+		Dist:   dist,
 		Path:   path,
 		Target: lev.At(p).Actor,
 	}
@@ -129,6 +140,12 @@ func (s *ActorShooter) Target(p math.Point) (Target, error) {
 }
 
 func (s *ActorShooter) Shoot(p math.Point) error {
+	s.obj.Game.SwitchMode(ModeHud)
+
+	if s.obj.Pos() == p {
+		return ErrTargetSelf
+	}
+
 	target, err := s.Target(p)
 	if err != nil {
 		return err
@@ -138,9 +155,20 @@ func (s *ActorShooter) Shoot(p math.Point) error {
 	atk := attacker.Sheet.Ranged()
 	dist := 0
 
+	var msg string
+	if victim := target.Target; victim != nil {
+		msg = fmt.Sprintf("%v shoots at %v.", attacker.Spec.Name, victim.Spec.Name)
+	} else {
+		msg = fmt.Sprintf("%v shoots.", attacker.Spec.Name)
+	}
+	attacker.Game.Events.Message(msg)
+
 	for _, pt := range path {
 		dist++
 		defender := level.At(pt).Actor
+		if defender == nil {
+			continue
+		}
 
 		atk.Hit -= dist / 2
 

@@ -54,9 +54,10 @@ func (s *sheetPanel) Render(g *game.Game) {
 	s.display.Write(1, 12, fmt.Sprintf("MAX FLOOR %7dF", g.Progress.MaxFloor), termbox.ColorWhite, termbox.ColorBlack)
 
 	s.display.Write(22, 7, fmt.Sprintf("FIGHT %9s", sheet.Attack().Describe()), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 8, fmt.Sprintf("DEF %11s", sheet.Defense().Describe()), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 10, fmt.Sprintf("HP %12s", fmt.Sprintf("%d:%d", sheet.HP(), sheet.MaxHP())), termbox.ColorWhite, termbox.ColorBlack)
-	s.display.Write(22, 11, fmt.Sprintf("MP %12s", fmt.Sprintf("%d:%d", sheet.MP(), sheet.MaxMP())), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 8, fmt.Sprintf("SHOOT %9s", sheet.Ranged().Describe()), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 9, fmt.Sprintf("DEF %11s", sheet.Defense().Describe()), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 11, fmt.Sprintf("HP %12s", fmt.Sprintf("%d:%d", sheet.HP(), sheet.MaxHP())), termbox.ColorWhite, termbox.ColorBlack)
+	s.display.Write(22, 12, fmt.Sprintf("MP %12s", fmt.Sprintf("%d:%d", sheet.MP(), sheet.MaxMP())), termbox.ColorWhite, termbox.ColorBlack)
 
 	for sk := game.Melee; sk < game.NumSkills; sk++ {
 		rowfmt := "%-5s %3d = %2d %3s"
